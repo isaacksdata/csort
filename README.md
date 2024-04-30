@@ -1,10 +1,9 @@
-# Class Formatter
+# Csort
 
 Formatter for automatic re-ordering of methods defined within classes.
 
 ## Todo
 
-- rename to csort
 - handle empty classes (elippses)
 - handle class attributes
 - handle arbitrary decorators
