@@ -51,3 +51,14 @@ def test_formatting_empty(input_path, output_path, expected_path):
     expected_code = astor.parse_file(expected_path)
     assert astor.to_source(code) == astor.to_source(expected_code)
     Path(output_path).unlink()
+
+
+@pytest.mark.parametrize("input_path", ["attributes"], indirect=True)
+@pytest.mark.parametrize("output_path", ["attributes"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["attributes"], indirect=True)
+def test_formatting_attributes(input_path, output_path, expected_path):
+    main(input_path, output_py=output_path)
+    code = astor.parse_file(output_path)
+    expected_code = astor.parse_file(expected_path)
+    assert astor.to_source(code) == astor.to_source(expected_code)
+    Path(output_path).unlink()

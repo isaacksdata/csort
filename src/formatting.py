@@ -7,8 +7,8 @@ from typing import Optional
 import astor
 
 from src.configs import CLASS_SPACING
-from src.functions import get_method_type
-from src.functions import is_ellipsis
+from src.functions import get_method_type_and_name
+from src.functions import is_csortable
 from src.utilities import extract_text_from_file
 
 
@@ -66,7 +66,7 @@ def find_methods(code: ast.ClassDef) -> List[ast.stmt]:
 
     # Find all function definitions
     for node in code.body:
-        if isinstance(node, ast.FunctionDef) or is_ellipsis(node):
+        if is_csortable(node):
             functions.append(node)
 
     # Sort the functions based on their line numbers
@@ -76,14 +76,14 @@ def find_methods(code: ast.ClassDef) -> List[ast.stmt]:
 
 def order_class_functions(methods: List[ast.stmt]) -> List[ast.stmt]:
     """
-    Sort a list of method definitions by the method type
+    Sort a list of method definitions by the method type and alphabetically by method name
     Args:
         methods: list of method definitions
 
     Returns:
         sorted_methods: method definitions sorted by method type
     """
-    sorted_methods = sorted(methods, key=get_method_type)
+    sorted_methods = sorted(methods, key=get_method_type_and_name)
     return sorted_methods
 
 
