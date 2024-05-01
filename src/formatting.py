@@ -3,11 +3,11 @@ import ast
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import TypedDict
 
 import astor
 
-from src.configs import CLASS_SPACING
-from src.functions import get_method_type_and_name
+from src.functions import describe_method
 from src.functions import is_csortable
 from src.utilities import extract_text_from_file
 
@@ -32,7 +32,10 @@ def parse_code(code: Optional[str] = None, file_path: Optional[str] = None) -> a
     raise ValueError("Must provide code or file_path!")
 
 
-def find_classes(code: ast.Module) -> Dict[str, ast.ClassDef]:
+find_classes_response = TypedDict("find_classes_response", {"node": ast.ClassDef, "index": int})
+
+
+def find_classes(code: ast.Module) -> Dict[str, find_classes_response]:
     """
     Find all class definitions within parsed code
     Args:
@@ -44,9 +47,9 @@ def find_classes(code: ast.Module) -> Dict[str, ast.ClassDef]:
     classes = {}
 
     # Find all function definitions
-    for node in code.body:
+    for i, node in enumerate(code.body):
         if isinstance(node, ast.ClassDef):
-            classes[node.name] = node
+            classes[node.name] = find_classes_response(node=node, index=i)
 
     # Sort the functions based on their line numbers
     # classes.sort(key=lambda x: x[0])
@@ -83,7 +86,7 @@ def order_class_functions(methods: List[ast.stmt]) -> List[ast.stmt]:
     Returns:
         sorted_methods: method definitions sorted by method type
     """
-    sorted_methods = sorted(methods, key=get_method_type_and_name)
+    sorted_methods = sorted(methods, key=describe_method)
     return sorted_methods
 
 
@@ -92,16 +95,22 @@ def main(file_path: str, output_py: Optional[str] = None) -> None:
     python_code = extract_text_from_file(file_path)
     parsed_code = parse_code(code=python_code, file_path=file_path)
     classes = find_classes(parsed_code)
-    functions = {name: find_methods(cls) for name, cls in classes.items()}
+    functions = {name: find_methods(cls["node"]) for name, cls in classes.items()}
 
     sorted_functions: Dict[str, List[ast.stmt]] = {
         cls: order_class_functions(methods) for cls, methods in functions.items()
     }
 
+    # update the classes dictionary with new class body
     for name, cls in classes.items():
-        cls.body = sorted_functions[name]
+        cls["node"].body = sorted_functions[name]
+
+    # update parsed code with sorted classes
+    for _, cls in classes.items():
+        parsed_code.body[cls["index"]] = cls["node"]
+
+    # unparse code and add extra line space between classes
+    new_code = astor.to_source(parsed_code)
 
     with open(output_py, "w", encoding="utf-8") as f:
-        for _, code in classes.items():
-            f.writelines(ast.unparse(code))
-            f.writelines(CLASS_SPACING)
+        f.writelines(new_code)

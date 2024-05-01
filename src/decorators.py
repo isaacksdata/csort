@@ -3,6 +3,7 @@ import ast
 from typing import Callable
 from typing import Dict
 from typing import List
+from typing import Optional
 
 
 def decorator_name_id(decorator: ast.Name) -> str:
@@ -52,7 +53,7 @@ def get_decorator_id(decorator: ast.expr) -> str:
     return func(decorator)
 
 
-def get_decorators(method: ast.FunctionDef) -> List[str]:
+def get_decorators(method: ast.stmt) -> Optional[List[str]]:
     """
     Get decorators from an ast parsed function
     Args:
@@ -61,4 +62,13 @@ def get_decorators(method: ast.FunctionDef) -> List[str]:
     Returns:
         list of ids from decorator list attribute
     """
+    if not isinstance(method, ast.FunctionDef) or not hasattr(method, "decorator_list"):
+        return None
     return [get_decorator_id(decorator) for decorator in method.decorator_list]
+
+
+def has_decorator(method: ast.stmt, decorator: str) -> bool:
+    decorators = get_decorators(method)
+    if decorators is None:
+        return False
+    return decorator in decorators

@@ -87,6 +87,20 @@ def get_attribute_name(attribute: ast.Assign) -> str:
     return attribute.targets[0].id
 
 
+def get_ellipsis_name(expression: ast.Expr) -> str:
+    """
+    Extract name from an Ellipsis node
+    Args:
+        expression: ellipsis expression
+
+    Returns:
+        name
+    """
+    if not hasattr(expression.value, "value"):
+        raise AttributeError("Could not find value attribute!")
+    return str(expression.value.value)
+
+
 names_factory: Dict[type, Callable] = {
     ast.FunctionDef: get_function_name,
     ast.AnnAssign: get_annotated_attribute_name,
@@ -94,7 +108,7 @@ names_factory: Dict[type, Callable] = {
 }
 
 
-def get_expression_name(expression: ast.AST) -> str:
+def get_expression_name(expression: ast.stmt) -> str:
     """
     Extract name from ast parsed expression
 
@@ -104,4 +118,30 @@ def get_expression_name(expression: ast.AST) -> str:
     Returns:
         name of the expression
     """
+    if is_ellipsis(expression) and isinstance(expression, ast.Expr):
+        return get_ellipsis_name(expression)
     return names_factory[type(expression)](expression)
+
+
+def is_ellipsis(expression: ast.AST) -> bool:
+    """
+    Determine if a class has an empty body - use of ...
+
+    e.g.
+
+    class MyClass(MyMixin, MyBaseClass):
+        ...
+
+    Args:
+        expression: ast parsed expression
+
+    Returns:
+        True if the expression is an Ellipsis
+    """
+    if not hasattr(expression, "value"):
+        return False
+    expression_value = expression.value
+    if isinstance(expression_value, ast.Constant):
+        constant_value = expression_value.value
+        return str(constant_value) == "Ellipsis"
+    return False

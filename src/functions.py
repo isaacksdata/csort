@@ -3,36 +3,16 @@ import ast
 from collections import OrderedDict
 from typing import Callable
 from typing import Dict
+from typing import List
+from typing import Optional
 from typing import Tuple
 
 from src.configs import DUNDER_PATTERN
 from src.configs import INSTANCE_METHOD_LEVEL
 from src.decorators import get_decorators
+from src.decorators import has_decorator
 from src.utilities import get_expression_name
-
-
-def is_ellipsis(expression: ast.AST) -> bool:
-    """
-    Determine if a class has an empty body - use of ...
-
-    e.g.
-
-    class MyClass(MyMixin, MyBaseClass):
-        ...
-
-    Args:
-        expression: ast parsed expression
-
-    Returns:
-        True if the expression is an Ellipsis
-    """
-    if not hasattr(expression, "value"):
-        return False
-    expression_value = expression.value
-    if isinstance(expression_value, ast.Constant):
-        constant_value = expression_value.value
-        return str(constant_value) == "Ellipsis"
-    return False
+from src.utilities import is_ellipsis
 
 
 def is_annotated_class_attribute(expression: ast.AST) -> bool:
@@ -101,7 +81,7 @@ def is_class_method(method: ast.FunctionDef) -> bool:
     Returns:
         True if the method is a class method
     """
-    return "classmethod" in get_decorators(method)
+    return has_decorator(method, "classmethod")
 
 
 def is_static_method(method: ast.FunctionDef) -> bool:
@@ -113,7 +93,7 @@ def is_static_method(method: ast.FunctionDef) -> bool:
     Returns:
         True if the method is a static method
     """
-    return "staticmethod" in get_decorators(method)
+    return has_decorator(method, "staticmethod")
 
 
 def is_property(method: ast.FunctionDef) -> bool:
@@ -125,7 +105,7 @@ def is_property(method: ast.FunctionDef) -> bool:
     Returns:
         True if the method is a property
     """
-    return "property" in get_decorators(method)
+    return has_decorator(method, "property")
 
 
 def is_setter(method: ast.FunctionDef) -> bool:
@@ -137,7 +117,7 @@ def is_setter(method: ast.FunctionDef) -> bool:
     Returns:
         True if the method is a setter
     """
-    return "setter" in get_decorators(method)
+    return has_decorator(method, "setter")
 
 
 def is_getter(method: ast.FunctionDef) -> bool:
@@ -149,7 +129,7 @@ def is_getter(method: ast.FunctionDef) -> bool:
     Returns:
         True if the method is a getter
     """
-    return "getter" in get_decorators(method)
+    return has_decorator(method, "getter")
 
 
 def is_private_method(method: ast.FunctionDef) -> bool:
@@ -176,6 +156,23 @@ def is_function(expression: ast.AST) -> bool:
 
     """
     return isinstance(expression, ast.FunctionDef)
+
+
+def is_decorated(expression: ast.stmt) -> bool:
+    """
+    Determine if the ast parsed expression is decorated.
+
+    Args:
+        expression: the ast parsed expression
+
+    Returns:
+        True if the expression has a decorator
+
+    """
+    decorators = get_decorators(expression)
+    if decorators is None or len(decorators) == 0:
+        return False
+    return True
 
 
 def is_csortable(expression: ast.AST) -> bool:
@@ -206,7 +203,8 @@ method_checking_map: Dict[Callable, int] = OrderedDict(
         (is_property, 5),
         (is_getter, 6),
         (is_setter, 7),
-        (is_private_method, 9),
+        (is_decorated, 8),
+        (is_private_method, 10),
     ]
 )
 
@@ -226,7 +224,7 @@ def get_method_type(method: ast.stmt) -> int:
     return INSTANCE_METHOD_LEVEL
 
 
-def get_method_type_and_name(method: ast.stmt) -> Tuple[int, str]:
+def describe_method(method: ast.stmt) -> Tuple[int, Optional[List[str]], str]:
     """
     Get the ordering level of the method and the method name
     Args:
@@ -238,4 +236,5 @@ def get_method_type_and_name(method: ast.stmt) -> Tuple[int, str]:
     """
     name = get_expression_name(method)
     level = get_method_type(method)
-    return level, name
+    decorators = get_decorators(method)
+    return level, decorators, name
