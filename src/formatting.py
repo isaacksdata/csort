@@ -7,6 +7,7 @@ from typing import TypedDict
 
 import astor
 
+from src.edge_cases import handle_edge_cases
 from src.functions import describe_method
 from src.functions import is_csortable
 from src.utilities import extract_text_from_file
@@ -111,6 +112,8 @@ def main(file_path: str, output_py: Optional[str] = None) -> None:
 
     # unparse code and add extra line space between classes
     new_code = astor.to_source(parsed_code)
+
+    new_code = handle_edge_cases(new_code)
 
     with open(output_py, "w", encoding="utf-8") as f:
         f.writelines(new_code)
