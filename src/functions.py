@@ -12,6 +12,7 @@ from src.configs import INSTANCE_METHOD_LEVEL
 from src.decorators import get_decorators
 from src.decorators import has_decorator
 from src.utilities import get_expression_name
+from src.utilities import is_class_docstring
 from src.utilities import is_ellipsis
 
 
@@ -188,23 +189,24 @@ def is_csortable(expression: ast.AST) -> bool:
         True if the expression is sortable
 
     """
-    checks = [is_function, is_ellipsis, is_annotated_class_attribute, is_class_attribute]
+    checks = [is_function, is_ellipsis, is_annotated_class_attribute, is_class_attribute, is_class_docstring]
     return any(func(expression) for func in checks)
 
 
 method_checking_map: Dict[Callable, int] = OrderedDict(
     [
         (is_ellipsis, 0),
-        (is_annotated_class_attribute, 0),
-        (is_class_attribute, 1),
-        (is_dunder_method, 2),
-        (is_class_method, 3),
-        (is_static_method, 4),
-        (is_property, 5),
-        (is_getter, 6),
-        (is_setter, 7),
-        (is_decorated, 8),
-        (is_private_method, 10),
+        (is_class_docstring, 0),
+        (is_annotated_class_attribute, 1),
+        (is_class_attribute, 2),
+        (is_dunder_method, 3),
+        (is_class_method, 4),
+        (is_static_method, 5),
+        (is_property, 6),
+        (is_getter, 7),
+        (is_setter, 8),
+        (is_decorated, 9),
+        (is_private_method, 101),
     ]
 )
 

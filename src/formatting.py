@@ -1,16 +1,20 @@
 """Reformat class method definitions"""
 import ast
+from copy import deepcopy
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import TypedDict
 
+import ast_comments
 import astor
 
 from src.edge_cases import handle_edge_cases
 from src.functions import describe_method
 from src.functions import is_csortable
 from src.utilities import extract_text_from_file
+from src.utilities import merge_code_strings
+from src.utilities import remove_comment_nodes
 
 
 def parse_code(code: Optional[str] = None, file_path: Optional[str] = None) -> ast.Module:
@@ -29,7 +33,7 @@ def parse_code(code: Optional[str] = None, file_path: Optional[str] = None) -> a
     if file_path:
         return astor.parse_file(file_path)
     if code:
-        return ast.parse(code)
+        return ast_comments.parse(code)
     raise ValueError("Must provide code or file_path!")
 
 
@@ -91,10 +95,31 @@ def order_class_functions(methods: List[ast.stmt]) -> List[ast.stmt]:
     return sorted_methods
 
 
+def preserve_comments(parsed_code: ast.Module) -> str:
+    """
+    Preserve comments by merging the code derived from astor and ast_comments libraries.
+
+    Astor is better at preserving indentations and line breaks.
+    Ast_comments captures comments but the comments cannot be unparsed with astor.
+    Args:
+        parsed_code: ast tree
+
+    Returns:
+        new_code: merged code from astor and ast_comments parsers
+    """
+    uncommented_code = deepcopy(parsed_code)
+    uncommented_code = remove_comment_nodes(uncommented_code)
+    astor_code = astor.to_source(uncommented_code)
+    new_code = ast_comments.unparse(parsed_code)
+    new_code = merge_code_strings(astor_code, new_code)
+    return new_code
+
+
 def main(file_path: str, output_py: Optional[str] = None) -> None:
     output_py = file_path if output_py is None else output_py
     python_code = extract_text_from_file(file_path)
-    parsed_code = parse_code(code=python_code, file_path=file_path)
+    # parsed_code = parse_code(code=python_code, file_path=file_path)
+    parsed_code = parse_code(code=python_code)
     classes = find_classes(parsed_code)
     functions = {name: find_methods(cls["node"]) for name, cls in classes.items()}
 
@@ -111,7 +136,7 @@ def main(file_path: str, output_py: Optional[str] = None) -> None:
         parsed_code.body[cls["index"]] = cls["node"]
 
     # unparse code and add extra line space between classes
-    new_code = astor.to_source(parsed_code)
+    new_code = preserve_comments(parsed_code)
 
     new_code = handle_edge_cases(new_code)
 
