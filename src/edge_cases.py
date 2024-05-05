@@ -23,7 +23,21 @@ def handle_if_name_main(source_code: str) -> str:
     return source_code
 
 
-handlers: List[Callable] = [handle_if_name_main]
+def handle_last_line_white_space(source_code: str) -> str:
+    """
+    Add a blank line at end of file if not present
+    Args:
+        source_code: source code as a string
+
+    Returns:
+        source_code: with blank final line
+    """
+    if not source_code.endswith("\n"):
+        source_code = source_code + "\n"
+    return source_code
+
+
+handlers: List[Callable] = [handle_if_name_main, handle_last_line_white_space]
 
 
 def handle_edge_cases(source_code: str) -> str:
