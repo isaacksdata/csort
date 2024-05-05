@@ -1,10 +1,12 @@
 import os
 from pathlib import Path
 
+import ast_comments
 import astor
 import pytest
 
 from src.formatting import main
+from src.utilities import extract_text_from_file
 
 
 @pytest.fixture
@@ -78,9 +80,20 @@ def test_formatting_decorators(input_path, output_path, expected_path):
 @pytest.mark.parametrize("input_path", ["other_code"], indirect=True)
 @pytest.mark.parametrize("output_path", ["other_code"], indirect=True)
 @pytest.mark.parametrize("expected_path", ["other_code"], indirect=True)
-def test_formatting_decorators(input_path, output_path, expected_path):
+def test_formatting_other_code(input_path, output_path, expected_path):
     main(input_path, output_py=output_path)
     code = astor.parse_file(output_path)
     expected_code = astor.parse_file(expected_path)
     assert astor.to_source(code) == astor.to_source(expected_code)
+    Path(output_path).unlink()
+
+
+@pytest.mark.parametrize("input_path", ["docstrings_comments"], indirect=True)
+@pytest.mark.parametrize("output_path", ["docstrings_comments"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["docstrings_comments"], indirect=True)
+def test_formatting_docs_comments(input_path, output_path, expected_path):
+    main(input_path, output_py=output_path)
+    code = ast_comments.parse(extract_text_from_file(output_path))
+    expected_code = ast_comments.parse(extract_text_from_file(expected_path))
+    assert ast_comments.unparse(code) == ast_comments.unparse(expected_code)
     Path(output_path).unlink()
