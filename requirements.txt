@@ -1,3 +1,4 @@
+ast_comments==1.2.2
 astor==0.8.1
 black==24.3.0
 mypy==1.9.0
