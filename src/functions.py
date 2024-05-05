@@ -189,7 +189,13 @@ def is_csortable(expression: ast.AST) -> bool:
         True if the expression is sortable
 
     """
-    checks = [is_function, is_ellipsis, is_annotated_class_attribute, is_class_attribute, is_class_docstring]
+    checks = [
+        is_function,
+        is_ellipsis,
+        is_annotated_class_attribute,
+        is_class_attribute,
+        is_class_docstring,
+    ]
     return any(func(expression) for func in checks)
 
 
