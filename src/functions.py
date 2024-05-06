@@ -244,5 +244,5 @@ def describe_method(method: ast.stmt) -> Tuple[int, Optional[List[str]], str]:
     """
     name = get_expression_name(method)
     level = get_method_type(method)
-    decorators = get_decorators(method)
+    decorators = get_decorators(method, sort=True)
     return level, decorators, name
