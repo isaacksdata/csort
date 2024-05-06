@@ -77,6 +77,17 @@ def test_formatting_decorators(input_path, output_path, expected_path):
     Path(output_path).unlink()
 
 
+@pytest.mark.parametrize("input_path", ["multi_decorators"], indirect=True)
+@pytest.mark.parametrize("output_path", ["multi_decorators"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["multi_decorators"], indirect=True)
+def test_formatting_decorators(input_path, output_path, expected_path):
+    main(input_path, output_py=output_path)
+    code = astor.parse_file(output_path)
+    expected_code = astor.parse_file(expected_path)
+    assert astor.to_source(code) == astor.to_source(expected_code)
+    Path(output_path).unlink()
+
+
 @pytest.mark.parametrize("input_path", ["other_code"], indirect=True)
 @pytest.mark.parametrize("output_path", ["other_code"], indirect=True)
 @pytest.mark.parametrize("expected_path", ["other_code"], indirect=True)
