@@ -108,3 +108,25 @@ def test_formatting_docs_comments(input_path, output_path, expected_path):
     expected_code = ast_comments.parse(extract_text_from_file(expected_path))
     assert ast_comments.unparse(code) == ast_comments.unparse(expected_code)
     Path(output_path).unlink()
+
+
+@pytest.mark.parametrize("input_path", ["csort_group"], indirect=True)
+@pytest.mark.parametrize("output_path", ["csort_group"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["csort_group"], indirect=True)
+def test_formatting_csort_group(input_path, output_path, expected_path):
+    main(input_path, output_py=output_path)
+    code = ast_comments.parse(extract_text_from_file(output_path))
+    expected_code = ast_comments.parse(extract_text_from_file(expected_path))
+    assert ast_comments.unparse(code) == ast_comments.unparse(expected_code)
+    Path(output_path).unlink()
+
+
+@pytest.mark.parametrize("input_path", ["imports"], indirect=True)
+@pytest.mark.parametrize("output_path", ["imports"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["imports"], indirect=True)
+def test_formatting_imports(input_path, output_path, expected_path):
+    main(input_path, output_py=output_path)
+    code = ast_comments.parse(extract_text_from_file(output_path))
+    expected_code = ast_comments.parse(extract_text_from_file(expected_path))
+    assert ast_comments.unparse(code) == ast_comments.unparse(expected_code)
+    Path(output_path).unlink()
