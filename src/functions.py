@@ -73,6 +73,18 @@ def is_dunder_method(method: ast.FunctionDef) -> bool:
     return method.name.startswith(DUNDER_PATTERN) and method.name.endswith(DUNDER_PATTERN)
 
 
+def is_csort_group(method: ast.FunctionDef) -> bool:
+    """
+    Determine if the ast parsed method is a csort_group method - i.e. used the @csort_group() decorator
+    Args:
+        method: the ast parsed method
+
+    Returns:
+        True if the method has been assigned a csort group
+    """
+    return has_decorator(method, "csort_group")
+
+
 def is_class_method(method: ast.FunctionDef) -> bool:
     """
     Determine if the ast parsed method is a class method - i.e. used the @classmethod decorator
@@ -206,33 +218,37 @@ method_checking_map: Dict[Callable, int] = OrderedDict(
         (is_annotated_class_attribute, 1),
         (is_class_attribute, 2),
         (is_dunder_method, 3),
-        (is_class_method, 4),
-        (is_static_method, 5),
-        (is_property, 6),
-        (is_getter, 7),
-        (is_setter, 8),
-        (is_decorated, 9),
-        (is_private_method, 101),
+        (is_csort_group, 4),
+        (is_class_method, 5),
+        (is_static_method, 6),
+        (is_property, 7),
+        (is_getter, 8),
+        (is_setter, 9),
+        (is_decorated, 10),
+        (is_private_method, 12),
     ]
 )
 
 
-def get_method_type(method: ast.stmt) -> int:
+def get_method_type(method: ast.stmt, use_csort_group: bool = True) -> int:
     """
     Get the ordering level of the method type
     Args:
         method: the method to get the ordering level of
+        use_csort_group: If True, then will check for csort_group
 
     Returns:
         level: sorting level of the method
     """
     for func, level in method_checking_map.items():
+        if func.__name__ == "is_csort_group" and not use_csort_group:
+            continue
         if func(method):
             return level
     return INSTANCE_METHOD_LEVEL
 
 
-def describe_method(method: ast.stmt) -> Tuple[int, Optional[List[str]], str]:
+def describe_method(method: ast.stmt) -> Tuple[Tuple[int, int], Optional[List[str]], str]:
     """
     Get the ordering level of the method and the method name
     Args:
@@ -245,4 +261,9 @@ def describe_method(method: ast.stmt) -> Tuple[int, Optional[List[str]], str]:
     name = get_expression_name(method)
     level = get_method_type(method)
     decorators = get_decorators(method, sort=True)
-    return level, decorators, name
+    if decorators is not None and "csort_group" in decorators:
+        second_level = get_method_type(method, use_csort_group=False)
+        decorators.remove("csort_group")
+    else:
+        second_level = level
+    return (level, second_level), decorators, name

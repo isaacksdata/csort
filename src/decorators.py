@@ -58,9 +58,27 @@ def decorator_attribute_id(decorator: ast.Attribute) -> str:
     return decorator.attr
 
 
+def decorator_call_id(decorator: ast.Call) -> str:
+    """
+    Get the decorator type from an ast.Call decorator
+    Args:
+        decorator: input decorator
+
+    Returns:
+        attr attribute
+
+    Raises:
+        AttributeError: if decorator.func does not have id attribute
+    """
+    if hasattr(decorator.func, "id"):
+        return decorator.func.id
+    raise AttributeError("decorator of type ast.Call does not have func attribute with id attribute!")
+
+
 decorator_description_factory: Dict[type, Callable] = {
     ast.Name: decorator_name_id,
     ast.Attribute: decorator_attribute_id,
+    ast.Call: decorator_call_id,
 }
 
 

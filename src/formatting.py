@@ -12,6 +12,7 @@ import astor
 from src.edge_cases import handle_edge_cases
 from src.functions import describe_method
 from src.functions import is_csortable
+from src.imports import handle_import_formatting
 from src.utilities import extract_text_from_file
 from src.utilities import merge_code_strings
 from src.utilities import remove_comment_nodes
@@ -118,7 +119,7 @@ def preserve_comments(parsed_code: ast.Module) -> str:
 def main(file_path: str, output_py: Optional[str] = None) -> None:
     output_py = file_path if output_py is None else output_py
     python_code = extract_text_from_file(file_path)
-    # parsed_code = parse_code(code=python_code, file_path=file_path)
+    parsed_code = parse_code(code=python_code, file_path=file_path)
     parsed_code = parse_code(code=python_code)
     classes = find_classes(parsed_code)
     functions = {name: find_methods(cls["node"]) for name, cls in classes.items()}
@@ -139,6 +140,8 @@ def main(file_path: str, output_py: Optional[str] = None) -> None:
     new_code = preserve_comments(parsed_code)
 
     new_code = handle_edge_cases(new_code)
+
+    new_code = handle_import_formatting(source_code=python_code, ast_code=new_code)
 
     with open(output_py, "w", encoding="utf-8") as f:
         f.writelines(new_code)

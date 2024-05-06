@@ -5,7 +5,7 @@ from typing import Final
 DUNDER_PATTERN: Final[str] = "__"
 
 # default sorting level to use for instance methods e.g. def func(self): ...
-INSTANCE_METHOD_LEVEL: Final[int] = 10
+INSTANCE_METHOD_LEVEL: Final[int] = 11
 
 # spacing between class definitions
 CLASS_SPACING: Final[str] = "\n\n\n"
