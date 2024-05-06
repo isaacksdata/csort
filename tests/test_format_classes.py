@@ -1,4 +1,6 @@
+import json
 import os
+import subprocess
 from pathlib import Path
 
 import ast_comments
@@ -130,3 +132,30 @@ def test_formatting_imports(input_path, output_path, expected_path):
     expected_code = ast_comments.parse(extract_text_from_file(expected_path))
     assert ast_comments.unparse(code) == ast_comments.unparse(expected_code)
     Path(output_path).unlink()
+
+
+@pytest.mark.parametrize("input_path", ["complex"], indirect=True)
+@pytest.mark.parametrize("output_path", ["complex"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["complex"], indirect=True)
+def test_formatting_complex(input_path, output_path, expected_path):
+    main(input_path, output_py=output_path)
+    code = ast_comments.parse(extract_text_from_file(output_path))
+    expected_code = ast_comments.parse(extract_text_from_file(expected_path))
+    assert ast_comments.unparse(code) == ast_comments.unparse(expected_code)
+
+    process = subprocess.Popen(["python", input_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, error = process.communicate()
+    assert not error
+    with open("primes.json", "r") as f:
+        input_data = json.load(f)
+
+    process = subprocess.Popen(["python", output_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, error = process.communicate()
+    assert not error
+    with open("primes.json", "r") as f:
+        output_data = json.load(f)
+
+    assert input_data["primes"] == output_data["primes"]
+
+    Path(output_path).unlink()
+    Path("primes.json").unlink()
