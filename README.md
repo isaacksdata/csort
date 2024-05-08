@@ -30,6 +30,7 @@ If multiple methods occur for a given sorting level, then the methods are sorted
 ## Todo
 
 - command line entrypoint
+- support pyproject.toml
 - auto convert to static method
 - pre-commit hook
 - pypy
