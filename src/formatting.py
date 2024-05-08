@@ -9,7 +9,9 @@ from typing import TypedDict
 import ast_comments
 import astor
 
+from src.config_loader import ConfigLoader
 from src.edge_cases import handle_edge_cases
+from src.functions import ASTMethodDescriber
 from src.functions import describe_method
 from src.functions import is_csortable
 from src.imports import handle_import_formatting
@@ -83,16 +85,17 @@ def find_methods(code: ast.ClassDef) -> List[ast.stmt]:
     return functions
 
 
-def order_class_functions(methods: List[ast.stmt]) -> List[ast.stmt]:
+def order_class_functions(methods: List[ast.stmt], method_describer: ASTMethodDescriber) -> List[ast.stmt]:
     """
     Sort a list of method definitions by the method type and alphabetically by method name
     Args:
         methods: list of method definitions
+        method_describer: instance of MethodDescriber for classifying methods of classes
 
     Returns:
         sorted_methods: method definitions sorted by method type
     """
-    sorted_methods = sorted(methods, key=describe_method)
+    sorted_methods = sorted(methods, key=lambda m: describe_method(method=m, method_describer=method_describer))
     return sorted_methods
 
 
@@ -117,6 +120,13 @@ def preserve_comments(parsed_code: ast.Module) -> str:
 
 
 def main(file_path: str, output_py: Optional[str] = None) -> None:
+    # get config file
+    config_loader = ConfigLoader()
+    cfg = config_loader.config
+
+    # build method describer
+    method_describer = ASTMethodDescriber(config=cfg)
+
     output_py = file_path if output_py is None else output_py
     python_code = extract_text_from_file(file_path)
     parsed_code = parse_code(code=python_code, file_path=file_path)
@@ -125,7 +135,7 @@ def main(file_path: str, output_py: Optional[str] = None) -> None:
     functions = {name: find_methods(cls["node"]) for name, cls in classes.items()}
 
     sorted_functions: Dict[str, List[ast.stmt]] = {
-        cls: order_class_functions(methods) for cls, methods in functions.items()
+        cls: order_class_functions(methods, method_describer) for cls, methods in functions.items()
     }
 
     # update the classes dictionary with new class body

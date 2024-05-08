@@ -1,12 +1,18 @@
 """Functions for handling ast parsed class methods"""
 import ast
+import configparser
+import logging
+from abc import ABC
+from abc import abstractmethod
 from collections import OrderedDict
+from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
 
+from src.configs import DEFAULT_CSORT_ORDER_PARAMS
 from src.configs import DUNDER_PATTERN
 from src.configs import INSTANCE_METHOD_LEVEL
 from src.decorators import get_decorators
@@ -211,6 +217,7 @@ def is_csortable(expression: ast.AST) -> bool:
     return any(func(expression) for func in checks)
 
 
+# todo this needs to be mapped from the config file
 method_checking_map: Dict[Callable, int] = OrderedDict(
     [
         (is_ellipsis, 0),
@@ -230,39 +237,166 @@ method_checking_map: Dict[Callable, int] = OrderedDict(
 )
 
 
-def get_method_type(method: ast.stmt, use_csort_group: bool = True) -> int:
+class MethodDescriber(ABC):
     """
-    Get the ordering level of the method type
-    Args:
-        method: the method to get the ordering level of
-        use_csort_group: If True, then will check for csort_group
+    Abstract class for describing a method of a class
 
-    Returns:
-        level: sorting level of the method
+    Attributes:
+        _config: contains configurations from config file
+        _config_to_func_map: a mapping from config keys to the appropriate function
+        _method_checking_map: a mapping of a function to an ordering level
     """
-    for func, level in method_checking_map.items():
-        if func.__name__ == "is_csort_group" and not use_csort_group:
-            continue
-        if func(method):
-            return level
-    return INSTANCE_METHOD_LEVEL
+
+    def __init__(self, config: configparser.ConfigParser) -> None:
+        self._config = config
+        self._config_to_func_map: Dict[str, Callable] = self._setup_config_to_func_map()
+        self._method_checking_map: Dict[Callable, int] = self._setup_func_to_level_map()
+        self._instance_method_default: int = INSTANCE_METHOD_LEVEL
+
+    @abstractmethod
+    def _setup_func_to_level_map(self) -> Dict[Callable, int]:
+        pass
+
+    @abstractmethod
+    def _validate_node(self, node: Any) -> bool:
+        """
+        Validate that a representation of some code can be used with this instance of MethodDescriber
+        Args:
+            node: the code representation
+
+        Returns:
+            True if the code is compatible
+        """
+        pass
+
+    @abstractmethod
+    def _setup_config_to_func_map(self) -> Dict[str, Callable]:
+        pass
+
+    def get_method_type(self, method: Any, use_csort_group: bool = True) -> int:
+        """
+        Get the ordering level of the method type
+        Args:
+            method: the method to get the ordering level of
+            use_csort_group: If True, then will check for csort_group
+
+        Returns:
+            level: sorting level of the method
+
+        Raises:
+            TypeError: if incompatible code representation used
+        """
+        if not self._validate_node(method):
+            raise TypeError(f"Node of type {type(method)} cannot be used!")
+        for func, level in self._method_checking_map.items():
+            if func.__name__ == "is_csort_group" and not use_csort_group:
+                continue
+            if func(method):
+                return level
+        return self._instance_method_default
 
 
-def describe_method(method: ast.stmt) -> Tuple[Tuple[int, int], Optional[List[str]], str]:
+class ASTMethodDescriber(MethodDescriber):
+    """
+    Concrete class for describing methods of classes where the methods have been parsed using AST tree.
+    """
+
+    def _validate_node(self, node: Any) -> bool:
+        """
+        Validate that the node is instance of ast.AST
+        Args:
+            node: AST node for some source code
+
+        Returns:
+            True if the node is of type ast.AST
+        """
+        return isinstance(node, ast.AST)
+
+    def _setup_config_to_func_map(self) -> Dict[str, Callable]:
+        """
+        Setting up the mapping from csort config to AST function classifying functions
+        Returns:
+            The mapping of config variables to a Callable function
+        """
+        return {
+            "dunder_method": is_dunder_method,
+            "csort_group": is_csort_group,
+            "class_method": is_class_method,
+            "static_method": is_static_method,
+            "property": is_property,
+            "getter": is_getter,
+            "setter": is_setter,
+            "decorated_method": is_decorated,
+            "private_method": is_private_method,
+        }
+
+    @staticmethod
+    def _non_method_defaults() -> List[Tuple[Callable, int]]:
+        """
+        Set up fixed mapping from AST functions to ordering level.
+
+        The ordering level does not change for these node types.
+        Returns:
+            Mapping from fixed node types to order level
+        """
+        return [
+            (is_ellipsis, 0),
+            (is_class_docstring, 0),
+            (is_annotated_class_attribute, 1),
+            (is_class_attribute, 2),
+        ]
+
+    def _setup_func_to_level_map(self) -> Dict[Callable, int]:
+        """
+        Set up a full mapping from AST function classifying function to ordering level.
+
+        1) Fixed defaults are added
+        2) User defined ordering levels from the config file are added
+        3) Any node types missing from the config are added using default values
+        4) Sort the mapping according to ordering level and put into OrderedDict
+        Returns:
+            func_to_value_map: OrderedDict with node classifying functions as keys and ordering levels as values
+        """
+        configs = self._config["csort.order"]
+        if "instance_method" in configs:
+            self._instance_method_default = int(configs.pop("instance_method"))
+
+        mapping: List[Tuple[Callable, int]] = []
+
+        mapping.extend(self._non_method_defaults())
+        mapping.extend([(self._config_to_func_map[method], int(value)) for method, value in configs.items()])
+
+        # check if need to add any defaults
+        for method_type, value in DEFAULT_CSORT_ORDER_PARAMS.items():
+            if method_type == "instance_method":
+                continue
+            if self._config_to_func_map[method_type] not in map(lambda t: t[0], mapping):
+                logging.info("Using default level %s for %s", value, method_type)
+                mapping.append((self._config_to_func_map[method_type], value))
+        mapping = sorted(mapping, key=lambda t: t[1])
+        func_to_value_map: Dict[Callable, int] = OrderedDict(mapping)
+
+        return func_to_value_map
+
+
+def describe_method(
+    method: ast.stmt, method_describer: MethodDescriber
+) -> Tuple[Tuple[int, int], Optional[List[str]], str]:
     """
     Get the ordering level of the method and the method name
     Args:
         method: input ast parsed method
+        method_describer: instance of a MethodDescriber subclass which can map methods of classes to an order level
 
     Returns:
         level: integer used to order the methods
         name: assigned name of the expression
     """
     name = get_expression_name(method)
-    level = get_method_type(method)
+    level = method_describer.get_method_type(method, use_csort_group=True)
     decorators = get_decorators(method, sort=True)
     if decorators is not None and "csort_group" in decorators:
-        second_level = get_method_type(method, use_csort_group=False)
+        second_level = method_describer.get_method_type(method, use_csort_group=False)
         decorators.remove("csort_group")
     else:
         second_level = level
