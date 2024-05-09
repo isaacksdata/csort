@@ -6,7 +6,8 @@ from typing import Dict
 
 import ast_comments
 import astor
-from configs import DOCSTRING_NAME
+
+from src.configs import DOCSTRING_NAME
 
 
 def extract_text_from_file(file_path: str) -> str:
