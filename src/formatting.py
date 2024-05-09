@@ -119,9 +119,19 @@ def preserve_comments(parsed_code: ast.Module) -> str:
     return new_code
 
 
-def main(file_path: str, output_py: Optional[str] = None) -> None:
+def format_csort(file_path: str, output_py: Optional[str] = None, config_path: Optional[str] = None) -> None:
+    """
+    Main function for running Csort
+    Args:
+        file_path: path to source code (.py) file
+        output_py: where to write out formatted code (.py) file
+        config_path: path to csort.ini file
+
+    Returns:
+        void
+    """
     # get config file
-    config_loader = ConfigLoader()
+    config_loader = ConfigLoader(config_path=config_path)
     cfg = config_loader.config
 
     # build method describer
