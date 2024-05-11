@@ -38,6 +38,7 @@ def test_parse_commandline():
         "--config-path=test/config/csort.ini",
         "--skip-patterns=expected",
         "--skip-patterns=pattern",
+        "--check",
     ]
     with patch.object(sys, "argv", commands):
         output = parse_commandline()
@@ -46,6 +47,7 @@ def test_parse_commandline():
     assert output.output_path == "test/output/path/file.py"
     assert output.config_path == "test/config/csort.ini"
     assert output.skip_patterns == ["expected", "pattern"]
+    assert output.check
 
 
 def test_validate_paths(script_path, output_path):
@@ -102,9 +104,16 @@ def test_main_no_scripts(caplog):
 
 def test_main(script_path, output_path, caplog):
     caplog.set_level(logging.DEBUG)
-    commands = ["", f"--input-path={script_path}", f"--output-path={output_path}"]  # mock script name
+    commands = ["", f"--input-path={script_path}", f"--output-path={output_path}"]  # mock script name as first arg
     with patch.object(sys, "argv", commands):
         main()
     assert Path(output_path).exists()
     assert f"Reformatting {script_path} ..." in caplog.messages
     shutil.rmtree(Path(output_path).parent.as_posix())
+
+
+def test_main_check_unchanged(script_path, caplog):
+    script_path = script_path.replace("_input", "_expected")
+    commands = ["", f"--input-path={script_path}", f"--output-path={output_path}", "--check"]
+    with patch.object(sys, "argv", commands):
+        main()
