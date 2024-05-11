@@ -1,5 +1,6 @@
 """Reformat class method definitions"""
 import ast
+import logging
 from copy import deepcopy
 from typing import Dict
 from typing import List
@@ -120,7 +121,7 @@ def preserve_comments(parsed_code: ast.Module) -> str:
     return new_code
 
 
-def format_csort(file_path: str, output_py: Optional[str] = None, config_path: Optional[str] = None) -> None:
+def format_csort(file_path: str, output_py: Optional[str] = None, config_path: Optional[str] = None) -> int:
     """
     Main function for running Csort
     Args:
@@ -129,7 +130,7 @@ def format_csort(file_path: str, output_py: Optional[str] = None, config_path: O
         config_path: path to csort.ini file
 
     Returns:
-        void
+        code indicating whether file was changed or not
     """
     # get config file
     config_loader = ConfigLoader(config_path=config_path)
@@ -138,7 +139,6 @@ def format_csort(file_path: str, output_py: Optional[str] = None, config_path: O
     # build method describer
     method_describer = ASTMethodDescriber(config=cfg)
 
-    output_py = file_path if output_py is None else output_py
     python_code = extract_text_from_file(file_path)
     parsed_code = parse_code(code=python_code, file_path=file_path)
     parsed_code = parse_code(code=python_code)
@@ -149,21 +149,26 @@ def format_csort(file_path: str, output_py: Optional[str] = None, config_path: O
         cls: order_class_functions(methods, method_describer) for cls, methods in functions.items()
     }
 
+    if all(functions[cname] == sorted_functions[cname] for cname in functions.keys()):
+        logging.info("No changes made!")
+        return 0
     # update the classes dictionary with new class body
     for name, cls in classes.items():
         cls["node"].body = sorted_functions[name]
 
-    # update parsed code with sorted classes
+        # update parsed code with sorted classes
     for _, cls in classes.items():
         parsed_code.body[cls["index"]] = cls["node"]
 
-    # unparse code and add extra line space between classes
+        # unparse code and add extra line space between classes
     new_code = preserve_comments(parsed_code)
 
     new_code = handle_edge_cases(new_code)
 
     new_code = handle_import_formatting(source_code=python_code, ast_code=new_code)
 
-    create_path(output_py)
-    with open(output_py, "w", encoding="utf-8") as f:
-        f.writelines(new_code)
+    if output_py is not None:
+        create_path(output_py)
+        with open(output_py, "w", encoding="utf-8") as f:
+            f.writelines(new_code)
+    return 1
