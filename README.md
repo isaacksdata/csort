@@ -29,9 +29,11 @@ If multiple methods occur for a given sorting level, then the methods are sorted
 
 ## Todo
 
+- move to libcst from ast
+- Check that pandas querys are preserved e.g. "'column' == 'mystring'"
 - use pyproject.toml instead of setup files
 - support pyproject.toml
-- check only mode - should print how many changes would be made
+- diff only mode - show difference without changing files
 - auto convert to static method
 - pre-commit hook
 - pypy
