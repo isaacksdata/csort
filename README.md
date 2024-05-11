@@ -31,6 +31,7 @@ If multiple methods occur for a given sorting level, then the methods are sorted
 
 - use pyproject.toml instead of setup files
 - support pyproject.toml
+- check only mode - should print how many changes would be made
 - auto convert to static method
 - pre-commit hook
 - pypy
