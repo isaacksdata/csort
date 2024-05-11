@@ -1,5 +1,7 @@
 import ast
 import logging
+import os
+from pathlib import Path
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -168,12 +170,15 @@ def is_class_docstring(expression: ast.AST) -> bool:
     Returns:
         True if the expression is a docstring
 
+    Raises:
+        AttributeError: if astor.to_source fails and its not due to the node representing a Comment
+
     """
     try:
         s: str = astor.to_source(expression)
     except AttributeError as e:
         if str(e) == "No defined handler for node of type Comment":
-            logging.warning("Comments are not supported by astor")
+            logging.debug("Comments are not supported by astor")
             return False
         raise
     return (s.startswith('"""') and s.endswith('"""\n')) or (s.startswith("'''") and s.endswith("'''\n"))
@@ -226,3 +231,9 @@ def remove_comment_nodes(node: Any) -> Any:
     if hasattr(node, "body"):
         node.body = [remove_comment_nodes(n) for n in node.body if not isinstance(n, ast_comments.Comment)]
     return node
+
+
+def create_path(path: str) -> None:
+    if Path(path).suffix:
+        path = Path(path).parent.as_posix()
+    os.makedirs(path, exist_ok=True)

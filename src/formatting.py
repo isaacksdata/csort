@@ -15,6 +15,7 @@ from src.functions import ASTMethodDescriber
 from src.functions import describe_method
 from src.functions import is_csortable
 from src.imports import handle_import_formatting
+from src.utilities import create_path
 from src.utilities import extract_text_from_file
 from src.utilities import merge_code_strings
 from src.utilities import remove_comment_nodes
@@ -163,5 +164,6 @@ def format_csort(file_path: str, output_py: Optional[str] = None, config_path: O
 
     new_code = handle_import_formatting(source_code=python_code, ast_code=new_code)
 
+    create_path(output_py)
     with open(output_py, "w", encoding="utf-8") as f:
         f.writelines(new_code)
