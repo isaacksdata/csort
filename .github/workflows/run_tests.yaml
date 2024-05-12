@@ -40,12 +40,14 @@ jobs:
           python -m pytest --cov=src --cov-report=xml:unit.xml tests/unit
 
       - name: Upload unit tests coverage reports to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./unit.xml,
-          flags: unittests
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        steps:
+          - uses: actions/checkout@main
+          - uses: codecov/codecov-action@v4
+            with:
+              files: ./unit.xml,
+              flags: unittests
+            env:
+              CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Run integration tests with coverage
         run: |
