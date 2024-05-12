@@ -1,0 +1,54 @@
+name: Codecov
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  codecov:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 3.11
+          auto-activate-base: false
+      - shell: bash -l {0}
+        run: |
+          conda info
+      - name: Create and activate Conda environment
+        run: conda create -n myenv python=3.11
+      - run: conda activate myenv
+      - name: Install requirements
+        run: |
+          poetry install --with unit_tests
+          python -m pip install -r requirements.txt
+      - name: Run tests and coverage
+        run: |
+          pytest --cov --cov-report=xml
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+#      - name: Report test-coverage to DeepSource
+#        env:
+#          DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
+#        run: |
+#          # Install the CLI
+#          curl https://deepsource.io/cli | sh
+#
+#          # Send the report to DeepSource
+#          ./bin/deepsource report --analyzer test-coverage --key python --value-file coverage.xml
