@@ -10,27 +10,29 @@ import pytest
 from src.formatting import format_csort
 from src.utilities import extract_text_from_file
 
+DEBUG = "tests" in os.getcwd()
+
 
 @pytest.fixture
 def input_path(request):
-    if os.getcwd().endswith("tests"):
-        return f"./scripts/{request.param}_input.py"
+    if DEBUG:
+        return f"../scripts/{request.param}_input.py"
     else:
         return f"./tests/scripts/{request.param}_input.py"
 
 
 @pytest.fixture
 def output_path(request):
-    if os.getcwd().endswith("tests"):
-        return f"./scripts/{request.param}_output.py"
+    if DEBUG:
+        return f"../scripts/{request.param}_output.py"
     else:
         return f"./tests/scripts/{request.param}_output.py"
 
 
 @pytest.fixture
 def expected_path(request):
-    if os.getcwd().endswith("tests"):
-        return f"./scripts/{request.param}_expected.py"
+    if DEBUG:
+        return f"../scripts/{request.param}_expected.py"
     else:
         return f"./tests/scripts/{request.param}_expected.py"
 
@@ -82,7 +84,7 @@ def test_formatting_decorators(input_path, output_path, expected_path):
 @pytest.mark.parametrize("input_path", ["multi_decorators"], indirect=True)
 @pytest.mark.parametrize("output_path", ["multi_decorators"], indirect=True)
 @pytest.mark.parametrize("expected_path", ["multi_decorators"], indirect=True)
-def test_formatting_decorators(input_path, output_path, expected_path):
+def test_formatting_mutli_decorators(input_path, output_path, expected_path):
     format_csort(input_path, output_py=output_path)
     code = astor.parse_file(output_path)
     expected_code = astor.parse_file(expected_path)

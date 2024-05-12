@@ -13,20 +13,20 @@ from src.main import parse_commandline
 from src.main import validate_paths
 
 
-DEBUG = os.getcwd().endswith("tests")
+DEBUG = "tests" in os.getcwd()
 
 
 @pytest.fixture
 def script_path():
     if DEBUG:
-        return "scripts/basic_input.py"
+        return "../scripts/basic_input.py"
     return "tests/scripts/basic_input.py"
 
 
 @pytest.fixture
 def output_path():
     if DEBUG:
-        return "scripts/output/basic_output.py"
+        return "../scripts/output/basic_output.py"
     return "tests/scripts/output/basic_output.py"
 
 

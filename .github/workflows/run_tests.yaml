@@ -35,12 +35,27 @@ jobs:
         run: |
           python -m pip install -r requirements.txt
           pip install .
-      - name: Run tests and coverage
+      - name: Run unit tests with coverage
         run: |
-          python -m pytest --cov=src --cov-report=xml
+          python -m pytest --cov=src --cov-report=xml:unit.xml tests/unit
 
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+      - name: Upload unit tests coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./unit.xml,
+          flags: unittests
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Run integration tests with coverage
+        run: |
+          python -m pytest --cov=src --cov-report=xml:integration.xml tests/integration
+
+      - name: Upload integration tests coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./integration.xml,
+          flags: integration
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 #      - name: Report test-coverage to DeepSource

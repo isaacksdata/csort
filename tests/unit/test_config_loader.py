@@ -6,11 +6,14 @@ import pytest
 from src.config_loader import ConfigLoader
 
 
+DEBUG = "tests" in os.getcwd()
+
+
 @pytest.fixture
 def config_path():
-    if os.getcwd().endswith("tests"):
+    if DEBUG:
         return "./csort.ini"
-    return "./tests/csort.ini"
+    return "./tests/unit/csort.ini"
 
 
 @pytest.fixture

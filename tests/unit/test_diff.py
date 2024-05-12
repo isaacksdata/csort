@@ -6,7 +6,7 @@ import pytest
 from src.diff import ASTDiffGenerator
 
 
-DEBUG = os.getcwd().endswith("tests")
+DEBUG = "tests" in os.getcwd()
 
 
 @pytest.fixture
@@ -17,14 +17,14 @@ def differ():
 @pytest.fixture
 def input_script():
     if DEBUG:
-        return "scripts/basic_input.py"
+        return "../scripts/basic_input.py"
     return "tests/scripts/basic_input.py"
 
 
 @pytest.fixture
 def expected_script():
     if DEBUG:
-        return "scripts/basic_expected.py"
+        return "../scripts/basic_expected.py"
     return "tests/scripts/basic_expected.py"
 
 
