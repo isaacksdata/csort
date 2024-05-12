@@ -9,6 +9,7 @@ from typing import Optional
 from typing import Tuple
 
 from src.formatting import format_csort
+from src.formatting import format_csort_response
 
 logging.basicConfig(level=logging.INFO)
 
@@ -53,6 +54,12 @@ def parse_commandline() -> argparse.Namespace:
         action="store_true",
         help="Use --check to run Csort without changing any files and instead return a code indicating how many files"
         "would be changed.",
+    )
+    parser.add_argument(
+        "--diff",
+        default=False,
+        action="store_true",
+        help="Use --diff to run Csort without changing any files and print the changes which would be made.",
     )
     params = parser.parse_args()
 
@@ -153,7 +160,7 @@ def main() -> None:
     skip_patterns = [] if params.skip_patterns is None else params.skip_patterns
 
     py_scripts, outputs = validate_paths(
-        input_path=params.input_path, output_path=params.output_path, check_only=params.check
+        input_path=params.input_path, output_path=params.output_path, check_only=params.check or params.diff
     )
 
     if len(py_scripts) == 0:
@@ -161,7 +168,7 @@ def main() -> None:
     else:
         logging.info("Checking %s python scripts ...", len(py_scripts))
 
-    responses: List[int] = []
+    responses: List[format_csort_response] = []
     for input_script, output_script in zip(py_scripts, outputs):
         if any(skip_pat in Path(input_script).stem for skip_pat in skip_patterns):
             logging.debug("Skipping %s", input_script)
@@ -169,12 +176,14 @@ def main() -> None:
         logging.debug("Reformatting %s ...", input_script)
         response = format_csort(file_path=input_script, output_py=output_script, config_path=params.config_path)
         responses.append(response)
+    n = sum(resp["code"] for resp in responses)
     if params.check:
-        logging.info(
-            "\n----\nCsort ran in check mode : %s / %s files would be changed!\n----", sum(responses), len(py_scripts)
-        )
+        logging.info("\n----\nCsort ran in check mode : %s / %s files would be changed!\n----", n, len(py_scripts))
+    elif params.diff:
+        diff = "\n\n".join([resp["diff"] for resp in responses])
+        logging.info("\n ----- \nCsort ran in diff mode : %s", diff)
     else:
-        logging.info("\n----\nCsort modified %s / %s files!\n----", sum(responses), len(py_scripts))
+        logging.info("\n----\nCsort modified %s / %s files!\n----", n, len(py_scripts))
 
 
 if __name__ == "__main__":

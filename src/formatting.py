@@ -11,6 +11,7 @@ import ast_comments
 import astor
 
 from src.config_loader import ConfigLoader
+from src.diff import ASTDiffGenerator
 from src.edge_cases import handle_edge_cases
 from src.functions import ASTMethodDescriber
 from src.functions import describe_method
@@ -43,6 +44,7 @@ def parse_code(code: Optional[str] = None, file_path: Optional[str] = None) -> a
 
 
 find_classes_response = TypedDict("find_classes_response", {"node": ast.ClassDef, "index": int})
+format_csort_response = TypedDict("format_csort_response", {"code": int, "diff": str})
 
 
 def find_classes(code: ast.Module) -> Dict[str, find_classes_response]:
@@ -121,7 +123,9 @@ def preserve_comments(parsed_code: ast.Module) -> str:
     return new_code
 
 
-def format_csort(file_path: str, output_py: Optional[str] = None, config_path: Optional[str] = None) -> int:
+def format_csort(
+    file_path: str, output_py: Optional[str] = None, config_path: Optional[str] = None
+) -> format_csort_response:
     """
     Main function for running Csort
     Args:
@@ -130,7 +134,10 @@ def format_csort(file_path: str, output_py: Optional[str] = None, config_path: O
         config_path: path to csort.ini file
 
     Returns:
-        code indicating whether file was changed or not
+        {
+            "code" : indicates whether file has changed or not
+            "diff": string indicating changes introduced by csort
+        }
     """
     # get config file
     config_loader = ConfigLoader(config_path=config_path)
@@ -151,7 +158,7 @@ def format_csort(file_path: str, output_py: Optional[str] = None, config_path: O
 
     if all(functions[cname] == sorted_functions[cname] for cname in functions.keys()):
         logging.info("No changes made!")
-        return 0
+        return format_csort_response(code=0, diff="")
     # update the classes dictionary with new class body
     for name, cls in classes.items():
         cls["node"].body = sorted_functions[name]
@@ -167,8 +174,16 @@ def format_csort(file_path: str, output_py: Optional[str] = None, config_path: O
 
     new_code = handle_import_formatting(source_code=python_code, ast_code=new_code)
 
+    diff_gen = ASTDiffGenerator()
+    diff_list = []
+    for cls_name in functions:
+        diff = diff_gen.diff(functions[cls_name], sorted_functions[cls_name])
+        diff = f"**************\n ***** {file_path} *****\n**************\n" + f"\n ----- {cls_name} ----- \n" + diff
+        diff_list.append(diff)
+    compiled_diff = "/n/n".join(diff_list)
+
     if output_py is not None:
         create_path(output_py)
         with open(output_py, "w", encoding="utf-8") as f:
             f.writelines(new_code)
-    return 1
+    return format_csort_response(code=1, diff=compiled_diff)
