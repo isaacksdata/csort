@@ -10,8 +10,7 @@ from typing import Tuple
 
 from src.formatting import format_csort
 from src.formatting import format_csort_response
-
-logging.basicConfig(level=logging.INFO)
+from src.logger import set_logging
 
 
 def parse_commandline() -> argparse.Namespace:
@@ -60,6 +59,9 @@ def parse_commandline() -> argparse.Namespace:
         default=False,
         action="store_true",
         help="Use --diff to run Csort without changing any files and print the changes which would be made.",
+    )
+    parser.add_argument(
+        "-v", "--verbose", type=int, default=1, help="Set the verbosity of the Csort output. Use 0, 1, or 2."
     )
     params = parser.parse_args()
 
@@ -157,6 +159,7 @@ def validate_paths(
 
 def main() -> None:
     params = parse_commandline()
+    set_logging(params.verbose)
     skip_patterns = [] if params.skip_patterns is None else params.skip_patterns
 
     py_scripts, outputs = validate_paths(

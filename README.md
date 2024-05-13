@@ -75,7 +75,6 @@ If multiple methods occur for a given sorting level, then the methods are sorted
 
 ## Todo
 
-- logging level cli option
 - move to libcst from ast
 - Check that pandas querys are preserved e.g. "'column' == 'mystring'"
 - use pyproject.toml instead of setup files
