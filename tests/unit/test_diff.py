@@ -3,7 +3,7 @@ import os
 
 import pytest
 
-from src.diff import ASTDiffGenerator
+from src.diff import SyntaxTreeDiffGenerator
 
 
 DEBUG = "tests" in os.getcwd()
@@ -11,7 +11,7 @@ DEBUG = "tests" in os.getcwd()
 
 @pytest.fixture
 def differ():
-    return ASTDiffGenerator()
+    return SyntaxTreeDiffGenerator()
 
 
 @pytest.fixture

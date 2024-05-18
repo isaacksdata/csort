@@ -38,6 +38,7 @@ def test_parse_commandline():
         "--config-path=test/config/csort.ini",
         "--skip-patterns=expected",
         "--skip-patterns=pattern",
+        "--parser=cst",
         "--check",
     ]
     with patch.object(sys, "argv", commands):
@@ -47,6 +48,7 @@ def test_parse_commandline():
     assert output.output_path == "test/output/path/file.py"
     assert output.config_path == "test/config/csort.ini"
     assert output.skip_patterns == ["expected", "pattern"]
+    assert output.parser == "cst"
     assert output.check
 
 
@@ -94,7 +96,7 @@ def test_validate_paths_not_exist():
 
 
 def test_main_no_scripts(caplog):
-    os.mkdir("empty_dir")
+    os.makedirs("empty_dir", exist_ok=True)
     commands = ["", "--input-path=./empty_dir"]  # mock script name
     with patch.object(sys, "argv", commands):
         main()
@@ -109,6 +111,22 @@ def test_main(script_path, output_path, caplog):
         main()
     assert Path(output_path).exists()
     assert f"Reformatting {script_path} ..." in caplog.messages
+    shutil.rmtree(Path(output_path).parent.as_posix())
+
+
+def test_main_cst(script_path, output_path, caplog):
+    caplog.set_level(logging.DEBUG)
+    commands = [
+        "",
+        f"--input-path={script_path}",
+        f"--output-path={output_path}",
+        "--parser=cst",
+    ]  # mock script name as first arg
+    with patch.object(sys, "argv", commands):
+        main()
+    assert Path(output_path).exists()
+    assert f"Reformatting {script_path} ..." in caplog.messages
+    assert "Using the CST parser!" in caplog.messages
     shutil.rmtree(Path(output_path).parent.as_posix())
 
 
