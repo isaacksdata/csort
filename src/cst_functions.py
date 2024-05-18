@@ -10,6 +10,7 @@ import libcst
 from src.configs import DUNDER_PATTERN
 from src.configs import find_classes_response
 from src.decorators import get_decorators
+from src.utilities import check_and_get_attribute
 from src.utilities import extract_text_from_file
 from src.utilities import is_class_docstring_cst
 from src.utilities import is_ellipsis_cst
@@ -52,12 +53,9 @@ def update_node(cls: find_classes_response, components: List[libcst.CSTNode]) ->
     """
     if not isinstance(cls["node"], libcst.ClassDef):
         raise TypeError(f"Expected type libcst.ClassDef! Not {type(cls['node'])}")
-    if not hasattr(cls["node"], "body"):
-        raise AttributeError("Class node does not have body attribute!")
-    if not hasattr(cls["node"].body, "with_changes"):
-        raise AttributeError("Class body does not have with_changes() method!")
-    if not hasattr(cls["node"], "with_changes"):
-        raise AttributeError("Class node does not have with_changes() method!")
+    # check_attribute(cls["node"], "body", raise_exception=True)
+    # check_attribute(cls["node"], "with_changes", raise_exception=True)
+    # check_attribute(cls["node"].body, "with_changes", raise_exception=True)
     cls["node"] = cls["node"].with_changes(body=cls["node"].body.with_changes(body=tuple(components)))
     return cls
 
@@ -141,7 +139,7 @@ def is_dunder_method(method: libcst.CSTNode) -> bool:
         True if the method is dunder
 
     """
-    if not hasattr(method, "name"):
+    if check_and_get_attribute(method, "name") is not None:
         return False
     return method.name.value.startswith(DUNDER_PATTERN) and method.name.value.endswith(DUNDER_PATTERN)
 

@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 from typing import Callable
 from typing import Dict
+from typing import TypeVar
 from typing import Union
 
 import ast_comments
@@ -12,6 +13,16 @@ import astor
 import libcst
 
 from src.configs import DOCSTRING_NAME
+
+
+T = TypeVar("T")
+
+
+def check_and_get_attribute(obj: T, attribute: str, raise_exception: bool = False) -> Any:
+    output = hasattr(obj, attribute)
+    if not output and raise_exception:
+        raise AttributeError(f"Object of type {type(obj)} does not have the attribute {attribute}!")
+    return getattr(obj, attribute, None)
 
 
 def extract_text_from_file(file_path: str) -> str:
@@ -85,9 +96,7 @@ def get_annotated_attribute_name(attribute: ast.AnnAssign) -> str:
     Raises:
         AttributeError: if the target does not have id attribute
     """
-    if not hasattr(attribute.target, "id"):
-        raise AttributeError("ID attribute not found for attribute.target")
-    return attribute.target.id
+    return check_and_get_attribute(attribute.target, "id", raise_exception=True)
 
 
 def get_annotated_attribute_name_cst(attribute: libcst.AnnAssign) -> str:
@@ -112,11 +121,7 @@ def get_annotated_attribute_name_cst(attribute: libcst.AnnAssign) -> str:
     """
     if not isinstance(attribute, libcst.SimpleStatementLine) or not isinstance(attribute.body[0], libcst.AnnAssign):
         raise TypeError("Attribute is not annotated attribute!")
-    if not hasattr(attribute.body[0], "target"):
-        raise AttributeError("Target attribute not found!")
-    if not hasattr(attribute.body[0].target, "value"):
-        raise AttributeError("ID attribute not found for attribute.target")
-    return attribute.body[0].target.value
+    return check_and_get_attribute(attribute.body[0].target, "value", raise_exception=True)
 
 
 def get_attribute_name(attribute: ast.Assign) -> str:
@@ -141,9 +146,7 @@ def get_attribute_name(attribute: ast.Assign) -> str:
     """
     if len(attribute.targets) == 0:
         raise ValueError("No targets found for the attribute")
-    if not hasattr(attribute.targets[0], "id"):
-        raise AttributeError("ID attribute not found for attribute.targets")
-    return attribute.targets[0].id
+    return check_and_get_attribute(attribute.targets[0], "id", raise_exception=True)
 
 
 def get_attribute_name_cst(attribute: libcst.Assign) -> str:
@@ -168,11 +171,8 @@ def get_attribute_name_cst(attribute: libcst.Assign) -> str:
     """
     if not isinstance(attribute, libcst.SimpleStatementLine) or not isinstance(attribute.body[0], libcst.Assign):
         raise TypeError("Attribute is not attribute!")
-    if not hasattr(attribute.body[0], "targets"):
-        raise AttributeError("Targets attribute not found!")
-    if not hasattr(attribute.body[0].targets[0], "target"):
-        raise AttributeError("Target attribute not found for attribute")
-    return attribute.body[0].targets[0].target.value
+    target = check_and_get_attribute(attribute.body[0].targets[0], "target", raise_exception=True)
+    return target.value
 
 
 def get_ellipsis_name(expression: Union[ast.Expr, libcst.CSTNode]) -> str:
@@ -186,9 +186,7 @@ def get_ellipsis_name(expression: Union[ast.Expr, libcst.CSTNode]) -> str:
     """
     if isinstance(expression, libcst.CSTNode):
         return "ellipsis"
-    if not hasattr(expression.value, "value"):
-        raise AttributeError("Could not find value attribute!")
-    return str(expression.value.value)
+    return str(check_and_get_attribute(expression.value, "value", raise_exception=True))
 
 
 names_factory: Dict[type, Callable] = {
@@ -275,9 +273,7 @@ def is_ellipsis(expression: ast.AST) -> bool:
     Returns:
         True if the expression is an Ellipsis
     """
-    if not hasattr(expression, "value"):
-        return False
-    expression_value = expression.value
+    expression_value = check_and_get_attribute(expression, "value", raise_exception=True)
     if isinstance(expression_value, ast.Constant):
         constant_value = expression_value.value
         return str(constant_value) == "Ellipsis"
@@ -352,9 +348,7 @@ def is_class_docstring_cst(expression: libcst.CSTNode) -> bool:
         return False
     if not isinstance(expression.body[0], libcst.Expr) or not hasattr(expression.body[0], "value"):
         return False
-    if not hasattr(expression.body[0].value, "value"):
-        return False
-    s: str = expression.body[0].value.value
+    s: str = check_and_get_attribute(expression.body[0].value, "value", raise_exception=True)
     return (s.startswith('"""') and s.endswith('"""')) or (s.startswith("'''") and s.endswith("'''"))
 
 
@@ -402,6 +396,7 @@ def remove_comment_nodes(node: Any) -> Any:
     Returns:
         node without comments
     """
+
     if hasattr(node, "body"):
         node.body = [remove_comment_nodes(n) for n in node.body if not isinstance(n, ast_comments.Comment)]
     return node

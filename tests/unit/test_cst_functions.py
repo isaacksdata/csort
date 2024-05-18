@@ -13,6 +13,7 @@ from src.cst_functions import find_classes
 from src.cst_functions import is_annotated_class_attribute
 from src.cst_functions import is_class_attribute
 from src.cst_functions import is_dunder_method
+from src.cst_functions import update_node
 from src.decorators import _get_decorators_cst
 from src.decorators import get_decorator_id_cst
 from src.utilities import extract_text_from_file
@@ -40,6 +41,19 @@ def mock_statement(script_path):
 @pytest.fixture
 def mock_cst_module(mock_statement):
     return libcst.parse_module(mock_statement)
+
+
+def test_update_node_wrong_type():
+    cls = {"node": 3, "index": 1}
+    with pytest.raises(TypeError):
+        update_node(cls, [])
+
+
+@pytest.mark.parametrize("script_path", ["basic"], indirect=True)
+def test_update_node_cls_attribute_error(mock_cst_module):
+    with pytest.raises(AttributeError) as e:
+        update_node(cls, [])
+    assert e
 
 
 @pytest.mark.parametrize("script_path", ["basic"], indirect=True)
