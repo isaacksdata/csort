@@ -1,7 +1,12 @@
 """Constants used throughout the project"""
+import ast
 from typing import Any
 from typing import Dict
 from typing import Final
+from typing import TypedDict
+from typing import Union
+
+import libcst
 
 # pattern used to define magic dunder methods e.g. "__init__()"
 DUNDER_PATTERN: Final[str] = "__"
@@ -35,3 +40,5 @@ DEFAULT_CSORT_ORDER_PARAMS: Final[Dict[str, Any]] = {
 DEFAULT_CSORT_GENERAL_PARAMS: Final[Dict[str, Any]] = {
     "use_csort_group": True,
 }
+find_classes_response = TypedDict("find_classes_response", {"node": Union[ast.ClassDef, libcst.CSTNode], "index": int})
+format_csort_response = TypedDict("format_csort_response", {"code": int, "diff": str})

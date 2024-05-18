@@ -5,6 +5,8 @@ from abc import abstractmethod
 from typing import Any
 from typing import List
 
+import libcst
+
 from src.utilities import get_expression_name
 
 
@@ -77,23 +79,23 @@ class DiffGenerator(ABC):
         return self._generate_diff_string()
 
 
-class ASTDiffGenerator(DiffGenerator):
+class SyntaxTreeDiffGenerator(DiffGenerator):
     """
-    Concrete class for generating code difference strings when the code has been parsed with AST
+    Concrete class for generating code difference strings when the code has been parsed with AST or CST
     """
 
     def _extract_method_names(self, methods: List[Any]) -> List[str]:
         """
-        Implements identifier extraction from AST parsed code nodes
+        Implements identifier extraction from AST/CST parsed code nodes
         Args:
-            methods: input list of ast parsed methods
+            methods: input list of AST/CST parsed methods
 
         Returns:
             a list of identifiers extracted from methods
 
         Raises:
-            TypeError: if any of the methods are not AST parsed
+            TypeError: if any of the methods are not AST/CST parsed
         """
-        if not all(isinstance(method, ast.AST) for method in methods):
+        if not all(isinstance(method, (ast.AST, libcst.CSTNode)) for method in methods):
             raise TypeError("Unexpected code type!")
         return [get_expression_name(method) for method in methods]

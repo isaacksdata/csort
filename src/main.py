@@ -2,15 +2,18 @@
 Command line entrypoint for Csort
 """
 import argparse
+import importlib
 import logging
 from pathlib import Path
 from typing import List
 from typing import Optional
 from typing import Tuple
 
+from src.config_loader import ConfigLoader
+from src.configs import format_csort_response
 from src.formatting import format_csort
-from src.formatting import format_csort_response
 from src.logger import set_logging
+from src.method_describers import get_method_describer
 
 
 def parse_commandline() -> argparse.Namespace:
@@ -63,6 +66,9 @@ def parse_commandline() -> argparse.Namespace:
     parser.add_argument(
         "-v", "--verbose", type=int, default=1, help="Set the verbosity of the Csort output. Use 0, 1, or 2."
     )
+    parser.add_argument(
+        "-p", "--parser", type=str, default="cst", choices=["ast", "cst"], help="Choose a parser. Either ast or cst."
+    )
     params = parser.parse_args()
 
     return params
@@ -102,7 +108,7 @@ def _validate_paths_input_dir(
     """
     Validate that the input file path and output path are compatible when the user has specified an input directory
     Args:
-        input_path: file path to a a directory containing .py files
+        input_path: file path to a directory containing .py files
         output_path: output path to a file or directory
         check_only: If True, then outputs will be None and no code will be changed
 
@@ -171,13 +177,21 @@ def main() -> None:
     else:
         logging.info("Checking %s python scripts ...", len(py_scripts))
 
+    logging.info("Using the %s parser!", str.upper(params.parser))
+    code_parser = importlib.import_module(f"src.{params.parser}_functions")
+    config_loader = ConfigLoader(config_path=params.config_path)
+    cfg = config_loader.config
+    method_describer = get_method_describer(parser_type=params.parser, config=cfg)
+
     responses: List[format_csort_response] = []
     for input_script, output_script in zip(py_scripts, outputs):
         if any(skip_pat in Path(input_script).stem for skip_pat in skip_patterns):
             logging.debug("Skipping %s", input_script)
             continue
         logging.debug("Reformatting %s ...", input_script)
-        response = format_csort(file_path=input_script, output_py=output_script, config_path=params.config_path)
+        response = format_csort(
+            file_path=input_script, output_py=output_script, parser=code_parser, method_describer=method_describer
+        )
         responses.append(response)
     n = sum(resp["code"] for resp in responses)
     if params.check:
