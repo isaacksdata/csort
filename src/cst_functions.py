@@ -16,6 +16,15 @@ from src.utilities import is_ellipsis_cst
 
 
 def update_module(module: libcst.Module, classes: Dict[str, find_classes_response]) -> libcst.Module:
+    """
+    Update the libcst tree module with the formatted class nodes
+    Args:
+        module: libcst tree
+        classes: mapping of class names to class nodes
+
+    Returns:
+        module: modified to include formatted classes
+    """
     new_body = []
     for item in module.body:
         if isinstance(item, libcst.ClassDef):
@@ -36,6 +45,10 @@ def update_node(cls: find_classes_response, components: List[libcst.CSTNode]) ->
 
     Returns:
         void
+
+    Raises:
+        TypeError: if classes contains nodes which are not class definitions
+        AttributeError: if expected attributes of class definitions are not available
     """
     if not isinstance(cls["node"], libcst.ClassDef):
         raise TypeError(f"Expected type libcst.ClassDef! Not {type(cls['node'])}")
@@ -70,10 +83,30 @@ def parse_code(code: Optional[str] = None, file_path: Optional[str] = None) -> l
 
 
 def nodes_to_code(tree: libcst.Module, **kwargs: Any) -> str:  # pylint: disable=unused-argument
+    """
+    Unparse libcst tree to code string
+
+    **kwargs provided for compatibility with ast_functions.nodes_to_code()
+
+    Args:
+        tree: libcst tree
+        **kwargs: any other args
+
+    Returns:
+        source code string
+    """
     return tree.code_for_node(tree)
 
 
 def find_classes(module: libcst.Module) -> Dict[str, find_classes_response]:
+    """
+    Extract class definitions from libcst tree
+    Args:
+        module: libcst tree
+
+    Returns:
+        classes: a mapping of class names to class definition node and index in the tree body
+    """
     classes = {
         node.name.value: find_classes_response(node=node, index=i)
         for i, node in enumerate(module.body)
@@ -83,6 +116,14 @@ def find_classes(module: libcst.Module) -> Dict[str, find_classes_response]:
 
 
 def extract_class_components(class_node: libcst.ClassDef) -> Sequence[libcst.BaseStatement]:
+    """
+    Extract components of the class definition body
+    Args:
+        class_node: libcst class definition node
+
+    Returns:
+        tuple of class components e.g. function definitions, attributes, docstrings
+    """
     if not hasattr(class_node, "body"):
         return tuple()
     if not isinstance(class_node.body, libcst.IndentedBlock):

@@ -28,6 +28,18 @@ from src.utilities import remove_comment_nodes
 
 
 def update_module(module: ast.Module, classes: Dict[str, find_classes_response]) -> ast.Module:
+    """
+    Update the ast tree module with the formatted class nodes
+    Args:
+        module: ast tree
+        classes: mapping of class names to class nodes
+
+    Returns:
+        module: modified to include formatted classes
+
+    Raises:
+        TypeError: if class node is not of tye ast.stmt
+    """
     for _, cls in classes.items():
         if not isinstance(cls["node"], ast.stmt):
             raise TypeError("Trying to assign incompatible node to ast module!")
@@ -43,7 +55,10 @@ def update_node(cls: find_classes_response, components: List[ast.stmt]) -> find_
         components: sorted class components
 
     Returns:
-        void
+        cls: class node updated with sorted components
+
+    Raises:
+        AttributeError: if class node does not have body attribute
     """
     if not hasattr(cls["node"], "body"):
         raise AttributeError("Class definition does not have body attribute!")
@@ -72,6 +87,21 @@ def parse_code(code: Optional[str] = None, file_path: Optional[str] = None) -> a
 
 
 def nodes_to_code(tree: ast.Module, source_code: str) -> str:
+    """
+    Unparse AST tree to source code.
+
+    Handle edge cases to ensure full reproducibility of source code:
+    1) merges back comments lost during AST parsing
+    2) handles line spacing
+    3) handles import spacing
+
+    Args:
+        tree: AST tree
+        source_code: original python code string
+
+    Returns:
+        new_code: source code strings after formatting
+    """
     new_code = preserve_comments(tree)
     new_code = handle_edge_cases(new_code)
     new_code = handle_import_formatting(source_code=source_code, ast_code=new_code)
