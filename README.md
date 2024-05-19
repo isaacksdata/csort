@@ -48,6 +48,21 @@ each class in each `.py` script:
 csort --input-path src/ --diff
 ```
 
+Csort can be run using Abstract Syntax Tree (AST) or Concrete Syntax Tree (CST) parsers. The AST parser is simpler
+but does always preserve code format such as line spacing, comments and quoting style. Csort handles some of these
+inconsistencies such as line spacing and comments by borrowing parsing information from `ast_comments` and `astor`.
+However, quoting style is not guaranteed with the AST parser. The CST parser uses the `libcst` package and faithfully
+preserves code style. It is recommended to use the CST parser with Csort and this is the default behaviour.
+The parser can be specified using `--parser` or `-p` flags.
+
+```commandline
+csort --input-path src/ --parser cst
+```
+
+```commandline
+csort --input-path src/ -p ast
+```
+
 ## Summary
 
 Csort is a formatter for python classes. Currently, there is no prescribed convention for how the methods of a class
@@ -75,7 +90,6 @@ If multiple methods occur for a given sorting level, then the methods are sorted
 
 ## Todo
 
-- move to libcst from ast
 - Check that pandas querys are preserved e.g. "'column' == 'mystring'"
 - use pyproject.toml instead of setup files
 - support pyproject.toml

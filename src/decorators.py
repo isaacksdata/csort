@@ -7,6 +7,9 @@ from typing import Hashable
 from typing import List
 from typing import Optional
 from typing import Tuple
+from typing import Union
+
+import libcst
 
 
 class DecoratorDefaultDict(defaultdict):
@@ -32,6 +35,10 @@ decorator_orders = DecoratorDefaultDict()
 decorators = ["classmethod", "staticmethod", "property", "getter", "setter"]
 for i, dec in enumerate(decorators):
     decorator_orders[dec] = i
+
+# -------------------------------------------------------------------------
+# AST functions
+# -------------------------------------------------------------------------
 
 
 def decorator_name_id(decorator: ast.Name) -> str:
@@ -75,10 +82,68 @@ def decorator_call_id(decorator: ast.Call) -> str:
     raise AttributeError("decorator of type ast.Call does not have func attribute with id attribute!")
 
 
-decorator_description_factory: Dict[type, Callable] = {
+# -------------------------------------------------------------------------
+# CST functions
+# -------------------------------------------------------------------------
+
+
+def decorator_name_id_cst(decorator: libcst.Decorator) -> str:
+    """
+    Get the decorator type from an Name decorator
+    Args:
+        decorator: input decorator
+
+    Returns:
+        id attribute
+    """
+    if not hasattr(decorator.decorator, "value"):
+        raise AttributeError("Could not find value attribute of decorator!")
+    return decorator.decorator.value
+
+
+def decorator_attribute_id_cst(decorator: libcst.Decorator) -> str:
+    """
+    Get the decorator type from an Attribute decorator
+    Args:
+        decorator: input decorator
+
+    Returns:
+        attr attribute
+    """
+    if not hasattr(decorator.decorator, "attr"):
+        raise AttributeError("Could not find attr attribute of decorator!")
+    return decorator.decorator.attr.value
+
+
+def decorator_call_id_cst(decorator: libcst.Decorator) -> str:
+    """
+    Get the decorator type from an ast.Call decorator
+    Args:
+        decorator: input decorator
+
+    Returns:
+        attr attribute
+
+    Raises:
+        AttributeError: if decorator.func does not have id attribute
+    """
+    if isinstance(decorator.decorator, libcst.Call):
+        if hasattr(decorator.decorator.func, "value"):
+            return decorator.decorator.func.value
+    raise AttributeError("libcst decorator of type libcst.Call does not have func attribute with value attribute!")
+
+
+# factory to indicate what functions to call for describing different types of decorators
+ast_decorator_description_factory: Dict[type, Callable] = {
     ast.Name: decorator_name_id,
     ast.Attribute: decorator_attribute_id,
     ast.Call: decorator_call_id,
+}
+
+cst_decorator_description_factory: Dict[type, Callable] = {
+    libcst.Name: decorator_name_id_cst,
+    libcst.Attribute: decorator_attribute_id_cst,
+    libcst.Call: decorator_call_id_cst,
 }
 
 
@@ -93,13 +158,44 @@ def get_decorator_id(decorator: ast.expr) -> str:
     Returns:
         type of decorator
     """
-    func = decorator_description_factory.get(type(decorator))
+    func = ast_decorator_description_factory.get(type(decorator))
     if func is None:
         raise TypeError(f"Unexpected type {type(decorator)}!")
     return func(decorator)
 
 
-def get_decorators(method: ast.stmt, sort: bool = False) -> Optional[List[str]]:
+def get_decorator_id_cst(decorator: libcst.Decorator) -> str:
+    """
+    Get the decorator type from a method decorator parsed by CST
+
+    Args:
+        decorator: input decorator expression
+
+    Returns:
+        type of decorator
+    """
+    func = cst_decorator_description_factory.get(type(decorator.decorator))
+    if func is None:
+        raise TypeError(f"Unexpected type {type(decorator)}!")
+    return func(decorator)
+
+
+def get_decorators(method: Union[ast.stmt, libcst.CSTNode], sort: bool = False) -> Optional[List[str]]:
+    """
+    Get decorators from an ast parsed function
+    Args:
+        method: the ast parsed method
+        sort: if True, then decorators will be sorted according to decorator_orders
+
+    Returns:
+        list of ids from decorator list attribute
+    """
+    if isinstance(method, ast.stmt):
+        return _get_decorators_ast(method, sort=sort)
+    return _get_decorators_cst(method, sort=sort)
+
+
+def _get_decorators_ast(method: ast.stmt, sort: bool = False) -> Optional[List[str]]:
     """
     Get decorators from an ast parsed function
     Args:
@@ -117,11 +213,29 @@ def get_decorators(method: ast.stmt, sort: bool = False) -> Optional[List[str]]:
     return decorators
 
 
-def has_decorator(method: ast.stmt, decorator: str) -> bool:
+def _get_decorators_cst(method: libcst.CSTNode, sort: bool = False) -> Optional[List[str]]:
     """
-    Determine if an ast parsed method has a specific decorator
+    Get decorators from an CST parsed function
     Args:
-        method: the ast parsed method node
+        method: the CST parsed method
+        sort: if True, then decorators will be sorted according to decorator_orders
+
+    Returns:
+        list of ids from decorator list attribute
+    """
+    if not isinstance(method, libcst.FunctionDef) or not hasattr(method, "decorators"):
+        return None
+    decorators = [get_decorator_id_cst(decorator) for decorator in method.decorators]
+    if sort:
+        decorators = order_decorators(decorators)
+    return decorators
+
+
+def has_decorator(method: Union[ast.stmt, libcst.CSTNode], decorator: str) -> bool:
+    """
+    Determine if a parsed method has a specific decorator
+    Args:
+        method: the AST or CST parsed method node
         decorator: decorator to look for
 
     Returns:

@@ -1,95 +1,20 @@
 """Reformat class method definitions"""
 import ast
 import logging
-from copy import deepcopy
+from types import ModuleType
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import TypedDict
 
-import ast_comments
-import astor
-
-from src.config_loader import ConfigLoader
-from src.diff import ASTDiffGenerator
-from src.edge_cases import handle_edge_cases
-from src.functions import ASTMethodDescriber
-from src.functions import describe_method
-from src.functions import is_csortable
-from src.imports import handle_import_formatting
+from src.configs import format_csort_response
+from src.diff import SyntaxTreeDiffGenerator
+from src.method_describers import describe_method
+from src.method_describers import MethodDescriber
 from src.utilities import create_path
 from src.utilities import extract_text_from_file
-from src.utilities import merge_code_strings
-from src.utilities import remove_comment_nodes
 
 
-def parse_code(code: Optional[str] = None, file_path: Optional[str] = None) -> ast.Module:
-    """
-    Parse already loaded code with ast module
-    Args:
-        code: input lines of code
-        file_path: path to .py code
-
-    Returns:
-        parsed code as ast Module
-
-    Raises:
-        ValueError: if code and file_path are both None
-    """
-    if file_path:
-        return astor.parse_file(file_path)
-    if code:
-        return ast_comments.parse(code)
-    raise ValueError("Must provide code or file_path!")
-
-
-find_classes_response = TypedDict("find_classes_response", {"node": ast.ClassDef, "index": int})
-format_csort_response = TypedDict("format_csort_response", {"code": int, "diff": str})
-
-
-def find_classes(code: ast.Module) -> Dict[str, find_classes_response]:
-    """
-    Find all class definitions within parsed code
-    Args:
-        code: parsed code module
-
-    Returns:
-        classes: list of class definitions
-    """
-    classes = {}
-
-    # Find all function definitions
-    for i, node in enumerate(code.body):
-        if isinstance(node, ast.ClassDef):
-            classes[node.name] = find_classes_response(node=node, index=i)
-
-    # Sort the functions based on their line numbers
-    # classes.sort(key=lambda x: x[0])
-    return classes
-
-
-def find_methods(code: ast.ClassDef) -> List[ast.stmt]:
-    """
-    Find all method definitions within a class definition
-    Args:
-        code: parsed class definition
-
-    Returns:
-        functions: list of function definitions
-    """
-    functions: List[ast.stmt] = []
-
-    # Find all function definitions
-    for node in code.body:
-        if is_csortable(node):
-            functions.append(node)
-
-    # Sort the functions based on their line numbers
-    # functions.sort(key=lambda x: x[0])
-    return functions
-
-
-def order_class_functions(methods: List[ast.stmt], method_describer: ASTMethodDescriber) -> List[ast.stmt]:
+def order_class_functions(methods: List[ast.stmt], method_describer: MethodDescriber) -> List[ast.stmt]:
     """
     Sort a list of method definitions by the method type and alphabetically by method name
     Args:
@@ -103,35 +28,19 @@ def order_class_functions(methods: List[ast.stmt], method_describer: ASTMethodDe
     return sorted_methods
 
 
-def preserve_comments(parsed_code: ast.Module) -> str:
-    """
-    Preserve comments by merging the code derived from astor and ast_comments libraries.
-
-    Astor is better at preserving indentations and line breaks.
-    Ast_comments captures comments but the comments cannot be unparsed with astor.
-    Args:
-        parsed_code: ast tree
-
-    Returns:
-        new_code: merged code from astor and ast_comments parsers
-    """
-    uncommented_code = deepcopy(parsed_code)
-    uncommented_code = remove_comment_nodes(uncommented_code)
-    astor_code = astor.to_source(uncommented_code)
-    new_code = ast_comments.unparse(parsed_code)
-    new_code = merge_code_strings(astor_code, new_code)
-    return new_code
-
-
 def format_csort(
-    file_path: str, output_py: Optional[str] = None, config_path: Optional[str] = None
+    parser: ModuleType,
+    file_path: str,
+    method_describer: MethodDescriber,
+    output_py: Optional[str] = None,
 ) -> format_csort_response:
     """
     Main function for running Csort
     Args:
+        parser: Module containing functions for specified code parser
         file_path: path to source code (.py) file
+        method_describer: instance of MethodDescriber for extracting class method info
         output_py: where to write out formatted code (.py) file
-        config_path: path to csort.ini file
 
     Returns:
         {
@@ -139,18 +48,11 @@ def format_csort(
             "diff": string indicating changes introduced by csort
         }
     """
-    # get config file
-    config_loader = ConfigLoader(config_path=config_path)
-    cfg = config_loader.config
-
-    # build method describer
-    method_describer = ASTMethodDescriber(config=cfg)
 
     python_code = extract_text_from_file(file_path)
-    parsed_code = parse_code(code=python_code, file_path=file_path)
-    parsed_code = parse_code(code=python_code)
-    classes = find_classes(parsed_code)
-    functions = {name: find_methods(cls["node"]) for name, cls in classes.items()}
+    parsed_code = parser.parse_code(code=python_code, file_path=file_path)
+    classes = parser.find_classes(parsed_code)
+    functions = {name: parser.extract_class_components(cls["node"]) for name, cls in classes.items()}
 
     sorted_functions: Dict[str, List[ast.stmt]] = {
         cls: order_class_functions(methods, method_describer) for cls, methods in functions.items()
@@ -160,21 +62,15 @@ def format_csort(
         logging.info("No changes made!")
         return format_csort_response(code=0, diff="")
     # update the classes dictionary with new class body
-    for name, cls in classes.items():
-        cls["node"].body = sorted_functions[name]
+    # for name, cls in classes.items():
+    #     cls = parser.update_node(cls, sorted_functions[name])
+    classes = {name: parser.update_node(cls, sorted_functions[name]) for name, cls in classes.items()}
+    # update parsed code with sorted classes
+    parsed_code = parser.update_module(parsed_code, classes)
 
-        # update parsed code with sorted classes
-    for _, cls in classes.items():
-        parsed_code.body[cls["index"]] = cls["node"]
+    new_code = parser.nodes_to_code(tree=parsed_code, source_code=python_code)
 
-        # unparse code and add extra line space between classes
-    new_code = preserve_comments(parsed_code)
-
-    new_code = handle_edge_cases(new_code)
-
-    new_code = handle_import_formatting(source_code=python_code, ast_code=new_code)
-
-    diff_gen = ASTDiffGenerator()
+    diff_gen = SyntaxTreeDiffGenerator()
     diff_list = []
     for cls_name in functions:
         diff = diff_gen.diff(functions[cls_name], sorted_functions[cls_name])

@@ -5,7 +5,7 @@ from typing import Callable
 
 import pytest
 
-from src.functions import ASTMethodDescriber
+from src.method_describers import ASTMethodDescriber
 
 
 @pytest.fixture

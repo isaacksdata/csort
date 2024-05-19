@@ -4,6 +4,7 @@ This module contains logic for loading csort configurations from a .ini file.
 import configparser
 import logging
 from pathlib import Path
+from typing import List
 from typing import Optional
 
 from src.configs import DEFAULT_CONFIG_FILE_NAME
@@ -33,13 +34,20 @@ class ConfigLoader:
         self._loaded_config: bool = False
 
     @staticmethod
-    def _locate_config_file() -> Optional[str]:
-        csort_ini_files = list(Path.cwd().glob(DEFAULT_CONFIG_FILE_NAME))
-        if len(csort_ini_files) > 1:
+    def _locate_config_file() -> List[Path]:
+        return list(Path.cwd().glob(DEFAULT_CONFIG_FILE_NAME))
+
+    @staticmethod
+    def _validate_config_path(config_path: List[Path]) -> Optional[str]:
+        if len(config_path) > 1:
             raise ValueError(f"More than one {DEFAULT_CONFIG_FILE_NAME} file found!")
-        if len(csort_ini_files) == 1:
-            return csort_ini_files[0].as_posix()
+        if len(config_path) == 1:
+            return config_path[0].as_posix()
         return None
+
+    def _get_config_file_path(self) -> Optional[str]:
+        csort_ini_files = self._locate_config_file()
+        return self._validate_config_path(csort_ini_files)
 
     def _read_config(self, config_path: str) -> None:
         self._config_parser.read(config_path)
@@ -50,7 +58,7 @@ class ConfigLoader:
         self._config_parser["csort"] = DEFAULT_CSORT_GENERAL_PARAMS
 
     def _load_config(self) -> None:
-        config_path = self._locate_config_file() if self._config_path is None else self._config_path
+        config_path = self._get_config_file_path() if self._config_path is None else self._config_path
         if config_path is None:
             logging.warning("No config file found! Using default behaviours.")
             self._load_defaults()
