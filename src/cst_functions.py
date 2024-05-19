@@ -139,9 +139,10 @@ def is_dunder_method(method: libcst.CSTNode) -> bool:
         True if the method is dunder
 
     """
-    if check_and_get_attribute(method, "name") is None:
+    name = check_and_get_attribute(method, "name")
+    if name is None:
         return False
-    return method.name.value.startswith(DUNDER_PATTERN) and method.name.value.endswith(DUNDER_PATTERN)
+    return name.value.startswith(DUNDER_PATTERN) and name.value.endswith(DUNDER_PATTERN)
 
 
 def is_annotated_class_attribute(expression: libcst.CSTNode) -> bool:
