@@ -241,7 +241,7 @@ def has_decorator(method: Union[ast.stmt, libcst.CSTNode], decorator: str) -> bo
     Returns:
         True if decorator in the decorators
     """
-    decorators = _get_decorators_cst(method) if isinstance(method, libcst.CSTNode) else get_decorators(method)
+    decorators = get_decorators(method)
     if decorators is None:
         return False
     return decorator in decorators

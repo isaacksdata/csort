@@ -126,7 +126,8 @@ def extract_class_components(class_node: libcst.ClassDef) -> Sequence[libcst.Bas
         return tuple()
     if not isinstance(class_node.body, libcst.IndentedBlock):
         raise TypeError("Expected class node body to be of type IndentedBlock!")
-    return class_node.body.body
+    components = [node for node in class_node.body.body if is_csortable(node)]
+    return components
 
 
 def is_dunder_method(method: libcst.CSTNode) -> bool:

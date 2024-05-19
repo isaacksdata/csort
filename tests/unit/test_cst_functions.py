@@ -1,4 +1,5 @@
 import os
+from unittest.mock import Mock
 
 import libcst
 import pytest
@@ -13,6 +14,7 @@ from src.cst_functions import find_classes
 from src.cst_functions import is_annotated_class_attribute
 from src.cst_functions import is_class_attribute
 from src.cst_functions import is_dunder_method
+from src.cst_functions import parse_code
 from src.cst_functions import update_node
 from src.decorators import _get_decorators_cst
 from src.decorators import get_decorator_id_cst
@@ -71,6 +73,10 @@ def test_cst_is_dunder_method(mock_cst_module):
     assert sum(output) == 2
     assert output[0]
     assert output[5]
+
+
+def test_cst_is_dunder_method_no_name():
+    assert not is_dunder_method(5)
 
 
 @pytest.mark.parametrize("script_path", ["multi_decorators"], indirect=True)
@@ -176,3 +182,21 @@ def test_is_ellipsis(mock_cst_module):
     assert len(output) == 3
     assert sum(output) == 1
     assert output[0]
+
+
+def test_parse_code():
+    with pytest.raises(ValueError):
+        parse_code(code=None, file_path=None)
+
+
+def test_extract_class_components_no_body():
+    output = extract_class_components(class_node=5)
+    assert isinstance(output, tuple)
+    assert len(output) == 0
+
+
+def test_extract_class_components_no_indentedblock():
+    mock_obj = Mock()
+    mock_obj.body = "This is the body content"
+    with pytest.raises(TypeError):
+        extract_class_components(class_node=mock_obj)
