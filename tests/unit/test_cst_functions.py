@@ -50,13 +50,6 @@ def test_update_node_wrong_type():
 
 
 @pytest.mark.parametrize("script_path", ["basic"], indirect=True)
-def test_update_node_cls_attribute_error(mock_cst_module):
-    with pytest.raises(AttributeError) as e:
-        update_node(cls, [])
-    assert e
-
-
-@pytest.mark.parametrize("script_path", ["basic"], indirect=True)
 def test_cst_extract_classes(mock_cst_module):
     output = find_classes(mock_cst_module)
     assert isinstance(output, dict)

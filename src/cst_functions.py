@@ -139,7 +139,7 @@ def is_dunder_method(method: libcst.CSTNode) -> bool:
         True if the method is dunder
 
     """
-    if check_and_get_attribute(method, "name") is not None:
+    if check_and_get_attribute(method, "name") is None:
         return False
     return method.name.value.startswith(DUNDER_PATTERN) and method.name.value.endswith(DUNDER_PATTERN)
 

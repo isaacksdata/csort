@@ -273,7 +273,9 @@ def is_ellipsis(expression: ast.AST) -> bool:
     Returns:
         True if the expression is an Ellipsis
     """
-    expression_value = check_and_get_attribute(expression, "value", raise_exception=True)
+    expression_value = check_and_get_attribute(expression, "value")
+    if expression_value is None:
+        return False
     if isinstance(expression_value, ast.Constant):
         constant_value = expression_value.value
         return str(constant_value) == "Ellipsis"
@@ -340,15 +342,14 @@ def is_class_docstring_cst(expression: libcst.CSTNode) -> bool:
     Returns:
         True if the expression is a docstring
 
-    Raises:
-        AttributeError: if astor.to_source fails and its not due to the node representing a Comment
-
     """
     if not isinstance(expression, libcst.SimpleStatementLine):
         return False
     if not isinstance(expression.body[0], libcst.Expr) or not hasattr(expression.body[0], "value"):
         return False
-    s: str = check_and_get_attribute(expression.body[0].value, "value", raise_exception=True)
+    s: str = check_and_get_attribute(expression.body[0].value, "value")
+    if s is None:
+        return False
     return (s.startswith('"""') and s.endswith('"""')) or (s.startswith("'''") and s.endswith("'''"))
 
 
