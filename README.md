@@ -90,7 +90,6 @@ If multiple methods occur for a given sorting level, then the methods are sorted
 
 ## Todo
 
-- Check that pandas querys are preserved e.g. "'column' == 'mystring'"
 - use pyproject.toml instead of setup files
 - support pyproject.toml
 - auto convert to static method
