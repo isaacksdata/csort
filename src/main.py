@@ -2,6 +2,7 @@
 Command line entrypoint for Csort
 """
 import argparse
+import ast
 import importlib
 import logging
 from pathlib import Path
@@ -187,7 +188,7 @@ def main() -> None:
     method_describer = get_method_describer(parser_type=params.parser, config=cfg)
 
     # command line can be used to override some options
-    auto_static = bool(cfg[DEFAULT_CSORT_PARAMS_SECTION]["auto_static"])
+    auto_static = ast.literal_eval(cfg[DEFAULT_CSORT_PARAMS_SECTION]["auto_static"])
     auto_static = True if "auto-static" in args else auto_static
     auto_static = False if "n-auto-static" in args else auto_static
 
