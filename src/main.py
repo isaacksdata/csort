@@ -10,6 +10,7 @@ from typing import Optional
 from typing import Tuple
 
 from src.config_loader import ConfigLoader
+from src.configs import DEFAULT_CSORT_PARAMS_SECTION
 from src.configs import format_csort_response
 from src.formatting import format_csort
 from src.logger import set_logging
@@ -190,7 +191,11 @@ def main() -> None:
             continue
         logging.debug("Reformatting %s ...", input_script)
         response = format_csort(
-            file_path=input_script, output_py=output_script, parser=code_parser, method_describer=method_describer
+            file_path=input_script,
+            output_py=output_script,
+            parser=code_parser,
+            method_describer=method_describer,
+            auto_static=bool(cfg[DEFAULT_CSORT_PARAMS_SECTION]["auto_static"]),
         )
         responses.append(response)
     n = sum(resp["code"] for resp in responses)

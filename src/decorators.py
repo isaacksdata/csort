@@ -271,3 +271,153 @@ def order_decorators(decorators: List[str]) -> List[str]:
         sorted decorators
     """
     return sorted(decorators, key=_get_decorator_order)
+
+
+class StaticMethodChecker:
+    """
+    A class for checking of an AST or CST parsed method could be labelled as static.
+
+    If a method does not use "self" in the method body then the @staticmethod decorator can be assigned.
+    """
+
+    def __init__(self) -> None:
+        self.static_method_count: int = 0
+        self.class_static_method_counts: Dict[str, int] = {}
+
+    def _check_for_static(self, func: Union[ast.FunctionDef, libcst.FunctionDef]) -> bool:
+        """
+        Returns True if the function is not labelled with staticmethod but could be static
+        Args:
+            func: input class method
+
+        Returns:
+            True or False
+        """
+        if has_decorator(func, "staticmethod"):
+            return False
+        if has_decorator(func, "abstractmethod"):
+            return False
+        if isinstance(func, ast.FunctionDef):
+            return self._check_for_static_ast(func)
+        return self._check_for_static_cst(func)
+
+    @staticmethod
+    def _check_for_static_ast(func: ast.FunctionDef) -> bool:
+        """
+        Returns True if "self" in params but not used in body of the code
+        Args:
+            func: input class method
+
+        Returns:
+            True or False
+        """
+        params = [arg.arg for arg in func.args.args]
+        if "self" not in params:
+            return False
+        code = "\n".join([ast.unparse(node) for node in func.body])
+        return "self" not in code
+
+    @staticmethod
+    def _check_for_static_cst(func: libcst.FunctionDef) -> bool:
+        """
+        Returns True if "self" in params but not used in body of the code
+        Args:
+            func: input class method
+
+        Returns:
+            True or False
+        """
+        params = [param.name.value for param in func.params.params]
+        if "self" not in params:
+            return False
+        code = libcst.Module([]).code_for_node(func.body)
+        return "self" not in code
+
+    @staticmethod
+    def _make_static_ast(func: ast.FunctionDef) -> ast.FunctionDef:
+        """
+        Modify AST parsed function to include @staticmethod decorator and remove "self" from args
+        Args:
+            func: input class method
+
+        Returns:
+            func: decorated with @staticmethod
+        """
+        func.decorator_list.append(ast.Name(id="staticmethod", lineno=func.lineno - 1, col_offset=func.col_offset))
+        func.args.args = [arg for arg in func.args.args if arg.arg != "self"]
+        return func
+
+    @staticmethod
+    def _make_static_cst(func: libcst.FunctionDef) -> libcst.FunctionDef:
+        """
+        Modify CST parsed function to include @staticmethod decorator and remove "self" from args
+        Args:
+            func: input class method
+
+        Returns:
+            func: decorated with @staticmethod
+        """
+        new_decorator_tuple = tuple([libcst.Decorator(decorator=libcst.Name(value="staticmethod"))])
+        func = func.with_changes(decorators=new_decorator_tuple)
+        new_params = [param for param in func.params.params if param.name.value != "self"]
+        func = func.with_changes(params=func.params.with_changes(params=tuple(new_params)))
+        return func
+
+    def _make_static(
+        self, func: Union[ast.FunctionDef, libcst.FunctionDef]
+    ) -> Union[ast.FunctionDef, libcst.FunctionDef]:
+        """
+        Modify parsed function to include @staticmethod decorator and remove "self" from args
+        Args:
+            func: input class method
+
+        Returns:
+            func: decorated with @staticmethod
+        """
+        if isinstance(func, ast.FunctionDef):
+            return self._make_static_ast(func)
+        return self._make_static_cst(func)
+
+    def _staticise(self, func: Union[ast.stmt, libcst.CSTNode]) -> Union[ast.stmt, libcst.CSTNode]:
+        """
+        If the class component provided is a method then check if it could be static and modify if so.
+        Args:
+            func: input class component
+
+        Returns:
+            func: forced to be static if applicable
+        """
+        if not isinstance(func, (ast.FunctionDef, libcst.FunctionDef)):
+            return func
+        if self._check_for_static(func):
+            self.static_method_count += 1
+            return self._make_static(func)
+        return func
+
+    def get_static_method_count(self) -> int:
+        """
+        Getter for static method count
+        Returns:
+            number of functions converted to static
+        """
+        return self.static_method_count
+
+    def staticise_classes(
+        self, class_dict: Dict[str, List[Union[ast.stmt, libcst.CSTNode]]]
+    ) -> Dict[str, List[Union[ast.stmt, libcst.CSTNode]]]:
+        """
+        Iterate over each class and its list of functions, apply staticise to each function,
+        and store the static method count for each class.
+
+        Args:
+            class_dict: Dictionary where keys are class names and values are lists of class components.
+
+        Returns:
+            Dictionary with class names as keys and counts of static method conversions as values.
+        """
+        self.class_static_method_counts = {}
+        for class_name, funcs in class_dict.items():
+            self.static_method_count = 0
+            class_dict[class_name] = [self._staticise(func) for func in funcs]
+            self.class_static_method_counts[class_name] = self.get_static_method_count()
+        return class_dict
