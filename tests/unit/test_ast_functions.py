@@ -4,6 +4,7 @@ import os
 import pytest
 
 import src.ast_functions as AST
+from src.decorators import StaticMethodChecker
 
 
 DEBUG = "tests" in os.getcwd()
@@ -19,6 +20,11 @@ def script_path(request):
 @pytest.fixture
 def mock_ast_module(script_path):
     return AST.parse_code(file_path=script_path)
+
+
+@pytest.fixture
+def static_method_checker():
+    return StaticMethodChecker()
 
 
 @pytest.mark.parametrize("script_path", ["basic"], indirect=True)
@@ -49,3 +55,29 @@ def test_parse_code_file(script_path):
 def test_parse_code_error():
     with pytest.raises(ValueError):
         AST.parse_code(file_path=None, code=None)
+
+
+@pytest.mark.parametrize("script_path", ["auto_static"], indirect=True)
+def test_could_be_static_true(mock_ast_module, static_method_checker):
+    output = static_method_checker._check_for_static_ast(mock_ast_module.body[1].body[6])
+    assert output
+
+
+@pytest.mark.parametrize("script_path", ["auto_static"], indirect=True)
+def test_could_be_static_false(mock_ast_module, static_method_checker):
+    output = static_method_checker._check_for_static_ast(mock_ast_module.body[1].body[7])
+    assert not output
+
+
+@pytest.mark.parametrize("script_path", ["auto_static"], indirect=True)
+def test_could_be_static_false_multi(mock_ast_module, static_method_checker):
+    output = static_method_checker._check_for_static_ast(mock_ast_module.body[1].body[8])
+    assert not output
+
+
+@pytest.mark.parametrize("script_path", ["auto_static"], indirect=True)
+def test_make_static_ast(mock_ast_module, static_method_checker):
+    output = static_method_checker._make_static_ast(mock_ast_module.body[1].body[6])
+    assert isinstance(output, ast.FunctionDef)
+    assert len(output.decorator_list) == 1
+    assert len(output.args.args) == 0

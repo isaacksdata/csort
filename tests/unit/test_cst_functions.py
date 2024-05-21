@@ -18,6 +18,7 @@ from src.cst_functions import parse_code
 from src.cst_functions import update_node
 from src.decorators import _get_decorators_cst
 from src.decorators import get_decorator_id_cst
+from src.decorators import StaticMethodChecker
 from src.utilities import extract_text_from_file
 from src.utilities import get_annotated_attribute_name_cst
 from src.utilities import get_attribute_name_cst
@@ -43,6 +44,11 @@ def mock_statement(script_path):
 @pytest.fixture
 def mock_cst_module(mock_statement):
     return libcst.parse_module(mock_statement)
+
+
+@pytest.fixture
+def static_method_checker():
+    return StaticMethodChecker()
 
 
 def test_update_node_wrong_type():
@@ -200,3 +206,41 @@ def test_extract_class_components_no_indentedblock():
     mock_obj.body = "This is the body content"
     with pytest.raises(TypeError):
         extract_class_components(class_node=mock_obj)
+
+
+@pytest.mark.parametrize("script_path", ["auto_static"], indirect=True)
+def test_could_be_static_true(mock_cst_module, static_method_checker):
+    output = static_method_checker._check_for_static_cst(mock_cst_module.body[1].body.body[6])
+    assert output
+
+
+@pytest.mark.parametrize("script_path", ["auto_static"], indirect=True)
+def test_could_be_static_false(mock_cst_module, static_method_checker):
+    output = static_method_checker._check_for_static_cst(mock_cst_module.body[1].body.body[7])
+    assert not output
+
+
+@pytest.mark.parametrize("script_path", ["auto_static"], indirect=True)
+def test_could_be_static_false_multi(mock_cst_module, static_method_checker):
+    output = static_method_checker._check_for_static_cst(mock_cst_module.body[1].body.body[8])
+    assert not output
+
+
+@pytest.mark.parametrize("script_path", ["auto_static"], indirect=True)
+def test_could_be_static_already_static(mock_cst_module, static_method_checker):
+    output = static_method_checker._check_for_static(mock_cst_module.body[1].body.body[9])
+    assert not output
+
+
+@pytest.mark.parametrize("script_path", ["auto_static"], indirect=True)
+def test_could_be_static_abstract(mock_cst_module, static_method_checker):
+    output = static_method_checker._check_for_static(mock_cst_module.body[1].body.body[12])
+    assert not output
+
+
+@pytest.mark.parametrize("script_path", ["auto_static"], indirect=True)
+def test_make_static_cst(mock_cst_module, static_method_checker):
+    output = static_method_checker._make_static_cst(mock_cst_module.body[1].body.body[6])
+    assert isinstance(output, libcst.FunctionDef)
+    assert len(output.decorators) == 1
+    assert len(output.params.params) == 0

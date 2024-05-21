@@ -42,7 +42,7 @@ def test_parse_commandline():
         "--check",
     ]
     with patch.object(sys, "argv", commands):
-        output = parse_commandline()
+        output, args = parse_commandline()
     assert isinstance(output, argparse.Namespace)
     assert output.input_path == "test/input/path/file.py"
     assert output.output_path == "test/output/path/file.py"
@@ -50,6 +50,7 @@ def test_parse_commandline():
     assert output.skip_patterns == ["expected", "pattern"]
     assert output.parser == "cst"
     assert output.check
+    assert len(args) == 0
 
 
 def test_validate_paths(script_path, output_path):
@@ -133,7 +134,7 @@ def test_main_cst(script_path, output_path, caplog):
 def test_main_check_unchanged(script_path, caplog):
     caplog.set_level(logging.INFO)
     script_path = script_path.replace("_input", "_expected")
-    commands = ["", f"--input-path={script_path}", f"--output-path={output_path}", "--check"]
+    commands = ["", f"--input-path={script_path}", f"--output-path={output_path}", "--check", "--n-auto-static"]
     with patch.object(sys, "argv", commands):
         main()
     assert "No changes made!" in caplog.messages
