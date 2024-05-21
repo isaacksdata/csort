@@ -7,6 +7,7 @@ from typing import List
 from typing import Optional
 
 from src.configs import format_csort_response
+from src.decorators import StaticMethodChecker
 from src.diff import SyntaxTreeDiffGenerator
 from src.method_describers import describe_method
 from src.method_describers import MethodDescriber
@@ -33,6 +34,7 @@ def format_csort(
     file_path: str,
     method_describer: MethodDescriber,
     output_py: Optional[str] = None,
+    auto_static: bool = False,
 ) -> format_csort_response:
     """
     Main function for running Csort
@@ -41,6 +43,7 @@ def format_csort(
         file_path: path to source code (.py) file
         method_describer: instance of MethodDescriber for extracting class method info
         output_py: where to write out formatted code (.py) file
+        auto_static: If True, then static methods without the @staticmethod decorator will be marked as static
 
     Returns:
         {
@@ -54,6 +57,13 @@ def format_csort(
     classes = parser.find_classes(parsed_code)
     functions = {name: parser.extract_class_components(cls["node"]) for name, cls in classes.items()}
 
+    if auto_static:
+        static_checker = StaticMethodChecker()
+        functions = static_checker.staticise_classes(functions)
+        for class_name, n_changes in static_checker.class_static_method_counts.items():
+            if n_changes > 0:
+                logging.info("Csort converted %s methods from %s to static!", n_changes, class_name)
+
     sorted_functions: Dict[str, List[ast.stmt]] = {
         cls: order_class_functions(methods, method_describer) for cls, methods in functions.items()
     }
@@ -62,8 +72,6 @@ def format_csort(
         logging.info("No changes made!")
         return format_csort_response(code=0, diff="")
     # update the classes dictionary with new class body
-    # for name, cls in classes.items():
-    #     cls = parser.update_node(cls, sorted_functions[name])
     classes = {name: parser.update_node(cls, sorted_functions[name]) for name, cls in classes.items()}
     # update parsed code with sorted classes
     parsed_code = parser.update_module(parsed_code, classes)

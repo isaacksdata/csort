@@ -2,6 +2,7 @@
 Command line entrypoint for Csort
 """
 import argparse
+import ast
 import importlib
 import logging
 from pathlib import Path
@@ -10,13 +11,14 @@ from typing import Optional
 from typing import Tuple
 
 from src.config_loader import ConfigLoader
+from src.configs import DEFAULT_CSORT_PARAMS_SECTION
 from src.configs import format_csort_response
 from src.formatting import format_csort
 from src.logger import set_logging
 from src.method_describers import get_method_describer
 
 
-def parse_commandline() -> argparse.Namespace:
+def parse_commandline() -> Tuple[argparse.Namespace, List[str]]:
     """Parse CLI arguments using argparse"""
     parser = argparse.ArgumentParser(
         description="Takes as input the path to .py file or directory containing .py files and re-orders methods of "
@@ -69,9 +71,11 @@ def parse_commandline() -> argparse.Namespace:
     parser.add_argument(
         "-p", "--parser", type=str, default="cst", choices=["ast", "cst"], help="Choose a parser. Either ast or cst."
     )
-    params = parser.parse_args()
+    # params = parser.parse_args()
+    params, args = parser.parse_known_args()
+    args = [arg.replace("--", "") for arg in args]
 
-    return params
+    return params, args
 
 
 def _validate_paths_input_file(
@@ -164,7 +168,7 @@ def validate_paths(
 
 
 def main() -> None:
-    params = parse_commandline()
+    params, args = parse_commandline()
     set_logging(params.verbose)
     skip_patterns = [] if params.skip_patterns is None else params.skip_patterns
 
@@ -183,6 +187,11 @@ def main() -> None:
     cfg = config_loader.config
     method_describer = get_method_describer(parser_type=params.parser, config=cfg)
 
+    # command line can be used to override some options
+    auto_static = ast.literal_eval(cfg[DEFAULT_CSORT_PARAMS_SECTION]["auto_static"])
+    auto_static = True if "auto-static" in args else auto_static
+    auto_static = False if "n-auto-static" in args else auto_static
+
     responses: List[format_csort_response] = []
     for input_script, output_script in zip(py_scripts, outputs):
         if any(skip_pat in Path(input_script).stem for skip_pat in skip_patterns):
@@ -190,7 +199,11 @@ def main() -> None:
             continue
         logging.debug("Reformatting %s ...", input_script)
         response = format_csort(
-            file_path=input_script, output_py=output_script, parser=code_parser, method_describer=method_describer
+            file_path=input_script,
+            output_py=output_script,
+            parser=code_parser,
+            method_describer=method_describer,
+            auto_static=auto_static,
         )
         responses.append(response)
     n = sum(resp["code"] for resp in responses)

@@ -23,6 +23,12 @@ DOCSTRING_NAME: Final[str] = "docstring"
 # Name of ini config file
 DEFAULT_CONFIG_FILE_NAME: Final[str] = "csort.ini"
 
+# Name of ordering subsection of csort.ini
+DEFAULT_CSORT_CONFIG_ORDERING: Final[str] = "csort.order"
+
+# Name of other csort params config section
+DEFAULT_CSORT_PARAMS_SECTION: Final[str] = "csort"
+
 # Default config file parameters
 DEFAULT_CSORT_ORDER_PARAMS: Final[Dict[str, Any]] = {
     "dunder_method": 3,
@@ -37,8 +43,6 @@ DEFAULT_CSORT_ORDER_PARAMS: Final[Dict[str, Any]] = {
     "private_method": 12,
 }
 
-DEFAULT_CSORT_GENERAL_PARAMS: Final[Dict[str, Any]] = {
-    "use_csort_group": True,
-}
+DEFAULT_CSORT_GENERAL_PARAMS: Final[Dict[str, Any]] = {"use_csort_group": True, "auto_static": True}
 find_classes_response = TypedDict("find_classes_response", {"node": Union[ast.ClassDef, libcst.CSTNode], "index": int})
 format_csort_response = TypedDict("format_csort_response", {"code": int, "diff": str})

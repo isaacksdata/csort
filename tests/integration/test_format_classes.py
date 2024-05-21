@@ -1,5 +1,6 @@
 import importlib
 import json
+import logging
 import os
 import subprocess
 from pathlib import Path
@@ -53,9 +54,18 @@ def method_describer(request):
 
 
 def simple_test(
-    parser, method_describer, input_path, output_path, expected_path, comments: bool = False, use_cst: bool = False
+    parser,
+    method_describer,
+    input_path,
+    output_path,
+    expected_path,
+    comments: bool = False,
+    use_cst: bool = False,
+    **kwargs,
 ):
-    format_csort(parser=parser, file_path=input_path, output_py=output_path, method_describer=method_describer)
+    format_csort(
+        parser=parser, file_path=input_path, output_py=output_path, method_describer=method_describer, **kwargs
+    )
     if use_cst:
         code = libcst.parse_module(extract_text_from_file(output_path))
         expected_code = libcst.parse_module(extract_text_from_file(expected_path))
@@ -293,3 +303,25 @@ def test_formatting_pandas_ast(parser, method_describer, input_path, output_path
 @pytest.mark.parametrize("expected_path", ["pandas"], indirect=True)
 def test_formatting_pandas_cst(parser, method_describer, input_path, output_path, expected_path):
     simple_test(parser, method_describer, input_path, output_path, expected_path, use_cst=True)
+
+
+@pytest.mark.parametrize("parser", ["ast"], indirect=True)
+@pytest.mark.parametrize("method_describer", ["ast"], indirect=True)
+@pytest.mark.parametrize("input_path", ["auto_static"], indirect=True)
+@pytest.mark.parametrize("output_path", ["auto_static"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["auto_static"], indirect=True)
+def test_formatting_auto_static_ast(parser, method_describer, input_path, output_path, expected_path, caplog):
+    caplog.set_level(logging.INFO)
+    simple_test(parser, method_describer, input_path, output_path, expected_path, auto_static=True)
+    assert "Csort converted 1 methods from MyClass to static!" in caplog.messages
+
+
+@pytest.mark.parametrize("parser", ["cst"], indirect=True)
+@pytest.mark.parametrize("method_describer", ["cst"], indirect=True)
+@pytest.mark.parametrize("input_path", ["auto_static"], indirect=True)
+@pytest.mark.parametrize("output_path", ["auto_static"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["auto_static"], indirect=True)
+def test_formatting_auto_static_cst(parser, method_describer, input_path, output_path, expected_path, caplog):
+    caplog.set_level(logging.INFO)
+    simple_test(parser, method_describer, input_path, output_path, expected_path, use_cst=True, auto_static=True)
+    assert "Csort converted 1 methods from MyClass to static!" in caplog.messages

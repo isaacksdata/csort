@@ -63,6 +63,26 @@ csort --input-path src/ --parser cst
 csort --input-path src/ -p ast
 ```
 
+Python classes can have methods which do not access or change the state of the instance. It can be useful to indicate
+that a method does not affect the state by using the `@staticmethod` decorator and removing `self` from the
+arguments of the method. Csort can automatically decorate methods which could be static with the `@staticmethod`
+decorator. This behaviour can be controlled using the `auto_static` parameter in the `csort` section of the
+`csort.ini` file. Alternatively, use the `--auto-static` flag on the command line to force the modifications, or use
+`--n-auto-static` to block any static modifications. Note that the command line arguments take precedence over the
+`csort.ini` parameters.
+
+Auto convert to static methods:
+
+```commandline
+csort --input-path src/ --auto-static
+```
+
+Block conversion to static methods:
+
+```commandline
+csort --input-path src/ --n-auto-static
+```
+
 ## Summary
 
 Csort is a formatter for python classes. Currently, there is no prescribed convention for how the methods of a class
@@ -90,9 +110,9 @@ If multiple methods occur for a given sorting level, then the methods are sorted
 
 ## Todo
 
+- fix use_csort_group config arg
 - use pyproject.toml instead of setup files
 - support pyproject.toml
-- auto convert to static method
 - pre-commit hook
 - pypy
 - tox
