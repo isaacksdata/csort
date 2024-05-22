@@ -210,7 +210,7 @@ def is_private_method(method: ast.FunctionDef) -> bool:
     Returns:
         True if the method is a private method
     """
-    return method.name.startswith("_")
+    return method.name.startswith("_") and not is_dunder_method(method)
 
 
 def is_function(expression: ast.AST) -> bool:

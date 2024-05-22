@@ -3,14 +3,19 @@ Command line entrypoint for Csort
 """
 import argparse
 import ast
+import configparser
 import importlib
 import logging
+import re
 from pathlib import Path
+from typing import Any
+from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
 
 from src.config_loader import ConfigLoader
+from src.configs import DEFAULT_CSORT_CONFIG_ORDERING
 from src.configs import DEFAULT_CSORT_PARAMS_SECTION
 from src.configs import format_csort_response
 from src.formatting import format_csort
@@ -18,7 +23,7 @@ from src.logger import set_logging
 from src.method_describers import get_method_describer
 
 
-def parse_commandline() -> Tuple[argparse.Namespace, List[str]]:
+def parse_commandline() -> Tuple[argparse.Namespace, Dict[str, Any]]:
     """Parse CLI arguments using argparse"""
     parser = argparse.ArgumentParser(
         description="Takes as input the path to .py file or directory containing .py files and re-orders methods of "
@@ -73,9 +78,15 @@ def parse_commandline() -> Tuple[argparse.Namespace, List[str]]:
     )
     # params = parser.parse_args()
     params, args = parser.parse_known_args()
-    args = [arg.replace("--", "") for arg in args]
+    kwargs: Dict[str, Any] = {}
+    for arg in args:
+        if "=" in arg:
+            k, v = arg.split("=")
+            kwargs[k.replace("--", "")] = v
+        else:
+            kwargs[arg.replace("--", "")] = None
 
-    return params, args
+    return params, kwargs
 
 
 def _validate_paths_input_file(
@@ -167,6 +178,59 @@ def validate_paths(
     return py_scripts, outputs
 
 
+def update_config_ordering(cfg: configparser.ConfigParser, args: Dict[str, Any]) -> configparser.ConfigParser:
+    """
+    Update the ordering section of config using command line arguments
+    Args:
+        cfg: config extracted from csort.ini
+        args: command line arguments
+
+    Returns:
+        cfg: updated if necessary by command line arguments
+    """
+    for param in cfg[DEFAULT_CSORT_CONFIG_ORDERING]:
+        if param in args or param.replace("_", "-") in args:
+            logging.info("Overriding %s order : set to %s", param, args[param.replace("_", "-")])
+            cfg[DEFAULT_CSORT_CONFIG_ORDERING][param.replace("-", "_")] = args[param.replace("_", "-")]
+    return cfg
+
+
+def update_config_general(cfg: configparser.ConfigParser, args: Dict[str, Any]) -> configparser.ConfigParser:
+    """
+    Update the general params section of config using command line arguments
+    Args:
+        cfg: config extracted from csort.ini
+        args: command line arguments
+
+    Returns:
+        cfg: updated if necessary by command line arguments
+    """
+    for param in cfg[DEFAULT_CSORT_PARAMS_SECTION]:
+        possible_params = [param, param.replace("_", "-"), f"n_{param}", f"n-{param.replace('_', '-')}"]
+        for p in possible_params:
+            if p in args:
+                value: str = args[p]
+                value = (not re.match(r"^n[-_]", p)) if value is None else value
+                logging.info("Overriding %s : set to %s", param, value)
+                cfg[DEFAULT_CSORT_PARAMS_SECTION][param] = str(value)
+    return cfg
+
+
+def update_config(cfg: configparser.ConfigParser, args: Dict[str, Any]) -> configparser.ConfigParser:
+    """
+    Update the config using command line arguments
+    Args:
+        cfg: config extracted from csort.ini
+        args: command line arguments
+
+    Returns:
+        cfg: updated if necessary by command line arguments
+    """
+    cfg = update_config_ordering(cfg, args)
+    cfg = update_config_general(cfg, args)
+    return cfg
+
+
 def main() -> None:
     params, args = parse_commandline()
     set_logging(params.verbose)
@@ -185,12 +249,16 @@ def main() -> None:
     code_parser = importlib.import_module(f"src.{params.parser}_functions")
     config_loader = ConfigLoader(config_path=params.config_path)
     cfg = config_loader.config
-    method_describer = get_method_describer(parser_type=params.parser, config=cfg)
 
     # command line can be used to override some options
     auto_static = ast.literal_eval(cfg[DEFAULT_CSORT_PARAMS_SECTION]["auto_static"])
     auto_static = True if "auto-static" in args else auto_static
     auto_static = False if "n-auto-static" in args else auto_static
+
+    cfg = update_config(cfg, args)
+
+    # instantiate method describer
+    method_describer = get_method_describer(parser_type=params.parser, config=cfg)
 
     responses: List[format_csort_response] = []
     for input_script, output_script in zip(py_scripts, outputs):

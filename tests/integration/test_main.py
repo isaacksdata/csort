@@ -165,3 +165,21 @@ def test_main_check_diff(script_path, caplog):
         main()
     assert any("Csort ran in diff mode" in msg for msg in caplog.messages)
     assert any("func                --->     __len__" in msg for msg in caplog.messages)
+
+
+def test_main_check_order_override(script_path, caplog):
+    caplog.set_level(logging.INFO)
+    commands = [
+        "",
+        f"--input-path={script_path}",
+        f"--output-path={output_path}",
+        "--diff",
+        "--n-auto-static",
+        "--private-method=3",
+        "--dunder-method=12",
+    ]
+    with patch.object(sys, "argv", commands):
+        main()
+    assert "Overriding dunder_method order : set to 12" in caplog.messages
+    assert "Overriding private_method order : set to 3" in caplog.messages
+    assert any("__init__            --->     _func" in msg for msg in caplog.messages)
