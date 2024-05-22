@@ -203,7 +203,7 @@ def is_private_method(method: libcst.FunctionDef) -> bool:
     Returns:
         True if the method is a private method
     """
-    return method.name.value.startswith("_")
+    return method.name.value.startswith("_") and not is_dunder_method(method)
 
 
 def is_function(expression: libcst.CSTNode) -> bool:
