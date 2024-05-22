@@ -18,6 +18,7 @@ import src.ast_functions as AST
 import src.cst_functions as CST
 import src.generic_functions as GEN
 from src.configs import DEFAULT_CSORT_ORDER_PARAMS
+from src.configs import DEFAULT_CSORT_PARAMS_SECTION
 from src.configs import INSTANCE_METHOD_LEVEL
 from src.decorators import get_decorators
 from src.utilities import get_expression_name
@@ -54,6 +55,15 @@ class MethodDescriber(ABC):
             Mapping from fixed node types to order level
         """
         pass
+
+    @property
+    def use_csort_group(self) -> bool:
+        """
+        Property method to access the use_csort_group param of the csort config
+        Returns:
+            True if Csort should consider the csort_group decorator
+        """
+        return ast.literal_eval(self._config[DEFAULT_CSORT_PARAMS_SECTION]["use_csort_group"])
 
     @abstractmethod
     def _validate_node(self, node: Any) -> bool:
@@ -251,9 +261,9 @@ def describe_method(
         name: assigned name of the expression
     """
     name = get_expression_name(method)
-    level = method_describer.get_method_type(method, use_csort_group=True)
+    level = method_describer.get_method_type(method, use_csort_group=method_describer.use_csort_group)
     decorators = get_decorators(method, sort=True)
-    if decorators is not None and "csort_group" in decorators:
+    if decorators is not None and "csort_group" in decorators and method_describer.use_csort_group:
         second_level = method_describer.get_method_type(method, use_csort_group=False)
         decorators.remove("csort_group")
     else:
