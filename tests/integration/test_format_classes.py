@@ -11,6 +11,7 @@ import libcst
 import pytest
 
 from src.config_loader import ConfigLoader
+from src.configs import DEFAULT_CSORT_PARAMS_SECTION
 from src.formatting import format_csort
 from src.method_describers import get_method_describer
 from src.utilities import extract_text_from_file
@@ -222,6 +223,16 @@ def test_formatting_csort_group_ast(parser, method_describer, input_path, output
 @pytest.mark.parametrize("output_path", ["csort_group"], indirect=True)
 @pytest.mark.parametrize("expected_path", ["csort_group"], indirect=True)
 def test_formatting_csort_group_cst(parser, method_describer, input_path, output_path, expected_path):
+    simple_test(parser, method_describer, input_path, output_path, expected_path)
+
+
+@pytest.mark.parametrize("parser", ["cst"], indirect=True)
+@pytest.mark.parametrize("method_describer", ["cst"], indirect=True)
+@pytest.mark.parametrize("input_path", ["csort_group"], indirect=True)
+@pytest.mark.parametrize("output_path", ["csort_group"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["csort_group_blocked"], indirect=True)
+def test_formatting_csort_group_cst_blocked(parser, method_describer, input_path, output_path, expected_path):
+    method_describer._config[DEFAULT_CSORT_PARAMS_SECTION]["use_csort_group"] = str(False)
     simple_test(parser, method_describer, input_path, output_path, expected_path)
 
 
