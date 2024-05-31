@@ -50,6 +50,12 @@ repos:
     hooks:
       - id: prettier
         types_or: [yaml]
+
+  - repo: https://github.com/abravalheri/validate-pyproject
+    rev: main
+    hooks:
+      - id: validate-pyproject
+
   - repo: local
     hooks:
       - id: pylint
