@@ -1,0 +1,15 @@
+[csort.order]
+dunder_method = 3
+csort_group = 4
+class_method = 5
+private_method = 12
+
+[csort]
+use_csort_group = true
+auto_static = false
+
+[database]
+server = "192.168.1.1"
+port = 5432
+user = "admin"
+password = "secret"
