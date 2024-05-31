@@ -83,6 +83,9 @@ Block conversion to static methods:
 csort --input-path src/ --n-auto-static
 ```
 
+Csort configurations can be specified in either a `csort.ini` file or a `pyproject.toml` file. If both files are
+present then the `pyproject.toml` file will take precedent.
+
 ## Summary
 
 Csort is a formatter for python classes. Currently, there is no prescribed convention for how the methods of a class
@@ -110,9 +113,7 @@ If multiple methods occur for a given sorting level, then the methods are sorted
 
 ## Todo
 
-- fix use_csort_group config arg
 - use pyproject.toml instead of setup files
-- support pyproject.toml
 - pre-commit hook
 - pypy
 - tox
