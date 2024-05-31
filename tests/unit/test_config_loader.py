@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
+from src.config_loader import ConfigLoader
 from src.config_loader import ConfigLoaderIni
 from src.config_loader import ConfigLoaderToml
 from src.config_loader import get_config_loader
@@ -48,15 +49,32 @@ def toml_config_loader():
     return ConfigLoaderToml()
 
 
+@patch.multiple(ConfigLoader, __abstractmethods__=set())
+def test_abstract_config_loader():
+    loader = ConfigLoader()
+    assert loader._set_config_parser() is None
+    assert loader._read_config(config_path="") is None
+
+
 def test_ini_reader(ini_config_path, ini_reader):
     output = ini_reader.read(ini_config_path)
     assert isinstance(output, dict)
     assert isinstance(output["csort"], dict)
 
 
+def test_ini_reader_valueerror(ini_reader):
+    with pytest.raises(ValueError):
+        ini_reader.read("file.txt")
+
+
 def test_toml_reader(toml_config_path, toml_reader):
     output = toml_reader.read(toml_config_path)
     assert isinstance(output, dict)
+
+
+def test_toml_reader_valueerror(toml_reader):
+    with pytest.raises(ValueError):
+        toml_reader.read("file.txt")
 
 
 def test_config_loader_init(config_no_path):
@@ -100,6 +118,9 @@ def test_config_loader_config(config_no_path):
     output = config_no_path.config
     assert isinstance(output, dict)
     assert "csort" in output.keys()
+    assert config_no_path._loaded_config
+    output2 = config_no_path.config
+    assert output2 == output
 
 
 def test_config_loader_load_defaults(config_no_path):
@@ -143,6 +164,20 @@ def test_config_loader_toml_read_config(toml_config_loader, toml_config_path):
     assert "csort" in output
     assert "csort.order" in output
     assert "database" not in output
+
+
+def test_config_loader_toml_read_config_no_dict(toml_config_loader, toml_config_path):
+    with pytest.raises(TypeError):
+        with patch("src.config_loader.TomlReader.read", return_value={"csort": 1}):
+            toml_config_loader._read_config(toml_config_path)
+
+
+def test_config_loader_toml_read_config_no_orders(toml_config_loader, toml_config_path):
+    with patch("src.config_loader.TomlReader.read", return_value={"csort": {"param": 1}}):
+        output = toml_config_loader._read_config(toml_config_path)
+    assert isinstance(output, dict)
+    assert "csort.order" in output
+    assert output["csort.order"] == {}
 
 
 def test_get_config_loader_valueerror():
