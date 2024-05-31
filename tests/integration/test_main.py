@@ -30,6 +30,20 @@ def output_path():
     return "tests/scripts/output/basic_output.py"
 
 
+@pytest.fixture
+def ini_config_path():
+    if DEBUG:
+        return "../unit/csort.ini"
+    return "tests/unit/csort.ini"
+
+
+@pytest.fixture
+def toml_config_path():
+    if DEBUG:
+        return "../unit/pyproject_test.toml"
+    return "tests/unit/pyproject_test.toml"
+
+
 def test_parse_commandline():
     commands = [
         "",  # mock script name
@@ -131,6 +145,22 @@ def test_main_cst(script_path, output_path, caplog):
     shutil.rmtree(Path(output_path).parent.as_posix())
 
 
+def test_main_ast(script_path, output_path, caplog):
+    caplog.set_level(logging.DEBUG)
+    commands = [
+        "",
+        f"--input-path={script_path}",
+        f"--output-path={output_path}",
+        "--parser=ast",
+    ]  # mock script name as first arg
+    with patch.object(sys, "argv", commands):
+        main()
+    assert Path(output_path).exists()
+    assert f"Reformatting {script_path} ..." in caplog.messages
+    assert "Using the AST parser!" in caplog.messages
+    shutil.rmtree(Path(output_path).parent.as_posix())
+
+
 def test_main_check_unchanged(script_path, caplog):
     caplog.set_level(logging.INFO)
     script_path = script_path.replace("_input", "_expected")
@@ -183,3 +213,35 @@ def test_main_check_order_override(script_path, caplog):
     assert "Overriding dunder_method order : set to 12" in caplog.messages
     assert "Overriding private_method order : set to 3" in caplog.messages
     assert any("__init__            --->     _func" in msg for msg in caplog.messages)
+
+
+def test_main_ini_config(script_path, output_path, ini_config_path, caplog):
+    caplog.set_level(logging.DEBUG)
+    commands = [
+        "",
+        f"--input-path={script_path}",
+        f"--output-path={output_path}",
+        f"--config-path={ini_config_path}",
+    ]  # mock script name as first arg
+    with patch.object(sys, "argv", commands):
+        main()
+    assert Path(output_path).exists()
+    assert f"Reformatting {script_path} ..." in caplog.messages
+    assert f"Loading csort configurations from {ini_config_path}" in caplog.messages
+    shutil.rmtree(Path(output_path).parent.as_posix())
+
+
+def test_main_toml_config(script_path, output_path, toml_config_path, caplog):
+    caplog.set_level(logging.DEBUG)
+    commands = [
+        "",
+        f"--input-path={script_path}",
+        f"--output-path={output_path}",
+        f"--config-path={toml_config_path}",
+    ]  # mock script name as first arg
+    with patch.object(sys, "argv", commands):
+        main()
+    assert Path(output_path).exists()
+    assert f"Reformatting {script_path} ..." in caplog.messages
+    assert f"Loading csort configurations from {toml_config_path}" in caplog.messages
+    shutil.rmtree(Path(output_path).parent.as_posix())

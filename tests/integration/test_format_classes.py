@@ -10,7 +10,7 @@ import astor
 import libcst
 import pytest
 
-from src.config_loader import ConfigLoader
+from src.config_loader import ConfigLoaderIni
 from src.configs import DEFAULT_CSORT_PARAMS_SECTION
 from src.formatting import format_csort
 from src.method_describers import get_method_describer
@@ -50,7 +50,7 @@ def parser(request):
 
 @pytest.fixture
 def method_describer(request):
-    cfg = ConfigLoader(config_path=None).config
+    cfg = ConfigLoaderIni(config_path=None).config
     return get_method_describer(parser_type=request.param, config=cfg)
 
 
