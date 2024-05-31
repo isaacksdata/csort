@@ -59,5 +59,5 @@ format_csort_response = TypedDict("format_csort_response", {"code": int, "diff":
 
 class Readable(Protocol):
     @staticmethod
-    def read(config_path: str) -> Dict[str, Any]:
+    def read(config_path: str) -> Dict[str, Any]:  # pragma: no cover
         ...
