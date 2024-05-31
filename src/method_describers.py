@@ -63,7 +63,8 @@ class MethodDescriber(ABC):
         Returns:
             True if Csort should consider the csort_group decorator
         """
-        return ast.literal_eval(self._config[DEFAULT_CSORT_PARAMS_SECTION]["use_csort_group"])
+        param = self._config[DEFAULT_CSORT_PARAMS_SECTION]["use_csort_group"]
+        return ast.literal_eval(param) if isinstance(param, str) else param
 
     @abstractmethod
     def _validate_node(self, node: Any) -> bool:
