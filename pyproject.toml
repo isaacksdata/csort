@@ -22,17 +22,16 @@ keywords = ["csort"]
 requires-python = ">=3.8"
 dynamic = ["version"]
 
-dependencies = ["ast_comments==1.2.2", "astor==0.8.1", "libcst==1.3.1"]
+dependencies = ["ast_comments==1.2.2", "astor==0.8.1", "libcst==1.3.1", "toml==0.10.2"]
 
 [project.optional-dependencies]
 dev = [
-	"black[jupyter]",
-	"coverage",
-	"isort",
-	"mypy",
-	"pre-commit",
-	"pytest",
-	"pytest-cov",
+	"black==24.3.0",
+	"coverage==6.5.0",
+	"mypy==1.9.0",
+	"pre-commit==3.7.0",
+	"pytest==8.1.2",
+	"pytest-cov==5.0.0",
 	"validate-pyproject[all]",
 ]
 
@@ -75,6 +74,33 @@ private_method = 12
 [tool.csort]
 use_csort_group = true
 auto_static = false
+
+[tool.tox]
+legacy_tox_ini = """
+    [tox]
+    min_version = 4.15
+    env_list =
+        py311
+        py310
+        py39
+        py38
+        type
+
+    [testenv]
+    deps =
+    	py38: -r requirements.txt
+    	py39: -r requirements.txt
+    	py310: -r requirements.txt
+    	py311: -r requirements.txt
+
+    commands = pytest tests
+
+    [testenv:type]
+    deps =
+    	mypy
+    	types-toml
+    commands = mypy src
+"""
 
 [tool.setuptools]
 packages = ["csort"]
