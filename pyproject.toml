@@ -121,6 +121,13 @@ legacy_tox_ini = """
     	mypy
     	types-toml
     commands = mypy src
+
+    [testenv:lint]
+	description = Perform static analysis and style checks
+	skip_install = True
+	deps = pylint
+	commands =
+		pylint ./src/csort --rcfile=.pylintrc
 """
 
 [tool.setuptools]

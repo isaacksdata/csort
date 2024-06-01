@@ -42,3 +42,9 @@ jobs:
           if ("${{ matrix.python-version }}" -eq "3.11") { tox -e py311 }
           if ("${{ matrix.python-version }}" -eq "3.12") { tox -e py312 }
         shell: pwsh
+
+      - name: typecheck
+        run: tox -e type
+
+      - name: linting
+        run: tox -e lint
