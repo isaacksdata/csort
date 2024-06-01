@@ -13,13 +13,13 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 
-from src.config_loader import get_config_loader
-from src.configs import DEFAULT_CSORT_ORDERING_SECTION
-from src.configs import DEFAULT_CSORT_PARAMS_SECTION
-from src.configs import format_csort_response
-from src.formatting import format_csort
-from src.logger import set_logging
-from src.method_describers import get_method_describer
+from .config_loader import get_config_loader
+from .configs import DEFAULT_CSORT_ORDERING_SECTION
+from .configs import DEFAULT_CSORT_PARAMS_SECTION
+from .configs import format_csort_response
+from .formatting import format_csort
+from .logger import set_logging
+from .method_describers import get_method_describer
 
 
 def parse_commandline() -> Tuple[argparse.Namespace, Dict[str, Any]]:
@@ -245,7 +245,7 @@ def main() -> None:
         logging.info("Checking %s python scripts ...", len(py_scripts))
 
     logging.info("Using the %s parser!", str.upper(params.parser))
-    code_parser = importlib.import_module(f"src.{params.parser}_functions")
+    code_parser = importlib.import_module(f"csort.{params.parser}_functions")
     config_loader = get_config_loader(config_path=params.config_path)
     cfg = config_loader.config
 

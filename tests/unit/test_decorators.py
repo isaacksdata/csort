@@ -1,14 +1,13 @@
 from unittest.mock import Mock
 
 import pytest
-
-from src.decorators import decorator_attribute_id_cst
-from src.decorators import decorator_call_id
-from src.decorators import decorator_call_id_cst
-from src.decorators import decorator_name_id_cst
-from src.decorators import get_decorator_id
-from src.decorators import get_decorator_id_cst
-from src.decorators import has_decorator
+from csort.decorators import decorator_attribute_id_cst
+from csort.decorators import decorator_call_id
+from csort.decorators import decorator_call_id_cst
+from csort.decorators import decorator_name_id_cst
+from csort.decorators import get_decorator_id
+from csort.decorators import get_decorator_id_cst
+from csort.decorators import has_decorator
 
 
 def test_decorator_call_id_attribute_error():

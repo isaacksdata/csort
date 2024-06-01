@@ -12,20 +12,20 @@ from typing import Optional
 from typing import Tuple
 from typing import Union
 
+import ast_functions as AST
+import cst_functions as CST
+import generic_functions as GEN
 import libcst
 
-import src.ast_functions as AST
-import src.cst_functions as CST
-import src.generic_functions as GEN
-from src.configs import DEFAULT_CSORT_ORDER_PARAMS
-from src.configs import DEFAULT_CSORT_PARAMS_SECTION
-from src.configs import INSTANCE_METHOD_LEVEL
-from src.decorators import get_decorators
-from src.utilities import get_expression_name
-from src.utilities import is_class_docstring
-from src.utilities import is_class_docstring_cst
-from src.utilities import is_ellipsis
-from src.utilities import is_ellipsis_cst
+from .configs import DEFAULT_CSORT_ORDER_PARAMS
+from .configs import DEFAULT_CSORT_PARAMS_SECTION
+from .configs import INSTANCE_METHOD_LEVEL
+from .decorators import get_decorators
+from .utilities import get_expression_name
+from .utilities import is_class_docstring
+from .utilities import is_class_docstring_cst
+from .utilities import is_ellipsis
+from .utilities import is_ellipsis_cst
 
 
 class MethodDescriber(ABC):

@@ -9,12 +9,11 @@ import ast_comments
 import astor
 import libcst
 import pytest
-
-from src.config_loader import ConfigLoaderIni
-from src.configs import DEFAULT_CSORT_PARAMS_SECTION
-from src.formatting import format_csort
-from src.method_describers import get_method_describer
-from src.utilities import extract_text_from_file
+from csort.config_loader import ConfigLoaderIni
+from csort.configs import DEFAULT_CSORT_PARAMS_SECTION
+from csort.formatting import format_csort
+from csort.method_describers import get_method_describer
+from csort.utilities import extract_text_from_file
 
 DEBUG = "tests" in os.getcwd()
 
@@ -45,7 +44,7 @@ def expected_path(request):
 
 @pytest.fixture
 def parser(request):
-    return importlib.import_module(f"src.{request.param}_functions")
+    return importlib.import_module(f"csort.{request.param}_functions")
 
 
 @pytest.fixture

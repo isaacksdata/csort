@@ -1,6 +1,5 @@
 import pytest
-
-from src.csort_decorator import csort_group
+from csort.csort_decorator import csort_group
 
 
 def my_func():

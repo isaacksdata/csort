@@ -10,21 +10,21 @@ from typing import Optional
 import ast_comments
 import astor
 
-from src.configs import DUNDER_PATTERN
-from src.configs import find_classes_response
-from src.decorators import get_decorators
-from src.edge_cases import handle_edge_cases
-from src.generic_functions import is_class_method
-from src.generic_functions import is_csort_group
-from src.generic_functions import is_getter
-from src.generic_functions import is_property
-from src.generic_functions import is_setter
-from src.generic_functions import is_static_method
-from src.imports import handle_import_formatting
-from src.utilities import is_class_docstring
-from src.utilities import is_ellipsis
-from src.utilities import merge_code_strings
-from src.utilities import remove_comment_nodes
+from .configs import DUNDER_PATTERN
+from .configs import find_classes_response
+from .decorators import get_decorators
+from .edge_cases import handle_edge_cases
+from .generic_functions import is_class_method
+from .generic_functions import is_csort_group
+from .generic_functions import is_getter
+from .generic_functions import is_property
+from .generic_functions import is_setter
+from .generic_functions import is_static_method
+from .imports import handle_import_formatting
+from .utilities import is_class_docstring
+from .utilities import is_ellipsis
+from .utilities import merge_code_strings
+from .utilities import remove_comment_nodes
 
 
 def update_module(module: ast.Module, classes: Dict[str, find_classes_response]) -> ast.Module:

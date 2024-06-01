@@ -7,10 +7,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
-from src.main import main
-from src.main import parse_commandline
-from src.main import validate_paths
+from csort.main import main
+from csort.main import parse_commandline
+from csort.main import validate_paths
 
 
 DEBUG = "tests" in os.getcwd()
