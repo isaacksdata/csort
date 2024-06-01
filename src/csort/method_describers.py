@@ -12,11 +12,11 @@ from typing import Optional
 from typing import Tuple
 from typing import Union
 
-import ast_functions as AST
-import cst_functions as CST
-import generic_functions as GEN
 import libcst
 
+from . import ast_functions as AST
+from . import cst_functions as CST
+from . import generic_functions as GEN
 from .configs import DEFAULT_CSORT_ORDER_PARAMS
 from .configs import DEFAULT_CSORT_PARAMS_SECTION
 from .configs import INSTANCE_METHOD_LEVEL
