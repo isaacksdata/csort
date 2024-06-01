@@ -89,13 +89,33 @@ legacy_tox_ini = """
         py39
         type
 
-    [testenv]
-    deps =
-    	py39: -r requirements.txt
-    	py310: -r requirements.txt
-    	py311: -r requirements.txt
+	[testenv:py39]
+	basepython = python3.9
+	deps =
+		py39: -r requirements.txt
+	commands =
+		pytest tests
 
-    commands = pytest tests
+	[testenv:py310]
+	basepython = python3.10
+	deps =
+		py310: -r requirements.txt
+	commands =
+		pytest tests
+
+	[testenv:py311]
+	basepython = python3.11
+	deps =
+		py311: -r requirements.txt
+	commands =
+		pytest tests
+
+	[testenv:py312]
+	basepython = python3.12
+	deps =
+		py312: -r requirements.txt
+	commands =
+		pytest tests
 
     [testenv:type]
     deps =
