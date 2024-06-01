@@ -27,8 +27,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install tox
       - name: Run tests on Unix
+        if: runner.os != 'Windows'
         run: |
           if [ "${{ matrix.python-version }}" == "3.9" ]; then tox -e py39; fi
           if [ "${{ matrix.python-version }}" == "3.10" ]; then tox -e py310; fi
           if [ "${{ matrix.python-version }}" == "3.11" ]; then tox -e py311; fi
           if [ "${{ matrix.python-version }}" == "3.12" ]; then tox -e py312; fi
+
+      - name: Run tests on Windows
+        if: runner.os == 'Windows'
+        run: |
+          if ( "${{ matrix.python-version }}" == "3.9" ); then tox -e py39; fi
+          if ( "${{ matrix.python-version }}" == "3.10" ); then tox -e py310; fi
+          if ( "${{ matrix.python-version }}" == "3.11" ); then tox -e py311; fi
+          if ( "${{ matrix.python-version }}" == "3.12" ); then tox -e py312; fi
