@@ -114,10 +114,9 @@ legacy_tox_ini = """
 	basepython = python3.12
 	deps =
 		py312: -r requirements.txt
-	commands =
-		pytest tests
+	commands = pytest tests
 
-    [testenv:type]
+	[testenv:type]
     deps =
     	mypy
     	types-toml
