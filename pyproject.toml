@@ -87,12 +87,10 @@ legacy_tox_ini = """
         py311
         py310
         py39
-        py38
         type
 
     [testenv]
     deps =
-    	py38: -r requirements.txt
     	py39: -r requirements.txt
     	py310: -r requirements.txt
     	py311: -r requirements.txt
