@@ -37,7 +37,7 @@ jobs:
       - name: Run tests on Windows
         if: runner.os == 'Windows'
         run: |
-          if "%python_version%" == "3.9" tox -e py39
-          if "%python_version%" == "3.10" tox -e py310
-          if "%python_version%" == "3.11" tox -e py311
-          if "%python_version%" == "3.12" tox -e py312
+          if "%PYTHON_VERSION%" == "3.9" (tox -e py39)
+          if "%PYTHON_VERSION%" == "3.10" (tox -e py310)
+          if "%PYTHON_VERSION%" == "3.11" (tox -e py311)
+          if "%PYTHON_VERSION%" == "3.12" (tox -e py312)
