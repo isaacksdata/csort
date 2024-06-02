@@ -2,6 +2,14 @@
 
 Formatter for automatic re-ordering of methods defined within classes.
 
+## Install
+
+Install from `testpypi` using:
+
+```commandline
+pip install -i https://test.pypi.org/pypi/ --extra-index-url https://pypi.org/simple csort==0.1.5
+```
+
 ## Usage
 
 Csort is a command line tool which can be run using:
@@ -113,8 +121,7 @@ If multiple methods occur for a given sorting level, then the methods are sorted
 
 ## Todo
 
-- use pyproject.toml instead of setup files
+- CICD build and publish
 - pre-commit hook
 - pypy
-- tox
 - sphinx documentation
