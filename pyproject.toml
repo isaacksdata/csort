@@ -153,6 +153,23 @@ legacy_tox_ini = """
 		SETUPTOOLS_*
 	commands =
 		build: python -m build
+
+	[testenv:publish]
+	description =
+		Publish the package you have been developing to a package index server.
+		By default, it uses testpypi. If you really want to publish your package
+		to be publicly accessible in PyPI, use the `-- --repository pypi` option.
+	skip_install = True
+	changedir = {toxinidir}
+	passenv =
+		TWINE_USERNAME
+		TWINE_PASSWORD
+		TWINE_REPOSITORY
+		TWINE_REPOSITORY_URL
+	deps = twine
+	commands =
+		python -m twine check dist/*
+		python -m twine upload {posargs:--repository {env:TWINE_REPOSITORY:testpypi}} dist/*
 """
 
 [tool.setuptools]
