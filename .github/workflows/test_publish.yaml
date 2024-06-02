@@ -51,5 +51,5 @@ jobs:
       - name: Run tests
         run: >-
           pipx run tox
-          --installpkg '${{ needs.prepare.outputs.wheel-distribution }}' --e py311
+          --installpkg '${{ needs.prepare.outputs.wheel-distribution }}' -e py311
           -- -n 5 -rFEx --durations 10 --color yes
