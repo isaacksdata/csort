@@ -14,14 +14,14 @@ from typing import Optional
 
 import toml
 
-from src.configs import DEFAULT_CONFIG_INI_FILE_NAME
-from src.configs import DEFAULT_CONFIG_TOML_FILE_NAME
-from src.configs import DEFAULT_CSORT_GENERAL_PARAMS
-from src.configs import DEFAULT_CSORT_ORDER_PARAMS
-from src.configs import DEFAULT_CSORT_ORDERING_SECTION
-from src.configs import DEFAULT_CSORT_ORDERING_SUBSECTION
-from src.configs import DEFAULT_CSORT_PARAMS_SECTION
-from src.configs import Readable
+from .configs import DEFAULT_CONFIG_INI_FILE_NAME
+from .configs import DEFAULT_CONFIG_TOML_FILE_NAME
+from .configs import DEFAULT_CSORT_GENERAL_PARAMS
+from .configs import DEFAULT_CSORT_ORDER_PARAMS
+from .configs import DEFAULT_CSORT_ORDERING_SECTION
+from .configs import DEFAULT_CSORT_ORDERING_SUBSECTION
+from .configs import DEFAULT_CSORT_PARAMS_SECTION
+from .configs import Readable
 
 
 class ConfigLoader(ABC):
@@ -235,7 +235,7 @@ class ConfigLoaderToml(ConfigLoader):
         cfg = self._config_parser.read(config_path)
         # toml can contain non csort related configs
         # toml reads in as csort with order dictionary nested within csort
-        csort_cfg = cfg[DEFAULT_CSORT_PARAMS_SECTION]
+        csort_cfg = cfg["tool"][DEFAULT_CSORT_PARAMS_SECTION]
         if not isinstance(csort_cfg, dict):
             raise TypeError("Expected csort config from toml file to be a dictionary!")
         if DEFAULT_CSORT_ORDERING_SUBSECTION in csort_cfg:

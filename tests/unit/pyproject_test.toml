@@ -1,10 +1,10 @@
-[csort.order]
+[tool.csort.order]
 dunder_method = 3
 csort_group = 4
 class_method = 5
 private_method = 12
 
-[csort]
+[tool.csort]
 use_csort_group = true
 auto_static = false
 

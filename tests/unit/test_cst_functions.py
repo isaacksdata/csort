@@ -3,28 +3,27 @@ from unittest.mock import Mock
 
 import libcst
 import pytest
-
-from src.ast_functions import is_class_method
-from src.ast_functions import is_getter
-from src.ast_functions import is_property
-from src.ast_functions import is_setter
-from src.ast_functions import is_static_method
-from src.cst_functions import extract_class_components
-from src.cst_functions import find_classes
-from src.cst_functions import is_annotated_class_attribute
-from src.cst_functions import is_class_attribute
-from src.cst_functions import is_dunder_method
-from src.cst_functions import parse_code
-from src.cst_functions import update_node
-from src.decorators import _get_decorators_cst
-from src.decorators import get_decorator_id_cst
-from src.decorators import StaticMethodChecker
-from src.utilities import extract_text_from_file
-from src.utilities import get_annotated_attribute_name_cst
-from src.utilities import get_attribute_name_cst
-from src.utilities import get_function_name_cst
-from src.utilities import is_class_docstring_cst
-from src.utilities import is_ellipsis_cst
+from csort.ast_functions import is_class_method
+from csort.ast_functions import is_getter
+from csort.ast_functions import is_property
+from csort.ast_functions import is_setter
+from csort.ast_functions import is_static_method
+from csort.cst_functions import extract_class_components
+from csort.cst_functions import find_classes
+from csort.cst_functions import is_annotated_class_attribute
+from csort.cst_functions import is_class_attribute
+from csort.cst_functions import is_dunder_method
+from csort.cst_functions import parse_code
+from csort.cst_functions import update_node
+from csort.decorators import _get_decorators_cst
+from csort.decorators import get_decorator_id_cst
+from csort.decorators import StaticMethodChecker
+from csort.utilities import extract_text_from_file
+from csort.utilities import get_annotated_attribute_name_cst
+from csort.utilities import get_attribute_name_cst
+from csort.utilities import get_function_name_cst
+from csort.utilities import is_class_docstring_cst
+from csort.utilities import is_ellipsis_cst
 
 DEBUG = "tests" in os.getcwd()
 

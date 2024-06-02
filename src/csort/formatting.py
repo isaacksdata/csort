@@ -6,13 +6,13 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
-from src.configs import format_csort_response
-from src.decorators import StaticMethodChecker
-from src.diff import SyntaxTreeDiffGenerator
-from src.method_describers import describe_method
-from src.method_describers import MethodDescriber
-from src.utilities import create_path
-from src.utilities import extract_text_from_file
+from .configs import format_csort_response
+from .decorators import StaticMethodChecker
+from .diff import SyntaxTreeDiffGenerator
+from .method_describers import describe_method
+from .method_describers import MethodDescriber
+from .utilities import create_path
+from .utilities import extract_text_from_file
 
 
 def order_class_functions(methods: List[ast.stmt], method_describer: MethodDescriber) -> List[ast.stmt]:

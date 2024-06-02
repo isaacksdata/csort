@@ -3,7 +3,7 @@ from typing import Union
 
 import libcst
 
-from src.decorators import has_decorator
+from .decorators import has_decorator
 
 
 def is_csort_group(method: Union[ast.FunctionDef, libcst.CSTNode]) -> bool:

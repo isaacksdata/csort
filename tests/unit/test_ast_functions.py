@@ -1,10 +1,9 @@
 import ast
 import os
 
+import csort.ast_functions as AST
 import pytest
-
-import src.ast_functions as AST
-from src.decorators import StaticMethodChecker
+from csort.decorators import StaticMethodChecker
 
 
 DEBUG = "tests" in os.getcwd()

@@ -4,8 +4,7 @@ from copy import deepcopy
 from typing import Callable
 
 import pytest
-
-from src.method_describers import ASTMethodDescriber
+from csort.method_describers import ASTMethodDescriber
 
 
 @pytest.fixture

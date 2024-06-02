@@ -12,7 +12,7 @@ import ast_comments
 import astor
 import libcst
 
-from src.configs import DOCSTRING_NAME
+from .configs import DOCSTRING_NAME
 
 
 T = TypeVar("T")

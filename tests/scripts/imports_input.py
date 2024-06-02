@@ -1,11 +1,4 @@
 """Test file for import formatting preservation"""
-from ast import Module
-from functools import lru_cache
-from typing import *
-
-import ast_comments as ac
-
-from src.configs import *
 
 
 class MyClass:
@@ -18,7 +11,7 @@ class MyClass:
         pass
 
     def _func(self):
-        import abc
+        pass
 
     @property
     def name(self):
@@ -45,4 +38,4 @@ class MyClass:
 
 
 if __name__ == "__main__":
-    import abc
+    pass

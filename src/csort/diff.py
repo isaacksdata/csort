@@ -7,7 +7,7 @@ from typing import List
 
 import libcst
 
-from src.utilities import get_expression_name
+from .utilities import get_expression_name
 
 
 class DiffGenerator(ABC):

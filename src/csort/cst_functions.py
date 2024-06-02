@@ -7,13 +7,13 @@ from typing import Sequence
 
 import libcst
 
-from src.configs import DUNDER_PATTERN
-from src.configs import find_classes_response
-from src.decorators import get_decorators
-from src.utilities import check_and_get_attribute
-from src.utilities import extract_text_from_file
-from src.utilities import is_class_docstring_cst
-from src.utilities import is_ellipsis_cst
+from .configs import DUNDER_PATTERN
+from .configs import find_classes_response
+from .decorators import get_decorators
+from .utilities import check_and_get_attribute
+from .utilities import extract_text_from_file
+from .utilities import is_class_docstring_cst
+from .utilities import is_ellipsis_cst
 
 
 def update_module(module: libcst.Module, classes: Dict[str, find_classes_response]) -> libcst.Module:

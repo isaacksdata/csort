@@ -1,9 +1,9 @@
 """Functions for handling method decorators"""
 import ast
 from collections import defaultdict
+from collections.abc import Hashable
 from typing import Callable
 from typing import Dict
-from typing import Hashable
 from typing import List
 from typing import Optional
 from typing import Tuple
