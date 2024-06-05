@@ -8,6 +8,7 @@ local_scheme = "dirty-tag"
 
 [project]
 name = "csort"
+description = "Automatic ordering of Python class components."
 authors = [
 	{ name = "Isaac Kitchen-Smith", email = "isaacks123@gmail.com" },
 ]
