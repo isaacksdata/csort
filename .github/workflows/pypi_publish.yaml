@@ -1,5 +1,5 @@
 # .github/workflows/pypi_publish.yml
-name: Publish to pypi
+name: Build
 
 on:
   push:

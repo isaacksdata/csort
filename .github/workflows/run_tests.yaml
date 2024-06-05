@@ -58,12 +58,11 @@ jobs:
           flags: integration
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-#      - name: Report test-coverage to DeepSource
-#        env:
-#          DEEPSOURCE_DSN: ${{ secrets.DEEPSOURCE_DSN }}
-#        run: |
-#          # Install the CLI
-#          curl https://deepsource.io/cli | sh
-#
-#          # Send the report to DeepSource
-#          ./bin/deepsource report --analyzer test-coverage --key python --value-file coverage.xml
+      - name: Update badge
+        if: always()
+        run: |
+          if [[ ${{ job.status }} == 'success' ]]; then
+            sed -i -E 's/!\[unit tests\]\([^)]*\)/![unit tests](https:\/\/github.com\/isaacksdata\/csort\/actions\/workflows\/run_tests.yml\/badge.svg)/' README.md
+          else
+            sed -i -E 's/!\[unit tests\]\([^)]*\)/![unit tests](https:\/\/github.com\/isaacksdata\/csort\/actions\/workflows\/run_tests.yml\/badge.svg?event=push)/' README.md
+          fi
