@@ -1,5 +1,5 @@
 # .github/workflows/test_publish.yml
-name: Publish to testpypi
+name: Build
 
 on:
   push:
