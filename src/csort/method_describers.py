@@ -78,10 +78,6 @@ class MethodDescriber(ABC):
         """
         pass
 
-    @abstractmethod
-    def _setup_config_to_func_map(self) -> Dict[str, Callable]:
-        pass
-
     def get_method_type(self, method: Any, use_csort_group: bool = True) -> int:
         """
         Get the ordering level of the method type
@@ -103,6 +99,10 @@ class MethodDescriber(ABC):
             if func(method):
                 return level
         return self._instance_method_default
+
+    @abstractmethod
+    def _setup_config_to_func_map(self) -> Dict[str, Callable]:
+        pass
 
     def _setup_func_to_level_map(self) -> Dict[Callable, int]:
         """
