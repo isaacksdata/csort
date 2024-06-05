@@ -100,10 +100,6 @@ class MethodDescriber(ABC):
                 return level
         return self._instance_method_default
 
-    @abstractmethod
-    def _setup_config_to_func_map(self) -> Dict[str, Callable]:
-        pass
-
     def _setup_func_to_level_map(self) -> Dict[Callable, int]:
         """
         Set up a full mapping from AST function classifying function to ordering level.
@@ -135,6 +131,10 @@ class MethodDescriber(ABC):
         func_to_value_map: Dict[Callable, int] = OrderedDict(mapping)
 
         return func_to_value_map
+
+    @abstractmethod
+    def _setup_config_to_func_map(self) -> Dict[str, Callable]:
+        pass
 
 
 class ASTMethodDescriber(MethodDescriber):
