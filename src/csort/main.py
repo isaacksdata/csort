@@ -233,6 +233,8 @@ def update_config(cfg: Dict[str, Any], args: Dict[str, Any]) -> Dict[str, Any]:
 def main() -> None:
     params, args = parse_commandline()
     set_logging(params.verbose)
+    logging.warning(params)
+    logging.warning(args)
     skip_patterns = [] if params.skip_patterns is None else params.skip_patterns
 
     py_scripts, outputs = validate_paths(
