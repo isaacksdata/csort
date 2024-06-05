@@ -284,23 +284,6 @@ class StaticMethodChecker:
         self.static_method_count: int = 0
         self.class_static_method_counts: Dict[str, int] = {}
 
-    def _check_for_static(self, func: Union[ast.FunctionDef, libcst.FunctionDef]) -> bool:
-        """
-        Returns True if the function is not labelled with staticmethod but could be static
-        Args:
-            func: input class method
-
-        Returns:
-            True or False
-        """
-        if has_decorator(func, "staticmethod"):
-            return False
-        if has_decorator(func, "abstractmethod"):
-            return False
-        if isinstance(func, ast.FunctionDef):
-            return self._check_for_static_ast(func)
-        return self._check_for_static_cst(func)
-
     @staticmethod
     def _check_for_static_ast(func: ast.FunctionDef) -> bool:
         """
@@ -363,6 +346,51 @@ class StaticMethodChecker:
         func = func.with_changes(params=func.params.with_changes(params=tuple(new_params)))
         return func
 
+    def get_static_method_count(self) -> int:
+        """
+        Getter for static method count
+        Returns:
+            number of functions converted to static
+        """
+        return self.static_method_count
+
+    def staticise_classes(
+        self, class_dict: Dict[str, List[Union[ast.stmt, libcst.CSTNode]]]
+    ) -> Dict[str, List[Union[ast.stmt, libcst.CSTNode]]]:
+        """
+        Iterate over each class and its list of functions, apply staticise to each function,
+        and store the static method count for each class.
+
+        Args:
+            class_dict: Dictionary where keys are class names and values are lists of class components.
+
+        Returns:
+            Dictionary with class names as keys and counts of static method conversions as values.
+        """
+        self.class_static_method_counts = {}
+        for class_name, funcs in class_dict.items():
+            self.static_method_count = 0
+            class_dict[class_name] = [self._staticise(func) for func in funcs]
+            self.class_static_method_counts[class_name] = self.get_static_method_count()
+        return class_dict
+
+    def _check_for_static(self, func: Union[ast.FunctionDef, libcst.FunctionDef]) -> bool:
+        """
+        Returns True if the function is not labelled with staticmethod but could be static
+        Args:
+            func: input class method
+
+        Returns:
+            True or False
+        """
+        if has_decorator(func, "staticmethod"):
+            return False
+        if has_decorator(func, "abstractmethod"):
+            return False
+        if isinstance(func, ast.FunctionDef):
+            return self._check_for_static_ast(func)
+        return self._check_for_static_cst(func)
+
     def _make_static(
         self, func: Union[ast.FunctionDef, libcst.FunctionDef]
     ) -> Union[ast.FunctionDef, libcst.FunctionDef]:
@@ -393,31 +421,3 @@ class StaticMethodChecker:
             self.static_method_count += 1
             return self._make_static(func)
         return func
-
-    def get_static_method_count(self) -> int:
-        """
-        Getter for static method count
-        Returns:
-            number of functions converted to static
-        """
-        return self.static_method_count
-
-    def staticise_classes(
-        self, class_dict: Dict[str, List[Union[ast.stmt, libcst.CSTNode]]]
-    ) -> Dict[str, List[Union[ast.stmt, libcst.CSTNode]]]:
-        """
-        Iterate over each class and its list of functions, apply staticise to each function,
-        and store the static method count for each class.
-
-        Args:
-            class_dict: Dictionary where keys are class names and values are lists of class components.
-
-        Returns:
-            Dictionary with class names as keys and counts of static method conversions as values.
-        """
-        self.class_static_method_counts = {}
-        for class_name, funcs in class_dict.items():
-            self.static_method_count = 0
-            class_dict[class_name] = [self._staticise(func) for func in funcs]
-            self.class_static_method_counts[class_name] = self.get_static_method_count()
-        return class_dict

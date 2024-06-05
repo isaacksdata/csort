@@ -67,6 +67,10 @@ class MethodDescriber(ABC):
         return ast.literal_eval(param) if isinstance(param, str) else param
 
     @abstractmethod
+    def _setup_config_to_func_map(self) -> Dict[str, Callable]:
+        pass
+
+    @abstractmethod
     def _validate_node(self, node: Any) -> bool:
         """
         Validate that a representation of some code can be used with this instance of MethodDescriber
@@ -132,26 +136,27 @@ class MethodDescriber(ABC):
 
         return func_to_value_map
 
-    @abstractmethod
-    def _setup_config_to_func_map(self) -> Dict[str, Callable]:
-        pass
-
 
 class ASTMethodDescriber(MethodDescriber):
     """
     Concrete class for describing methods of classes where the methods have been parsed using AST tree.
     """
 
-    def _validate_node(self, node: Any) -> bool:
+    @staticmethod
+    def _non_method_defaults() -> List[Tuple[Callable, int]]:
         """
-        Validate that the node is instance of ast.AST
-        Args:
-            node: AST node for some source code
+        Set up fixed mapping from AST functions to ordering level.
 
+        The ordering level does not change for these node types.
         Returns:
-            True if the node is of type ast.AST
+            Mapping from fixed node types to order level
         """
-        return isinstance(node, ast.AST)
+        return [
+            (is_ellipsis, 0),
+            (is_class_docstring, 0),
+            (AST.is_annotated_class_attribute, 1),
+            (AST.is_class_attribute, 2),
+        ]
 
     def _setup_config_to_func_map(self) -> Dict[str, Callable]:
         """
@@ -171,6 +176,23 @@ class ASTMethodDescriber(MethodDescriber):
             "private_method": AST.is_private_method,
         }
 
+    def _validate_node(self, node: Any) -> bool:
+        """
+        Validate that the node is instance of ast.AST
+        Args:
+            node: AST node for some source code
+
+        Returns:
+            True if the node is of type ast.AST
+        """
+        return isinstance(node, ast.AST)
+
+
+class CSTMethodDescriber(MethodDescriber):
+    """
+    Concrete class for describing methods of classes where the methods have been parsed using CST tree.
+    """
+
     @staticmethod
     def _non_method_defaults() -> List[Tuple[Callable, int]]:
         """
@@ -181,28 +203,11 @@ class ASTMethodDescriber(MethodDescriber):
             Mapping from fixed node types to order level
         """
         return [
-            (is_ellipsis, 0),
-            (is_class_docstring, 0),
-            (AST.is_annotated_class_attribute, 1),
-            (AST.is_class_attribute, 2),
+            (is_ellipsis_cst, 0),
+            (is_class_docstring_cst, 0),
+            (CST.is_annotated_class_attribute, 1),
+            (CST.is_class_attribute, 2),
         ]
-
-
-class CSTMethodDescriber(MethodDescriber):
-    """
-    Concrete class for describing methods of classes where the methods have been parsed using CST tree.
-    """
-
-    def _validate_node(self, node: Any) -> bool:
-        """
-        Validate that the node is instance of libcst.CSTNode
-        Args:
-            node: CST node for some source code
-
-        Returns:
-            True if the node is of type libcst.CSTNode
-        """
-        return isinstance(node, libcst.CSTNode)
 
     def _setup_config_to_func_map(self) -> Dict[str, Callable]:
         """
@@ -222,21 +227,16 @@ class CSTMethodDescriber(MethodDescriber):
             "private_method": CST.is_private_method,
         }
 
-    @staticmethod
-    def _non_method_defaults() -> List[Tuple[Callable, int]]:
+    def _validate_node(self, node: Any) -> bool:
         """
-        Set up fixed mapping from AST functions to ordering level.
+        Validate that the node is instance of libcst.CSTNode
+        Args:
+            node: CST node for some source code
 
-        The ordering level does not change for these node types.
         Returns:
-            Mapping from fixed node types to order level
+            True if the node is of type libcst.CSTNode
         """
-        return [
-            (is_ellipsis_cst, 0),
-            (is_class_docstring_cst, 0),
-            (CST.is_annotated_class_attribute, 1),
-            (CST.is_class_attribute, 2),
-        ]
+        return isinstance(node, libcst.CSTNode)
 
 
 method_describers: Dict[str, Callable] = {"ast": ASTMethodDescriber, "cst": CSTMethodDescriber}
