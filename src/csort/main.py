@@ -232,6 +232,7 @@ def update_config(cfg: Dict[str, Any], args: Dict[str, Any]) -> Dict[str, Any]:
 
 def main() -> None:
     params, args = parse_commandline()
+    print(params)
     set_logging(params.verbose)
     logging.warning(params)
     logging.warning(args)
