@@ -13,3 +13,4 @@
     - astor
     - ast-comments
     - toml
+  verbose: true
