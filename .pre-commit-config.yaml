@@ -82,4 +82,4 @@ repos:
         entry: csort
         language: system
         types: [python]
-        args: ["-ip=./src/csort"]
+        args: []
