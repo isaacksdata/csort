@@ -28,7 +28,7 @@ def parse_commandline() -> Tuple[argparse.Namespace, Dict[str, Any]]:
         description="Takes as input the path to .py file or directory containing .py files and re-orders methods of "
         "classes according to Csort guidelines."
     )
-    parser.add_argument("files", nargs="+")
+    parser.add_argument("files", nargs="*")
     parser.add_argument(
         "-ip",
         "--input-path",
