@@ -158,6 +158,7 @@ Option Two - use the remote hook
 
 ```yaml
   - repo: https://github.com/isaacksdata/csort
+    rev: v0.1.8
     hooks:
       - id: csort
         args: []
