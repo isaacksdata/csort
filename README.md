@@ -5,6 +5,7 @@
 ![Python versions](https://img.shields.io/badge/Python-3.9--3.12-blue.svg)
 <a href="https://github.com/isaacksdata/csort/blob/main/LICENSE"><img alt="License: MIT" src="https://black.readthedocs.io/en/stable/_static/license.svg"></a>
 <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+<a href="https://github.com/pre-commit/pre-commit"><img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit" alt="pre-commit" style="max-width:100%;"></a>
 <a href="https://mypy-lang.org/"><img src="https://www.mypy-lang.org/static/mypy_badge.svg"></a>
 <a href="https://tox.wiki/en/4.15.0/"><img alt="using: tox" src="https://img.shields.io/badge/using-tox-00AA00.svg"></a>
 <a href="https://pylint.readthedocs.io/en/stable/"><img alt="using: pylint" src="https://img.shields.io/badge/pylint-10.0-blue.svg"></a>
@@ -130,9 +131,38 @@ By default, Csort orders in the following way:
 
 If multiple methods occur for a given sorting level, then the methods are sorted alphabetically.
 
+## Pre-commit hook
+
+Csort can be used with pre-commit to reformat python classes as part of CICD pipelines.
+
+#### Steps:
+
+Create a `.pre-commit-config.yaml` file in your project root
+
+There are two options:
+
+Option One - use a local installation of Csort
+
+```yaml
+  - repo: local
+    hooks:
+      - id: csort
+        name: csort
+        entry: csort
+        language: system
+        types: [python]
+        args: []
+```
+
+Option Two - use the remote hook
+
+```yaml
+  - repo: https://github.com/isaacksdata/csort
+    hooks:
+      - id: csort
+        args: []
+```
+
 ## Todo
 
-- CICD build and publish
-- pre-commit hook
-- pypy
 - sphinx documentation

@@ -75,3 +75,11 @@ repos:
         pass_filenames: false
         additional_dependencies:
           - toml
+  - repo: local
+    hooks:
+      - id: csort
+        name: csort
+        entry: csort
+        language: system
+        types: [python]
+        args: []

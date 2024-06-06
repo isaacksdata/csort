@@ -54,6 +54,73 @@ class ConfigLoader(ABC):
         self._loaded_config: bool = False
         self._config: Optional[Dict[str, Any]] = None
 
+    @staticmethod
+    def _load_defaults() -> Dict[str, Any]:
+        """
+        If no file path is provided or found for csort, then default configurations are loaded
+        Returns:
+            cfg: mapping of default configurations
+        """
+        cfg = {"csort.order": DEFAULT_CSORT_ORDER_PARAMS, "csort": DEFAULT_CSORT_GENERAL_PARAMS}
+        return cfg
+
+    @property
+    def config(self) -> Dict[str, Any]:
+        """
+        Property method used to access _config if already loaded. If not loaded, then _load_config is called.
+        Returns:
+            cfg: mapping of configurations
+        """
+        if self._loaded_config and self._config is not None:
+            return self._config
+        cfg = self._load_config()
+        return cfg
+
+    @abstractmethod
+    def _read_config(self, config_path: str) -> Dict[str, Any]:
+        """
+        Concrete classes implement this method to load configurations from a config file and perform reformatting.
+        Args:
+            config_path: path to config file
+
+        Returns:
+            a mapping of configurations
+        """
+        pass
+
+    @abstractmethod
+    def _set_config_parser(self) -> Readable:
+        """
+        Concrete classes implement this method to instantiate a class which reads from the config file
+        Returns:
+            an instance which meets the Readable protocol
+        """
+        pass
+
+    def get_config_file_path(self) -> Optional[str]:
+        """
+        Wrapper around finding and validating config file paths
+        Returns:
+            a config file path if a config file is found, else None
+        """
+        config_files = self._locate_config_file()
+        return self._validate_config_path(config_files)
+
+    def _load_config(self) -> Dict[str, Any]:
+        """
+        Wrapper function for getting the config file path and loading configurations from the file
+        Returns:
+            cfg: mapping of configurations
+        """
+        config_path = self.get_config_file_path() if self._config_path is None else self._config_path
+        if config_path is None:
+            logging.warning("No config file found! Using default behaviours.")
+            cfg = self._load_defaults()
+        else:
+            cfg = self._read_config(config_path)
+        self._config = cfg
+        return cfg
+
     def _locate_config_file(self) -> List[Path]:
         """
         Find the default config file in local working directory
@@ -79,73 +146,6 @@ class ConfigLoader(ABC):
         if len(config_path) == 1:
             return config_path[0].as_posix()
         return None
-
-    def get_config_file_path(self) -> Optional[str]:
-        """
-        Wrapper around finding and validating config file paths
-        Returns:
-            a config file path if a config file is found, else None
-        """
-        config_files = self._locate_config_file()
-        return self._validate_config_path(config_files)
-
-    @abstractmethod
-    def _set_config_parser(self) -> Readable:
-        """
-        Concrete classes implement this method to instantiate a class which reads from the config file
-        Returns:
-            an instance which meets the Readable protocol
-        """
-        pass
-
-    @abstractmethod
-    def _read_config(self, config_path: str) -> Dict[str, Any]:
-        """
-        Concrete classes implement this method to load configurations from a config file and perform reformatting.
-        Args:
-            config_path: path to config file
-
-        Returns:
-            a mapping of configurations
-        """
-        pass
-
-    @staticmethod
-    def _load_defaults() -> Dict[str, Any]:
-        """
-        If no file path is provided or found for csort, then default configurations are loaded
-        Returns:
-            cfg: mapping of default configurations
-        """
-        cfg = {"csort.order": DEFAULT_CSORT_ORDER_PARAMS, "csort": DEFAULT_CSORT_GENERAL_PARAMS}
-        return cfg
-
-    def _load_config(self) -> Dict[str, Any]:
-        """
-        Wrapper function for getting the config file path and loading configurations from the file
-        Returns:
-            cfg: mapping of configurations
-        """
-        config_path = self.get_config_file_path() if self._config_path is None else self._config_path
-        if config_path is None:
-            logging.warning("No config file found! Using default behaviours.")
-            cfg = self._load_defaults()
-        else:
-            cfg = self._read_config(config_path)
-        self._config = cfg
-        return cfg
-
-    @property
-    def config(self) -> Dict[str, Any]:
-        """
-        Property method used to access _config if already loaded. If not loaded, then _load_config is called.
-        Returns:
-            cfg: mapping of configurations
-        """
-        if self._loaded_config and self._config is not None:
-            return self._config
-        cfg = self._load_config()
-        return cfg
 
 
 class IniReader:
@@ -184,9 +184,6 @@ class ConfigLoaderIni(ConfigLoader):
 
     default_config_file_name = DEFAULT_CONFIG_INI_FILE_NAME
 
-    def _set_config_parser(self) -> IniReader:
-        return IniReader()
-
     def _read_config(self, config_path: str) -> Dict[str, Any]:
         cfg = self._config_parser.read(config_path)
 
@@ -196,6 +193,9 @@ class ConfigLoaderIni(ConfigLoader):
         }
         self._loaded_config = True
         return formatted_csort_cfg
+
+    def _set_config_parser(self) -> IniReader:
+        return IniReader()
 
 
 class TomlReader:
@@ -228,9 +228,6 @@ class ConfigLoaderToml(ConfigLoader):
 
     default_config_file_name = DEFAULT_CONFIG_TOML_FILE_NAME
 
-    def _set_config_parser(self) -> TomlReader:
-        return TomlReader()
-
     def _read_config(self, config_path: str) -> Dict[str, Any]:
         cfg = self._config_parser.read(config_path)
         # toml can contain non csort related configs
@@ -245,6 +242,9 @@ class ConfigLoaderToml(ConfigLoader):
         formatted_csort_cfg = {DEFAULT_CSORT_PARAMS_SECTION: csort_cfg, DEFAULT_CSORT_ORDERING_SECTION: order}
         self._loaded_config = True
         return formatted_csort_cfg
+
+    def _set_config_parser(self) -> TomlReader:
+        return TomlReader()
 
 
 CONFIG_LOADERS: Dict[str, Callable] = {".ini": ConfigLoaderIni, ".toml": ConfigLoaderToml}

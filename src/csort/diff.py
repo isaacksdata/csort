@@ -39,6 +39,21 @@ class DiffGenerator(ABC):
         """
         pass
 
+    def diff(self, source_code: List[Any], csort_code: List[Any]) -> str:
+        """
+        Public method for finding difference between two lists of methods.
+
+        Args:
+            source_code: original list of methods in original order
+            csort_code: csort formatted order of methods
+
+        Returns:
+            string representing the code changes between source_code and csort_code
+        """
+        self._source_code_methods = self._extract_method_names(source_code)
+        self._modified_code_methods = self._extract_method_names(csort_code)
+        return self._generate_diff_string()
+
     def _generate_diff_string(self) -> str:
         """
         Create a diff representation from method names.
@@ -62,21 +77,6 @@ class DiffGenerator(ABC):
                 f"[{i}] : {source_name}{' ' * (longest_source_name - len(source_name))}     --->     {dest_name}"
             )
         return "\n".join(lines)
-
-    def diff(self, source_code: List[Any], csort_code: List[Any]) -> str:
-        """
-        Public method for finding difference between two lists of methods.
-
-        Args:
-            source_code: original list of methods in original order
-            csort_code: csort formatted order of methods
-
-        Returns:
-            string representing the code changes between source_code and csort_code
-        """
-        self._source_code_methods = self._extract_method_names(source_code)
-        self._modified_code_methods = self._extract_method_names(csort_code)
-        return self._generate_diff_string()
 
 
 class SyntaxTreeDiffGenerator(DiffGenerator):

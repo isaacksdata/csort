@@ -1,0 +1,16 @@
+- id: csort
+  name: csort
+  description: orders components in classes according to the type of method.
+  entry: csort
+  language: python
+  pass_filenames: true
+  always_run: false
+  fail_fast: false
+  types:
+    - python
+  additional_dependencies:
+    - libcst
+    - astor
+    - ast-comments
+    - toml
+  verbose: true

@@ -28,6 +28,7 @@ def parse_commandline() -> Tuple[argparse.Namespace, Dict[str, Any]]:
         description="Takes as input the path to .py file or directory containing .py files and re-orders methods of "
         "classes according to Csort guidelines."
     )
+    parser.add_argument("files", nargs="*")
     parser.add_argument(
         "-ip",
         "--input-path",
@@ -145,12 +146,16 @@ def _validate_paths_input_dir(
 
 
 def validate_paths(
-    input_path: str, output_path: Optional[str] = None, check_only: bool = False
+    files: List[str],
+    input_path: Optional[str] = None,
+    output_path: Optional[str] = None,
+    check_only: bool = False,
 ) -> Tuple[List[str], List[Optional[str]]]:
     """
     Validate that the user provided input and output paths are compatible.
 
     Args:
+        files: paths to .py file captured as positional arguments on command line
         input_path: file path to input script or directory of scripts
         output_path: path to output script or output directory
         check_only: If True, then outputs will be None and no code will be changed
@@ -159,6 +164,12 @@ def validate_paths(
         py_scripts: list of paths to .py scripts for formatting
         outputs: list of paths where formatted scripts will be written to
     """
+    if files:
+        output_files: List[Optional[str]] = [f for f in files if f is not None]
+        logging.info("Found %s files as positional args: %s", len(files), files)
+        return files, output_files
+    if input_path is None:
+        raise ValueError("Must provide an input path if positional args 'files' is None!")
     input_pure_path = Path(input_path)
     output_pure_path = Path(output_path) if output_path is not None else None
 
@@ -236,7 +247,10 @@ def main() -> None:
     skip_patterns = [] if params.skip_patterns is None else params.skip_patterns
 
     py_scripts, outputs = validate_paths(
-        input_path=params.input_path, output_path=params.output_path, check_only=params.check or params.diff
+        files=params.files,
+        input_path=params.input_path,
+        output_path=params.output_path,
+        check_only=params.check or params.diff,
     )
 
     if len(py_scripts) == 0:
