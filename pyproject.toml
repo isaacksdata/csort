@@ -66,7 +66,7 @@ check_untyped_defs = true
 warn_return_any = false
 no_implicit_optional = true
 strict_optional = true
-exclude = ['tests/', 'build/']
+exclude = ['tests/', 'build/', 'docs/']
 
 [tool.isort]
 profile = "black"
