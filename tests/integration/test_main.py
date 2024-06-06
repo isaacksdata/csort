@@ -66,8 +66,17 @@ def test_parse_commandline():
     assert len(args) == 0
 
 
+def test_parse_commandline_files():
+    commands = ["", "file1.py", "file2.py"]  # mock script name
+    with patch.object(sys, "argv", commands):
+        output, args = parse_commandline()
+    assert isinstance(output, argparse.Namespace)
+    assert len(output.files) == 2
+    assert "file1.py" in output.files
+
+
 def test_validate_paths(script_path, output_path):
-    inputs, outputs = validate_paths(script_path, output_path)
+    inputs, outputs = validate_paths(files=[], input_path=script_path, output_path=output_path)
     assert isinstance(inputs, list)
     assert isinstance(outputs, list)
     assert len(inputs) == len(outputs) == 1
@@ -78,13 +87,13 @@ def test_validate_paths(script_path, output_path):
 def test_validate_paths_input_dir_output_file(script_path, output_path):
     script_path = Path(script_path).parent.as_posix()
     with pytest.raises(ValueError):
-        validate_paths(script_path, output_path)
+        validate_paths(files=[], input_path=script_path, output_path=output_path)
 
 
 def test_validate_paths_input_dir_output_dir(script_path, output_path):
     script_path = Path(script_path).parent.as_posix()
     output_path = Path(output_path).parent.as_posix()
-    inputs, outputs = validate_paths(script_path, output_path)
+    inputs, outputs = validate_paths(files=[], input_path=script_path, output_path=output_path)
     assert isinstance(inputs, list)
     assert isinstance(outputs, list)
     assert len(inputs) == len(outputs)
@@ -93,7 +102,7 @@ def test_validate_paths_input_dir_output_dir(script_path, output_path):
 
 def test_validate_paths_input_file_output_dir(script_path, output_path):
     output_path = Path(output_path).parent.as_posix()
-    inputs, outputs = validate_paths(script_path, output_path)
+    inputs, outputs = validate_paths(files=[], input_path=script_path, output_path=output_path)
     assert isinstance(inputs, list)
     assert isinstance(outputs, list)
     assert len(inputs) == len(outputs)
@@ -106,7 +115,7 @@ def test_validate_paths_input_file_output_dir(script_path, output_path):
 def test_validate_paths_not_exist():
     input_path = "input/script.py"
     with pytest.raises(FileNotFoundError):
-        validate_paths(input_path)
+        validate_paths(files=[], input_path=input_path)
 
 
 def test_main_no_scripts(caplog):
@@ -116,6 +125,13 @@ def test_main_no_scripts(caplog):
         main()
     assert "No Python scripts found in ./empty_dir" in caplog.messages
     shutil.rmtree("./empty_dir")
+
+
+def test_validate_paths_with_files(script_path, caplog):
+    caplog.set_level(logging.INFO)
+    inputs, outputs = validate_paths(files=[script_path])
+    assert inputs == outputs == [script_path]
+    assert f"Found 1 files as positional args: ['{script_path}']" in caplog.messages
 
 
 def test_main(script_path, output_path, caplog):
