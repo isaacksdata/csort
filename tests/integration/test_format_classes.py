@@ -342,7 +342,7 @@ def test_formatting_auto_static_cst(parser, method_describer, input_path, output
 @pytest.mark.parametrize("input_path", ["csort_multi_group"], indirect=True)
 @pytest.mark.parametrize("output_path", ["csort_multi_group"], indirect=True)
 @pytest.mark.parametrize("expected_path", ["csort_multi_group"], indirect=True)
-def test_formatting_auto_static_ast(parser, method_describer, input_path, output_path, expected_path, caplog):
+def test_formatting_csort_multi_group_ast(parser, method_describer, input_path, output_path, expected_path, caplog):
     caplog.set_level(logging.INFO)
     simple_test(parser, method_describer, input_path, output_path, expected_path, use_cst=False, auto_static=False)
 
@@ -352,6 +352,6 @@ def test_formatting_auto_static_ast(parser, method_describer, input_path, output
 @pytest.mark.parametrize("input_path", ["csort_multi_group"], indirect=True)
 @pytest.mark.parametrize("output_path", ["csort_multi_group"], indirect=True)
 @pytest.mark.parametrize("expected_path", ["csort_multi_group"], indirect=True)
-def test_formatting_auto_static_cst(parser, method_describer, input_path, output_path, expected_path, caplog):
+def test_formatting_csort_multi_group_cst(parser, method_describer, input_path, output_path, expected_path, caplog):
     caplog.set_level(logging.INFO)
     simple_test(parser, method_describer, input_path, output_path, expected_path, use_cst=True, auto_static=False)

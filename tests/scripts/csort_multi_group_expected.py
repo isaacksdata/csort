@@ -7,10 +7,6 @@ class Dog:
         self.color = color
         self.owner = owner
 
-    @csort_group(group="sound")
-    def bark(self) -> None:
-        print("The dog is barking!")
-
     @csort_group(group="describe")
     def color_of_dog(self) -> None:
         print(f"The dog is {self.color}")
@@ -18,10 +14,6 @@ class Dog:
     @csort_group(group="describe")
     def describe(self) -> None:
         print(f"The dog called {self.name} is owned by {self.owner}")
-
-    @csort_group(group="sound")
-    def growling(self) -> None:
-        print("The dog is growling!")
 
     @csort_group(group="movement")
     def run(self) -> None:
@@ -34,6 +26,14 @@ class Dog:
     @csort_group(group="movement")
     def walk(self) -> None:
         print("The dog is walking!")
+
+    @csort_group(group="sound")
+    def bark(self) -> None:
+        print("The dog is barking!")
+
+    @csort_group(group="sound")
+    def growling(self) -> None:
+        print("The dog is growling!")
 
     @csort_group(group="sound")
     def whimper(self) -> None:
