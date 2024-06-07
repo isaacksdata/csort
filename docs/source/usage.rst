@@ -133,3 +133,49 @@ Misc
 
 Import Usage
 ------------
+Csort introduces the ``csort_group`` decorator which can be used to force a group of methods to be placed together
+by csort.
+
+This decorator can be useful if you have a complex class with subsets of related methods.
+
+Lets work through an example:
+
+.. code-block:: python
+
+ class Dog:
+    def __init__(self, name: str, color: str, owner: str) -> None:
+        self.name = name
+        self.color = color
+        self.owner = owner
+
+    @csort_group(group="movement")
+    def run(self) -> None:
+        print("The dog is running!")
+
+    @csort_group(group="sound")
+    def whimper(self) -> None:
+        print("The dog is whimpering!")
+
+    @csort_group(group="sound")
+    def growling(self) -> None:
+        print("The dog is growling!")
+
+    @csort_group(group="movement")
+    def walk(self) -> None:
+        print("The dog is walking!")
+
+    @csort_group(group="movement")
+    def wag(self) -> None:
+        print("The dog is wagging its tail!")
+
+    @csort_group(group="sound")
+    def bark(self) -> None:
+        print("The dog is barking!")
+
+    @csort_group(group="describe")
+    def describe(self) -> None:
+        print(f"The {self.color} dog called {self.name} is owned by {self.owner}")
+
+    @csort_group(group="describe")
+    def color_of_dog(self) -> None:
+        print(f"The dog is {self.color}")
