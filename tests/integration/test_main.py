@@ -230,6 +230,27 @@ def test_main_check_order_override(script_path, caplog):
     assert any("__init__            --->     _func" in msg for msg in caplog.messages)
 
 
+def test_main_check_order_override_same_value(script_path, caplog):
+    caplog.set_level(logging.INFO)
+    commands = [
+        "",
+        f"--input-path={script_path}",
+        f"--output-path={output_path}",
+        "--diff",
+        "--n-auto-static",
+        "--private-method=3",
+        "--dunder-method=3",
+    ]
+    with patch.object(sys, "argv", commands):
+        main()
+    assert "Overriding dunder_method order : set to 3" in caplog.messages
+    assert "Overriding private_method order : set to 3" in caplog.messages
+    assert any(
+        "[0] : __init__            --->     __init__\n[1] : func                --->     __len__\n[2] : _func" in msg
+        for msg in caplog.messages
+    )
+
+
 def test_main_ini_config(script_path, output_path, ini_config_path, caplog):
     caplog.set_level(logging.DEBUG)
     commands = [
