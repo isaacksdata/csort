@@ -335,3 +335,23 @@ def test_formatting_auto_static_cst(parser, method_describer, input_path, output
     caplog.set_level(logging.INFO)
     simple_test(parser, method_describer, input_path, output_path, expected_path, use_cst=True, auto_static=True)
     assert "Csort converted 1 methods from MyClass to static!" in caplog.messages
+
+
+@pytest.mark.parametrize("parser", ["ast"], indirect=True)
+@pytest.mark.parametrize("method_describer", ["ast"], indirect=True)
+@pytest.mark.parametrize("input_path", ["csort_multi_group"], indirect=True)
+@pytest.mark.parametrize("output_path", ["csort_multi_group"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["csort_multi_group"], indirect=True)
+def test_formatting_auto_static_ast(parser, method_describer, input_path, output_path, expected_path, caplog):
+    caplog.set_level(logging.INFO)
+    simple_test(parser, method_describer, input_path, output_path, expected_path, use_cst=False, auto_static=False)
+
+
+@pytest.mark.parametrize("parser", ["cst"], indirect=True)
+@pytest.mark.parametrize("method_describer", ["cst"], indirect=True)
+@pytest.mark.parametrize("input_path", ["csort_multi_group"], indirect=True)
+@pytest.mark.parametrize("output_path", ["csort_multi_group"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["csort_multi_group"], indirect=True)
+def test_formatting_auto_static_cst(parser, method_describer, input_path, output_path, expected_path, caplog):
+    caplog.set_level(logging.INFO)
+    simple_test(parser, method_describer, input_path, output_path, expected_path, use_cst=True, auto_static=False)
