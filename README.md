@@ -167,3 +167,8 @@ Option Two - use the remote hook
 ## Todo
 
 - sphinx documentation
+- nested classes
+- prevent user for setting a method sort level higher than fixed components
+  - e.g. static method above class docstring
+- deleter decorators
+- class decorators e.g. dataclass

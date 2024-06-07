@@ -68,6 +68,37 @@ specified using the ``--config-path`` option.
 
     This should be the relative path to a ``.ini`` or ``.toml`` file from which csort configurations can be loaded.
 
+Csort configurations can also be overridden on the command line. Any field defined in the configuration file can be
+re-defined on the command line.
+
+Class component ordering preferences can set on the command line - :ref:`components-label` :
+
+.. code-block:: console
+
+   $ csort file.py --private-method=3 --dunder-method=12
+
+This snippet would swap the default ordering of dunder methods and private methods.
+
+Note, if you set multiple components to have the same sorting level then they will be sorted alphabetically.
+
+Non-sorting parameters which are normally set in the configuration file can also be set on the command line.
+
+.. option:: --auto-static AUTO-STATIC
+
+    Check if a method could be made static and convert it if so.
+
+.. option:: --n-auto-static N-AUTO-STATIC
+
+    Do not check for possible static methods.
+
+.. option:: --use-csort-group USE-CSORT-GROUP
+
+    Account for the ``csort_group()`` decorator during method sorting.
+
+.. option:: --n-use-csort-group N-USE-CSORT-GROUP
+
+    Do not account for the ``csort_group()`` decorator during method sorting.
+
 Alternative modes
 .................
 
