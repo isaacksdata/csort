@@ -30,7 +30,7 @@ placeholder for a class which has not been implemented yet or during multi-inher
 The ellipsis has the highest sorting level in csort, ensuring that such classes do not get reformatted.
 
 Class docstrings
-...............
+................
 Class docstrings are defined by the triple quote blocks immediately beneath the class definition.
 
 Class docstrings have a fixed high order value to ensure that they are not reformatted.
@@ -44,7 +44,7 @@ Class docstrings have a fixed high order value to ensure that they are not refor
      ...
 
 Typed class attributes
-.........................
+......................
 Class attributes are data defined outside of a class method and are shared across all instances
 of the class.
 
@@ -62,7 +62,7 @@ Therefore, csort considers ``name`` to be a typed class attribute.
 Typed class attributes have a higher sorting level than untyped class attributes.
 
 Untyped class attributes
-..................
+........................
 .. code-block:: python
 
  class ExampleClass:
@@ -91,6 +91,7 @@ For example, this ``ExampleClass``:
      last_name = "Bloggs"
 
 would be converted to:
+
 .. code-block:: python
 
  class ExampleClass:
@@ -172,7 +173,7 @@ Static methods are often used for utility functions which are strongly tied to t
         return a - b
 
 Properties
-........
+..........
 In Python, the @property decorator is used to define methods in a class that act like attributes.
 These methods are typically used for managing the access to private attributes.
 

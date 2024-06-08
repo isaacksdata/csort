@@ -54,6 +54,8 @@ By default, csort will modify the original code but this behaviour can be modifi
     input but in the newly created output directory.
     If the output path is a single ``.py`` file but the input path is a directory, then an exception will be raised.
 
+.. _cli-custom-config-label:
+
 Custom configurations
 .....................
 
@@ -130,6 +132,7 @@ Misc
 
     See :ref:`parsing-label` for more details.
 
+.. _csort-group-label:
 
 Import Usage
 ------------
@@ -152,8 +155,9 @@ Lets work through an example:
     def run(self) -> None:
         print("The dog is running!")
 
+    @staticmethod
     @csort_group(group="sound")
-    def whimper(self) -> None:
+    def whimper() -> None:
         print("The dog is whimpering!")
 
     @csort_group(group="sound")
@@ -179,3 +183,55 @@ Lets work through an example:
     @csort_group(group="describe")
     def color_of_dog(self) -> None:
         print(f"The dog is {self.color}")
+
+In this example, the ``Dog`` class uses the ``csort_group`` decorator to define three method groups: movement, sound
+and describe.
+
+Csort will interpret the ``csort_group`` decorator and sort the methods by the group name, then by any additional
+sorting parameter and then alphabetically by name.
+
+.. code-block:: python
+
+ class Dog:
+    def __init__(self, name: str, color: str, owner: str) -> None:
+        self.name = name
+        self.color = color
+        self.owner = owner
+
+    @csort_group(group="describe")
+    def color_of_dog(self) -> None:
+        print(f"The dog is {self.color}")
+
+    @csort_group(group="describe")
+    def describe(self) -> None:
+        print(f"The {self.color} dog called {self.name} is owned by {self.owner}")
+
+    @csort_group(group="movement")
+    def run(self) -> None:
+        print("The dog is running!")
+
+    @csort_group(group="movement")
+    def wag(self) -> None:
+        print("The dog is wagging its tail!")
+
+    @csort_group(group="movement")
+    def walk(self) -> None:
+        print("The dog is walking!")
+
+    @staticmethod
+    @csort_group(group="sound")
+    def whimper() -> None:
+        print("The dog is whimpering!")
+
+    @csort_group(group="sound")
+    def bark(self) -> None:
+        print("The dog is barking!")
+
+    @csort_group(group="sound")
+    def growling(self) -> None:
+        print("The dog is growling!")
+
+In the csort formatted ``Dog`` class, the methods are sorted by group with the describe group first, then the movement
+group and finally the sound group. Also notice that sorting withing groups is alphabetical, except ``whimper()`` which
+is the first sound group method as it also has the ``@staticmethod`` decorator, affording it a higher rank than the
+other instance methods. See :ref:`components-label` for default ranks.
