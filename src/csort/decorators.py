@@ -193,7 +193,7 @@ cst_decorator_description_factory: Dict[type, Callable] = {
 }
 
 
-def get_csort_group_name(method: Union[ast.FunctionDef, libcst.FunctionDef]) -> Optional[str]:
+def get_csort_group_name(method: Union[ast.stmt, libcst.CSTNode]) -> Optional[str]:
     """
     Get the group name from a csort_group decorator
     Args:
@@ -202,6 +202,8 @@ def get_csort_group_name(method: Union[ast.FunctionDef, libcst.FunctionDef]) -> 
     Returns:
         name assigned to csort group
     """
+    if not isinstance(method, (ast.FunctionDef, libcst.FunctionDef)):
+        return None
     if isinstance(method, ast.FunctionDef):
         return get_csort_group_name_ast(method)
     return get_csort_group_name_cst(method)
