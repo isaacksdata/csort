@@ -21,7 +21,7 @@ Consider the expression ``a + b * c``.
 
 CST would represent this expression as:
 
-.. code-block:: mathematica
+.. code-block:: text
 
         Expression
     ├── Term
@@ -36,7 +36,7 @@ Every character in the expression and the relationships between characters is re
 
 AST might something like:
 
-.. code-block:: mathematica
+.. code-block:: text
 
     +
     ├── a
@@ -92,6 +92,7 @@ The AST tree would created using the python ``ast`` library would look like:
             )
         ]
     )
+
 This AST tree is enough to robustly capture the fact that the function takes two values and adds them.
 However, the comment is lost and whitespaces and line breaks might not be preserved.
 
@@ -270,6 +271,7 @@ Here is the CST for the same simple function:
         default_newline='\n',
         has_trailing_newline=True,
     )
+
 The CST is considerably longer and more complex but holds information about syntax, formatting and comments.
 
 By default, Csort uses the ``libcst`` python library to parse source code into a python friendly CST.
