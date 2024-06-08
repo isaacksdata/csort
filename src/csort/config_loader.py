@@ -61,7 +61,7 @@ class ConfigLoader(ABC):
         Returns:
             cfg: mapping of default configurations
         """
-        cfg = {"csort.order": DEFAULT_CSORT_ORDER_PARAMS, "csort": DEFAULT_CSORT_GENERAL_PARAMS}
+        cfg = {"csort.order": DEFAULT_CSORT_ORDER_PARAMS.copy(), "csort": DEFAULT_CSORT_GENERAL_PARAMS.copy()}
         return cfg
 
     @property

@@ -37,7 +37,22 @@ def handle_last_line_white_space(source_code: str) -> str:
     return source_code
 
 
-handlers: List[Callable] = [handle_if_name_main, handle_last_line_white_space]
+def handle_decorator_spaces(source_code: str) -> str:
+    """
+    Remove empty lines between decorator and function definition
+    Args:
+        source_code: source code string
+
+    Returns:
+        source_code without empty lines
+    """
+    lines = source_code.splitlines()
+    lines_to_drop = [i + 1 for i, l in enumerate(lines) if l.strip().startswith("@") and lines[i + 1] == ""]
+    lines = [l for i, l in enumerate(lines) if i not in lines_to_drop]
+    return "\n".join(lines)
+
+
+handlers: List[Callable] = [handle_if_name_main, handle_last_line_white_space, handle_decorator_spaces]
 
 
 def handle_edge_cases(source_code: str) -> str:
