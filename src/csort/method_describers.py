@@ -20,6 +20,7 @@ from . import generic_functions as GEN
 from .configs import DEFAULT_CSORT_ORDER_PARAMS
 from .configs import DEFAULT_CSORT_PARAMS_SECTION
 from .configs import INSTANCE_METHOD_LEVEL
+from .decorators import get_csort_group_name
 from .decorators import get_decorators
 from .utilities import get_expression_name
 from .utilities import is_class_docstring
@@ -250,7 +251,7 @@ def get_method_describer(parser_type: str, **kwargs: Any) -> MethodDescriber:
 
 def describe_method(
     method: Union[ast.stmt, libcst.CSTNode], method_describer: MethodDescriber
-) -> Tuple[Tuple[int, int], Optional[List[str]], str]:
+) -> Tuple[Tuple[int, Optional[str], int], Optional[List[str]], str]:
     """
     Get the ordering level of the method and the method name
     Args:
@@ -265,8 +266,10 @@ def describe_method(
     level = method_describer.get_method_type(method, use_csort_group=method_describer.use_csort_group)
     decorators = get_decorators(method, sort=True)
     if decorators is not None and "csort_group" in decorators and method_describer.use_csort_group:
+        csort_group = get_csort_group_name(method)
         second_level = method_describer.get_method_type(method, use_csort_group=False)
         decorators.remove("csort_group")
     else:
+        csort_group = None
         second_level = level
-    return (level, second_level), decorators, name
+    return (level, csort_group, second_level), decorators, name
