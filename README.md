@@ -1,6 +1,9 @@
 <a href="https://github.com/isaacksdata/csort/actions/workflows/test_publish.yaml"><img src="https://github.com/isaacksdata/csort/actions/workflows/test_publish.yaml/badge.svg"></a>
 <a href="https://github.com/isaacksdata/csort/actions/workflows/tox_ci.yaml"><img src="https://github.com/isaacksdata/csort/actions/workflows/tox_ci.yaml/badge.svg"></a>
 <a href="https://codecov.io/gh/isaacksdata/csort"><img src="https://codecov.io/gh/isaacksdata/csort/branch/main/graph/badge.svg"></a>
+<a href='https://csort.readthedocs.io/en/latest/?badge=latest'>
+<img src='https://readthedocs.org/projects/csort/badge/?version=latest' alt='Documentation Status' />
+</a>
 ![PyPI Version](https://img.shields.io/pypi/v/csort.svg)
 ![Python versions](https://img.shields.io/badge/Python-3.9--3.12-blue.svg)
 <a href="https://github.com/isaacksdata/csort/blob/main/LICENSE"><img alt="License: MIT" src="https://black.readthedocs.io/en/stable/_static/license.svg"></a>
@@ -13,6 +16,8 @@
 # Csort
 
 Formatter for automatic re-ordering of methods defined within classes.
+
+Read the full [documentation](http://csort.readthedocs.io/).
 
 ## Install
 
@@ -166,7 +171,7 @@ Option Two - use the remote hook
 
 ## Todo
 
-- sphinx documentation
+- rename as csort is taken in pypi
 - nested classes
 - prevent user for setting a method sort level higher than fixed components
   - e.g. static method above class docstring
