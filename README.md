@@ -117,8 +117,8 @@ according to some pre-described ordering pattern.
 
 By default, Csort orders in the following way:
 
-1. Type annotated attributes - e.g. `self.name: str = "MyClass"`
-1. Unannotated attributes - e.g. `self.name = "MyClass"`
+1. Type annotated class attributes - e.g. `name: str = "MyClass"`
+1. Unannotated class attributes - e.g. `name = "MyClass"`
 1. Dunder methods - e.g. `__init__`
 1. Class methods - `@classmethod`
 1. Static methods - `@staticmethod`
@@ -158,6 +158,7 @@ Option Two - use the remote hook
 
 ```yaml
   - repo: https://github.com/isaacksdata/csort
+    rev: v0.1.8
     hooks:
       - id: csort
         args: []
@@ -166,3 +167,9 @@ Option Two - use the remote hook
 ## Todo
 
 - sphinx documentation
+- nested classes
+- prevent user for setting a method sort level higher than fixed components
+  - e.g. static method above class docstring
+- deleter decorators
+- class decorators e.g. dataclass
+- threshold for number of changes in pre-commit
