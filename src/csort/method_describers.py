@@ -272,4 +272,8 @@ def describe_method(
     else:
         csort_group = None
         second_level = level
+
+    # if sorting gets down to the decorators then need to be sorting list of strings
+    decorators = ["zz"] if decorators is None else decorators
+
     return (level, csort_group, second_level), decorators, name
