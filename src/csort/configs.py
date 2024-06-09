@@ -48,6 +48,7 @@ DEFAULT_CSORT_ORDER_PARAMS: Final[Dict[str, Any]] = {
     "decorated_method": 10,
     "instance_method": 11,
     "private_method": 12,
+    "inner_class": 13,
 }
 
 DEFAULT_CSORT_GENERAL_PARAMS: Final[Dict[str, Any]] = {"use_csort_group": True, "auto_static": True}
