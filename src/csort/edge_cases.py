@@ -3,6 +3,7 @@ Module for functions handling specific edge cases
 """
 import re
 from typing import Callable
+from typing import Dict
 from typing import List
 
 
@@ -77,18 +78,22 @@ def handle_empty_line_between_class_methods(source_code: str) -> str:
     return "\n".join(lines)
 
 
-handlers: List[Callable] = [handle_if_name_main, handle_last_line_white_space, handle_decorator_spaces]
+handlers: Dict[str, List[Callable]] = {
+    "ast": [handle_if_name_main, handle_last_line_white_space, handle_decorator_spaces],
+    "cst": [handle_empty_line_between_class_methods, handle_last_line_white_space],
+}
 
 
-def handle_edge_cases(source_code: str) -> str:
+def handle_edge_cases(source_code: str, parser: str) -> str:
     """
     Check for and correct specific edge cases defined in handlers
     Args:
         source_code: input source code
+        parser: type of parser being used - edge cases are parser dependent
 
     Returns:
         source code: after edge case handling
     """
-    for handler in handlers:
+    for handler in handlers[parser]:
         source_code = handler(source_code)
     return source_code

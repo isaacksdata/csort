@@ -62,6 +62,12 @@ def update_node(cls: find_classes_response, components: List[ast.stmt]) -> find_
     """
     if not hasattr(cls["node"], "body"):
         raise AttributeError("Class definition does not have body attribute!")
+    components = [
+        update_node(find_classes_response(node=list(*m.items())[0], index=0), list(*m.items())[1])["node"]
+        if isinstance(m, dict)
+        else m
+        for m in components
+    ]
     cls["node"].body = components
     return cls
 
@@ -103,7 +109,7 @@ def nodes_to_code(tree: ast.Module, source_code: str) -> str:
         new_code: source code strings after formatting
     """
     new_code = preserve_comments(tree)
-    new_code = handle_edge_cases(new_code)
+    new_code = handle_edge_cases(new_code, "ast")
     new_code = handle_import_formatting(source_code=source_code, ast_code=new_code)
     return new_code
 
@@ -121,7 +127,7 @@ def find_classes(code: ast.Module) -> Dict[str, find_classes_response]:
 
     # Find all function definitions
     for i, node in enumerate(code.body):
-        if isinstance(node, ast.ClassDef):
+        if is_class(node) and hasattr(node, "name"):
             classes[node.name] = find_classes_response(node=node, index=i)
     return classes
 
@@ -270,6 +276,7 @@ def is_csortable(expression: ast.AST) -> bool:
 
     """
     checks = [
+        is_class,
         is_function,
         is_ellipsis,
         is_annotated_class_attribute,
