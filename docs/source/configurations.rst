@@ -50,6 +50,7 @@ See :ref:`components-label` for details on each component.
 :decorated method: Defaults to 10
 :instance method: Defaults to 11
 :private method: Defaults to 12
+:inner class: Defaults to 13
 
 Configuration Files
 -------------------
@@ -80,6 +81,7 @@ Below is an example ``pyproject.toml`` with csort tool groups
     decorated_method = 10
     instance_method = 11
     private_method = 12
+    inner_class = 13
 
     [tool.csort]
     use_csort_group = true
@@ -107,7 +109,7 @@ Below is an example ``csort.ini`` file
     setter = 10
     decorated_method = 11
     instance_method = 12
-
+    inner_class = 13
 
     [csort]
     use_csort_group = True

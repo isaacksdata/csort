@@ -39,7 +39,21 @@ def extract_text_from_file(file_path: str) -> str:
         return python_code
 
 
-def get_function_name(method: ast.FunctionDef) -> str:
+def get_function_name(method: Union[ast.FunctionDef, libcst.FunctionDef]) -> str:
+    """
+    Wrapper function for extracting a function name from AST or CST parsed code
+    Args:
+        method: node to get function name from
+
+    Returns:
+        function name
+    """
+    if isinstance(method, ast.FunctionDef):
+        return get_function_name_ast(method)
+    return get_expression_name_cst(method)
+
+
+def get_function_name_ast(method: ast.FunctionDef) -> str:
     """
     Extract name from ast parsed function
 
@@ -190,9 +204,10 @@ def get_ellipsis_name(expression: Union[ast.Expr, libcst.CSTNode]) -> str:
 
 
 names_factory: Dict[type, Callable] = {
-    ast.FunctionDef: get_function_name,
+    ast.FunctionDef: get_function_name_ast,
     ast.AnnAssign: get_annotated_attribute_name,
     ast.Assign: get_attribute_name,
+    ast.ClassDef: get_function_name_ast,
 }
 
 
@@ -200,6 +215,7 @@ cst_names_factory: Dict[type, Callable] = {
     libcst.FunctionDef: get_function_name_cst,
     libcst.AnnAssign: get_annotated_attribute_name_cst,
     libcst.Assign: get_attribute_name_cst,
+    libcst.ClassDef: get_function_name_cst,
 }
 
 
