@@ -207,6 +207,7 @@ names_factory: Dict[type, Callable] = {
     ast.FunctionDef: get_function_name_ast,
     ast.AnnAssign: get_annotated_attribute_name,
     ast.Assign: get_attribute_name,
+    ast.ClassDef: get_function_name_ast,
 }
 
 
