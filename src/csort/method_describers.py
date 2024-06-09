@@ -175,6 +175,7 @@ class ASTMethodDescriber(MethodDescriber):
             "setter": GEN.is_setter,
             "decorated_method": AST.is_decorated,
             "private_method": AST.is_private_method,
+            "inner_class": AST.is_class,
         }
 
     def _validate_node(self, node: Any) -> bool:
@@ -226,6 +227,7 @@ class CSTMethodDescriber(MethodDescriber):
             "setter": GEN.is_setter,
             "decorated_method": CST.is_decorated,
             "private_method": CST.is_private_method,
+            "inner_class": CST.is_class,
         }
 
     def _validate_node(self, node: Any) -> bool:
