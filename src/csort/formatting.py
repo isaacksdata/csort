@@ -5,6 +5,7 @@ from types import ModuleType
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Union
 
 from .configs import format_csort_response
 from .decorators import StaticMethodChecker
@@ -15,18 +16,30 @@ from .utilities import create_path
 from .utilities import extract_text_from_file
 
 
-def order_class_functions(methods: List[ast.stmt], method_describer: MethodDescriber) -> List[ast.stmt]:
+ordered_methods_type = List[Union[ast.stmt, Dict[ast.stmt, "ordered_methods_type"]]]
+
+
+def order_class_functions(
+    methods: List[ast.stmt], method_describer: MethodDescriber, parser: ModuleType
+) -> ordered_methods_type:
     """
     Sort a list of method definitions by the method type and alphabetically by method name
     Args:
         methods: list of method definitions
         method_describer: instance of MethodDescriber for classifying methods of classes
+        parser: module containing functions for the code parser e.g. AST or CST
 
     Returns:
         sorted_methods: method definitions sorted by method type
     """
-    sorted_methods = sorted(methods, key=lambda m: describe_method(method=m, method_describer=method_describer))
-    return sorted_methods
+    sorted_methods: List[ast.stmt] = sorted(methods, key=lambda m: describe_method(m, method_describer))
+    formatted_sorted_methods: ordered_methods_type = [
+        {m: order_class_functions(parser.extract_class_components(m), method_describer, parser)}
+        if parser.is_class(m)
+        else m
+        for m in sorted_methods
+    ]
+    return formatted_sorted_methods
 
 
 def format_csort(
@@ -64,8 +77,8 @@ def format_csort(
             if n_changes > 0:
                 logging.info("Csort converted %s methods from %s to static!", n_changes, class_name)
 
-    sorted_functions: Dict[str, List[ast.stmt]] = {
-        cls: order_class_functions(methods, method_describer) for cls, methods in functions.items()
+    sorted_functions: Dict[str, ordered_methods_type] = {
+        cls: order_class_functions(methods, method_describer, parser) for cls, methods in functions.items()
     }
 
     if all(functions[cname] == sorted_functions[cname] for cname in functions.keys()):
