@@ -144,6 +144,18 @@ def extract_class_components(code: ast.ClassDef) -> List[ast.stmt]:
     return functions
 
 
+def is_class(expression: ast.AST) -> bool:
+    """
+    Determine if AST parsed expression is a class definition
+    Args:
+        expression: AST expression
+
+    Returns:
+        True if represents a class definition
+    """
+    return isinstance(expression, ast.ClassDef)
+
+
 def is_annotated_class_attribute(expression: ast.AST) -> bool:
     """
     Determine if the ast parsed expression is a type annotated class attribute
