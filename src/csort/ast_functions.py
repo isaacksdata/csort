@@ -12,6 +12,7 @@ import astor
 
 from .configs import DUNDER_PATTERN
 from .configs import find_classes_response
+from .configs import ordered_methods_type
 from .decorators import get_decorators
 from .edge_cases import handle_edge_cases
 from .generic_functions import is_class_method
@@ -47,7 +48,7 @@ def update_module(module: ast.Module, classes: Dict[str, find_classes_response])
     return module
 
 
-def update_node(cls: find_classes_response, components: List[ast.stmt]) -> find_classes_response:
+def update_node(cls: find_classes_response, components: ordered_methods_type) -> find_classes_response:
     """
     Update AST class
     Args:
@@ -62,13 +63,13 @@ def update_node(cls: find_classes_response, components: List[ast.stmt]) -> find_
     """
     if not hasattr(cls["node"], "body"):
         raise AttributeError("Class definition does not have body attribute!")
-    components = [
+    formatted_components = [
         update_node(find_classes_response(node=list(*m.items())[0], index=0), list(*m.items())[1])["node"]
         if isinstance(m, dict)
         else m
         for m in components
     ]
-    cls["node"].body = components
+    cls["node"].body = formatted_components
     return cls
 
 
@@ -127,7 +128,7 @@ def find_classes(code: ast.Module) -> Dict[str, find_classes_response]:
 
     # Find all function definitions
     for i, node in enumerate(code.body):
-        if is_class(node) and hasattr(node, "name"):
+        if isinstance(node, ast.ClassDef):
             classes[node.name] = find_classes_response(node=node, index=i)
     return classes
 

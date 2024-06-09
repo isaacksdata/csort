@@ -5,18 +5,15 @@ from types import ModuleType
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Union
 
 from .configs import format_csort_response
+from .configs import ordered_methods_type
 from .decorators import StaticMethodChecker
 from .diff import SyntaxTreeDiffGenerator
 from .method_describers import describe_method
 from .method_describers import MethodDescriber
 from .utilities import create_path
 from .utilities import extract_text_from_file
-
-
-ordered_methods_type = List[Union[ast.stmt, Dict[ast.stmt, "ordered_methods_type"]]]
 
 
 def order_class_functions(

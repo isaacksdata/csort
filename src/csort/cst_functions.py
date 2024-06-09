@@ -1,7 +1,6 @@
 """Functions for handling CST parsed class components"""
 from typing import Any
 from typing import Dict
-from typing import List
 from typing import Optional
 from typing import Sequence
 
@@ -9,6 +8,7 @@ import libcst
 
 from .configs import DUNDER_PATTERN
 from .configs import find_classes_response
+from .configs import ordered_methods_type
 from .decorators import get_decorators
 from .edge_cases import handle_edge_cases
 from .utilities import check_and_get_attribute
@@ -38,7 +38,7 @@ def update_module(module: libcst.Module, classes: Dict[str, find_classes_respons
     return module
 
 
-def update_node(cls: find_classes_response, components: List[libcst.CSTNode]) -> find_classes_response:
+def update_node(cls: find_classes_response, components: ordered_methods_type) -> find_classes_response:
     """
     Update CST class
     Args:
@@ -54,13 +54,13 @@ def update_node(cls: find_classes_response, components: List[libcst.CSTNode]) ->
     """
     if not isinstance(cls["node"], libcst.ClassDef):
         raise TypeError(f"Expected type libcst.ClassDef! Not {type(cls['node'])}")
-    components = [
+    formatted_components = [
         update_node(find_classes_response(node=list(*m.items())[0], index=0), list(*m.items())[1])["node"]
         if isinstance(m, dict)
         else m
         for m in components
     ]
-    cls["node"] = cls["node"].with_changes(body=cls["node"].body.with_changes(body=tuple(components)))
+    cls["node"] = cls["node"].with_changes(body=cls["node"].body.with_changes(body=tuple(formatted_components)))
     return cls
 
 
@@ -126,7 +126,7 @@ def find_classes(module: libcst.Module) -> Dict[str, find_classes_response]:
     classes = {
         node.name.value: find_classes_response(node=node, index=i)
         for i, node in enumerate(module.body)
-        if is_class(node)
+        if is_class(node) and hasattr(node, "name")
     }
     return classes
 
