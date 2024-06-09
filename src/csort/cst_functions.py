@@ -10,6 +10,7 @@ import libcst
 from .configs import DUNDER_PATTERN
 from .configs import find_classes_response
 from .decorators import get_decorators
+from .edge_cases import handle_edge_cases
 from .utilities import check_and_get_attribute
 from .utilities import extract_text_from_file
 from .utilities import is_class_docstring_cst
@@ -53,9 +54,12 @@ def update_node(cls: find_classes_response, components: List[libcst.CSTNode]) ->
     """
     if not isinstance(cls["node"], libcst.ClassDef):
         raise TypeError(f"Expected type libcst.ClassDef! Not {type(cls['node'])}")
-    # check_attribute(cls["node"], "body", raise_exception=True)
-    # check_attribute(cls["node"], "with_changes", raise_exception=True)
-    # check_attribute(cls["node"].body, "with_changes", raise_exception=True)
+    components = [
+        update_node(find_classes_response(node=list(*m.items())[0], index=0), list(*m.items())[1])["node"]
+        if isinstance(m, dict)
+        else m
+        for m in components
+    ]
     cls["node"] = cls["node"].with_changes(body=cls["node"].body.with_changes(body=tuple(components)))
     return cls
 
@@ -93,7 +97,21 @@ def nodes_to_code(tree: libcst.Module, **kwargs: Any) -> str:  # pylint: disable
     Returns:
         source code string
     """
-    return tree.code_for_node(tree)
+    code = tree.code_for_node(tree)
+    code = handle_edge_cases(code, "cst")
+    return code
+
+
+def is_class(node: libcst.CSTNode) -> bool:
+    """
+    Determine if CST node is a class definition
+    Args:
+        node: input node
+
+    Returns:
+        True if node is a class definition
+    """
+    return isinstance(node, libcst.ClassDef)
 
 
 def find_classes(module: libcst.Module) -> Dict[str, find_classes_response]:
@@ -108,7 +126,7 @@ def find_classes(module: libcst.Module) -> Dict[str, find_classes_response]:
     classes = {
         node.name.value: find_classes_response(node=node, index=i)
         for i, node in enumerate(module.body)
-        if isinstance(node, libcst.ClassDef)
+        if is_class(node)
     }
     return classes
 
@@ -251,6 +269,7 @@ def is_csortable(expression: libcst.CSTNode) -> bool:
 
     """
     checks = [
+        is_class,
         is_function,
         is_ellipsis_cst,
         is_annotated_class_attribute,
