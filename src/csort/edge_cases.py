@@ -64,12 +64,21 @@ def handle_empty_line_between_class_methods(source_code: str) -> str:
     """
     idx = []
     lines = source_code.splitlines()
+    accept_patterns = ["@", "class"]
     for i, line in enumerate(lines):
         # if a line begins with @ then its a decorator and check to make sure line beforehand is decorator blank
-        if line.strip().startswith("@") and not lines[i - 1].strip().startswith("@") and lines[i - 1] != "":
+        if (
+            line.strip().startswith("@")
+            and not any(lines[i - 1].strip().startswith(p) for p in accept_patterns)
+            and lines[i - 1] != ""
+        ):
             idx.append(i)
         # if a line begins with def then preceding line should be a decorator or blank
-        elif line.strip().startswith("def ") and not lines[i - 1].strip().startswith("@") and lines[i - 1] != "":
+        elif (
+            line.strip().startswith("def ")
+            and not any(lines[i - 1].strip().startswith(p) for p in accept_patterns)
+            and lines[i - 1] != ""
+        ):
             idx.append(i)
         else:
             pass
