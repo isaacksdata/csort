@@ -87,9 +87,49 @@ def handle_empty_line_between_class_methods(source_code: str) -> str:
     return "\n".join(lines)
 
 
+def handle_empty_lines_after_class_definition(source_code: str) -> str:
+    """
+    Remove empty lines after class definitions
+
+    E.g.
+    class MyClass:
+
+        def func(self):
+            pass
+
+    -->
+
+    class MyClass:
+        def func(self):
+            pass
+
+    Args:
+        source_code: source code string
+
+    Returns:
+        source code without blank lines after class definitions
+    """
+    idx = []
+    lines = source_code.splitlines()
+    for i, line in enumerate(lines):
+        if line.strip().startswith("class") and lines[i + 1] == "":
+            idx.append(i + 1)
+    lines = [l for i, l in enumerate(lines) if i not in idx]
+    return "\n".join(lines)
+
+
 handlers: Dict[str, List[Callable]] = {
-    "ast": [handle_if_name_main, handle_last_line_white_space, handle_decorator_spaces],
-    "cst": [handle_empty_line_between_class_methods, handle_last_line_white_space],
+    "ast": [
+        handle_if_name_main,
+        handle_decorator_spaces,
+        handle_empty_lines_after_class_definition,
+        handle_last_line_white_space,
+    ],
+    "cst": [
+        handle_empty_line_between_class_methods,
+        handle_empty_lines_after_class_definition,
+        handle_last_line_white_space,
+    ],
 }
 
 
