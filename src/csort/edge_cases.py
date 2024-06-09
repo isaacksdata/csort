@@ -52,6 +52,31 @@ def handle_decorator_spaces(source_code: str) -> str:
     return "\n".join(lines)
 
 
+def handle_empty_line_between_class_methods(source_code: str) -> str:
+    """
+    Ensure that class functions are separated with blank line from end of preceding component
+    Args:
+        source_code: source code as a string
+
+    Returns:
+        source code with additional blank lines
+    """
+    idx = []
+    lines = source_code.splitlines()
+    for i, line in enumerate(lines):
+        # if a line begins with @ then its a decorator and check to make sure line beforehand is decorator blank
+        if line.strip().startswith("@") and not lines[i - 1].strip().startswith("@") and lines[i - 1] != "":
+            idx.append(i)
+        # if a line begins with def then preceding line should be a decorator or blank
+        elif line.strip().startswith("def ") and not lines[i - 1].strip().startswith("@") and lines[i - 1] != "":
+            idx.append(i)
+        else:
+            pass
+    for i, j in enumerate(idx):
+        lines.insert(i + j, "")
+    return "\n".join(lines)
+
+
 handlers: List[Callable] = [handle_if_name_main, handle_last_line_white_space, handle_decorator_spaces]
 
 
