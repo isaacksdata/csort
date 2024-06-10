@@ -1,6 +1,7 @@
 """Functions for handling CST parsed class components"""
 from typing import Any
 from typing import Dict
+from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Union
@@ -101,6 +102,20 @@ def nodes_to_code(tree: libcst.Module, **kwargs: Any) -> str:  # pylint: disable
     code = tree.code_for_node(tree)
     code = handle_edge_cases(code, "cst")
     return code
+
+
+def update_node_body(node: libcst.ClassDef, body: List[libcst.CSTNode]) -> libcst.ClassDef:
+    """
+    Update node with new body
+    Args:
+        node: libcst node to update
+        body: the new body
+
+    Returns:
+        node: with updated body
+    """
+    node = node.with_changes(body=node.body.with_changes(body=tuple(body)))
+    return node
 
 
 def is_class(node: libcst.CSTNode) -> bool:
