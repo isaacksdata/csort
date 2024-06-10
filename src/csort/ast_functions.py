@@ -74,6 +74,20 @@ def update_node(cls: find_classes_response, components: ordered_methods_type) ->
     return cls
 
 
+def update_node_body(node: ast.ClassDef, body: List[ast.stmt]) -> ast.ClassDef:
+    """
+    Update the body of a class definition
+    Args:
+        node: the node to update
+        body: the replacement body
+
+    Returns:
+        node: with updated body
+    """
+    node.body = body
+    return node
+
+
 def parse_code(code: Optional[str] = None, file_path: Optional[str] = None) -> ast.Module:
     """
     Parse already loaded code with ast module
