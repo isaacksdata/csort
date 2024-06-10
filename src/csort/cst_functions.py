@@ -3,6 +3,7 @@ from typing import Any
 from typing import Dict
 from typing import Optional
 from typing import Sequence
+from typing import Union
 
 import libcst
 
@@ -52,7 +53,7 @@ def update_node(cls: find_classes_response, components: ordered_methods_type) ->
         TypeError: if classes contains nodes which are not class definitions
         AttributeError: if expected attributes of class definitions are not available
     """
-    if not isinstance(cls["node"], libcst.ClassDef):
+    if not isinstance(cls["node"], (libcst.ClassDef, libcst.FunctionDef)):
         raise TypeError(f"Expected type libcst.ClassDef! Not {type(cls['node'])}")
     formatted_components = [
         update_node(find_classes_response(node=list(*m.items())[0], index=0), list(*m.items())[1])["node"]
@@ -114,6 +115,20 @@ def is_class(node: libcst.CSTNode) -> bool:
     return isinstance(node, libcst.ClassDef)
 
 
+def contains_class(node: libcst.FunctionDef) -> bool:
+    """
+    Determine if the body of a function definition contains an inner class
+    Args:
+        node: function definition node
+
+    Returns:
+        True if a class is defined in the function
+    """
+    if not hasattr(node, "body") or not hasattr(node.body, "body"):
+        return False
+    return any(is_class(child) for child in node.body.body)
+
+
 def find_classes(module: libcst.Module) -> Dict[str, find_classes_response]:
     """
     Extract class definitions from libcst tree
@@ -131,7 +146,7 @@ def find_classes(module: libcst.Module) -> Dict[str, find_classes_response]:
     return classes
 
 
-def extract_class_components(class_node: libcst.ClassDef) -> Sequence[libcst.BaseStatement]:
+def extract_class_components(class_node: Union[libcst.ClassDef, libcst.FunctionDef]) -> Sequence[libcst.BaseStatement]:
     """
     Extract components of the class definition body
     Args:
@@ -140,6 +155,8 @@ def extract_class_components(class_node: libcst.ClassDef) -> Sequence[libcst.Bas
     Returns:
         tuple of class components e.g. function definitions, attributes, docstrings
     """
+    if isinstance(class_node, libcst.FunctionDef):
+        return class_node.body.body
     if not hasattr(class_node, "body"):
         return tuple()
     if not isinstance(class_node.body, libcst.IndentedBlock):
