@@ -1,6 +1,7 @@
 import os
 from unittest.mock import Mock
 
+import csort.cst_functions as CST
 import libcst
 import pytest
 from csort.ast_functions import is_class_method
@@ -8,13 +9,6 @@ from csort.ast_functions import is_getter
 from csort.ast_functions import is_property
 from csort.ast_functions import is_setter
 from csort.ast_functions import is_static_method
-from csort.cst_functions import extract_class_components
-from csort.cst_functions import find_classes
-from csort.cst_functions import is_annotated_class_attribute
-from csort.cst_functions import is_class_attribute
-from csort.cst_functions import is_dunder_method
-from csort.cst_functions import parse_code
-from csort.cst_functions import update_node
 from csort.decorators import _get_decorators_cst
 from csort.decorators import get_decorator_id_cst
 from csort.decorators import StaticMethodChecker
@@ -47,18 +41,18 @@ def mock_cst_module(mock_statement):
 
 @pytest.fixture
 def static_method_checker():
-    return StaticMethodChecker()
+    return StaticMethodChecker(parser=CST)
 
 
 def test_update_node_wrong_type():
     cls = {"node": 3, "index": 1}
     with pytest.raises(TypeError):
-        update_node(cls, [])
+        CST.update_node(cls, [])
 
 
 @pytest.mark.parametrize("script_path", ["basic"], indirect=True)
 def test_cst_extract_classes(mock_cst_module):
-    output = find_classes(mock_cst_module)
+    output = CST.find_classes(mock_cst_module)
     assert isinstance(output, dict)
     assert len(output) == 1
     assert "MyClass" in output
@@ -66,14 +60,14 @@ def test_cst_extract_classes(mock_cst_module):
 
 @pytest.mark.parametrize("script_path", ["basic"], indirect=True)
 def test_cst_extract_class_components(mock_cst_module):
-    output = extract_class_components(mock_cst_module.body[0])
+    output = CST.extract_class_components(mock_cst_module.body[0])
     assert len(output) == 9
     assert output[0].name.value == "__init__"
 
 
 @pytest.mark.parametrize("script_path", ["basic"], indirect=True)
 def test_cst_is_dunder_method(mock_cst_module):
-    output = [is_dunder_method(method) for method in mock_cst_module.body[0].body.body]
+    output = [CST.is_dunder_method(method) for method in mock_cst_module.body[0].body.body]
     assert len(output) == 9
     assert sum(output) == 2
     assert output[0]
@@ -81,7 +75,7 @@ def test_cst_is_dunder_method(mock_cst_module):
 
 
 def test_cst_is_dunder_method_no_name():
-    assert not is_dunder_method(5)
+    assert not CST.is_dunder_method(5)
 
 
 @pytest.mark.parametrize("script_path", ["multi_decorators"], indirect=True)
@@ -145,7 +139,7 @@ def test_get_function_name(mock_cst_module):
 
 @pytest.mark.parametrize("script_path", ["attributes"], indirect=True)
 def test_is_unannotated_attribute(mock_cst_module):
-    output = [is_class_attribute(method) for method in mock_cst_module.body[0].body.body]
+    output = [CST.is_class_attribute(method) for method in mock_cst_module.body[0].body.body]
     assert len(output) == 7
     assert sum(output) == 2
     assert output[1] and output[3]
@@ -153,7 +147,7 @@ def test_is_unannotated_attribute(mock_cst_module):
 
 @pytest.mark.parametrize("script_path", ["attributes"], indirect=True)
 def test_is_annotated_attribute(mock_cst_module):
-    output = [is_annotated_class_attribute(method) for method in mock_cst_module.body[0].body.body]
+    output = [CST.is_annotated_class_attribute(method) for method in mock_cst_module.body[0].body.body]
     assert len(output) == 7
     assert sum(output) == 2
     assert output[0] and output[5]
@@ -191,11 +185,11 @@ def test_is_ellipsis(mock_cst_module):
 
 def test_parse_code():
     with pytest.raises(ValueError):
-        parse_code(code=None, file_path=None)
+        CST.parse_code(code=None, file_path=None)
 
 
 def test_extract_class_components_no_body():
-    output = extract_class_components(class_node=5)
+    output = CST.extract_class_components(class_node=5)
     assert isinstance(output, tuple)
     assert len(output) == 0
 
@@ -204,7 +198,7 @@ def test_extract_class_components_no_indentedblock():
     mock_obj = Mock()
     mock_obj.body = "This is the body content"
     with pytest.raises(TypeError):
-        extract_class_components(class_node=mock_obj)
+        CST.extract_class_components(class_node=mock_obj)
 
 
 @pytest.mark.parametrize("script_path", ["auto_static"], indirect=True)

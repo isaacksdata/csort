@@ -377,6 +377,30 @@ def test_formatting_csort_nested_classes_cst(parser, method_describer, input_pat
     simple_test(parser, method_describer, input_path, output_path, expected_path, use_cst=True, auto_static=False)
 
 
+@pytest.mark.parametrize("parser", ["cst"], indirect=True)
+@pytest.mark.parametrize("method_describer", ["cst"], indirect=True)
+@pytest.mark.parametrize("input_path", ["nested_classes_static"], indirect=True)
+@pytest.mark.parametrize("output_path", ["nested_classes_static"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["nested_classes_static"], indirect=True)
+def test_formatting_csort_nested_classes_auto_static_cst(
+    parser, method_describer, input_path, output_path, expected_path, caplog
+):
+    caplog.set_level(logging.INFO)
+    simple_test(parser, method_describer, input_path, output_path, expected_path, use_cst=True, auto_static=True)
+
+
+@pytest.mark.parametrize("parser", ["ast"], indirect=True)
+@pytest.mark.parametrize("method_describer", ["ast"], indirect=True)
+@pytest.mark.parametrize("input_path", ["nested_classes_static"], indirect=True)
+@pytest.mark.parametrize("output_path", ["nested_classes_static"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["nested_classes_static"], indirect=True)
+def test_formatting_csort_nested_classes_auto_static_ast(
+    parser, method_describer, input_path, output_path, expected_path, caplog
+):
+    caplog.set_level(logging.INFO)
+    simple_test(parser, method_describer, input_path, output_path, expected_path, use_cst=False, auto_static=True)
+
+
 @pytest.mark.parametrize("parser", ["ast"], indirect=True)
 @pytest.mark.parametrize("method_describer", ["ast"], indirect=True)
 @pytest.mark.parametrize("input_path", ["nested_function_classes"], indirect=True)
@@ -399,3 +423,27 @@ def test_formatting_csort_nested_function_classes_cst(
 ):
     caplog.set_level(logging.INFO)
     simple_test(parser, method_describer, input_path, output_path, expected_path, use_cst=True, auto_static=False)
+
+
+@pytest.mark.parametrize("parser", ["cst"], indirect=True)
+@pytest.mark.parametrize("method_describer", ["cst"], indirect=True)
+@pytest.mark.parametrize("input_path", ["nested_function_classes_static"], indirect=True)
+@pytest.mark.parametrize("output_path", ["nested_function_classes_static"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["nested_function_classes_static"], indirect=True)
+def test_formatting_csort_nested_function_classes_auto_static_cst(
+    parser, method_describer, input_path, output_path, expected_path, caplog
+):
+    caplog.set_level(logging.INFO)
+    simple_test(parser, method_describer, input_path, output_path, expected_path, use_cst=True, auto_static=True)
+
+
+@pytest.mark.parametrize("parser", ["ast"], indirect=True)
+@pytest.mark.parametrize("method_describer", ["ast"], indirect=True)
+@pytest.mark.parametrize("input_path", ["nested_function_classes_static"], indirect=True)
+@pytest.mark.parametrize("output_path", ["nested_function_classes_static"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["nested_function_classes_static"], indirect=True)
+def test_formatting_csort_nested_function_classes_auto_static_ast(
+    parser, method_describer, input_path, output_path, expected_path, caplog
+):
+    caplog.set_level(logging.INFO)
+    simple_test(parser, method_describer, input_path, output_path, expected_path, use_cst=False, auto_static=True)
