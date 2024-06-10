@@ -6,6 +6,7 @@ from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Union
 
 import ast_comments
 import astor
@@ -133,22 +134,20 @@ def find_classes(code: ast.Module) -> Dict[str, find_classes_response]:
     return classes
 
 
-def extract_class_components(code: ast.ClassDef) -> List[ast.stmt]:
+def extract_class_components(class_node: Union[ast.ClassDef, ast.FunctionDef]) -> List[ast.stmt]:
     """
     Find all method definitions within a class definition
     Args:
-        code: parsed class definition
+        class_node: parsed class definition
 
     Returns:
         functions: list of function definitions
     """
-    functions: List[ast.stmt] = []
+    if isinstance(class_node, ast.FunctionDef):
+        return class_node.body
 
-    # Find all function definitions
-    for node in code.body:
-        if is_csortable(node):
-            functions.append(node)
-    return functions
+    components = [node for node in class_node.body if is_csortable(node)]
+    return components
 
 
 def is_class(expression: ast.AST) -> bool:
@@ -161,6 +160,12 @@ def is_class(expression: ast.AST) -> bool:
         True if represents a class definition
     """
     return isinstance(expression, ast.ClassDef)
+
+
+def contains_class(expression: ast.FunctionDef) -> bool:
+    if not hasattr(expression, "body"):
+        return False
+    return any(is_class(child) for child in expression.body)
 
 
 def is_annotated_class_attribute(expression: ast.AST) -> bool:
