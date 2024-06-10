@@ -2,6 +2,7 @@
 import ast
 from collections import defaultdict
 from collections.abc import Hashable
+from types import ModuleType
 from typing import Callable
 from typing import Dict
 from typing import List
@@ -342,7 +343,14 @@ class StaticMethodChecker:
     If a method does not use "self" in the method body then the @staticmethod decorator can be assigned.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, parser: ModuleType) -> None:
+        """
+        Initialise the class
+
+        Args:
+            parser: code module with parser specific functions
+        """
+        self.parser = parser
         self.static_method_count: int = 0
         self.class_static_method_counts: Dict[str, int] = {}
 
@@ -445,13 +453,17 @@ class StaticMethodChecker:
         Returns:
             True or False
         """
-        if has_decorator(func, "staticmethod"):
-            return False
-        if has_decorator(func, "abstractmethod"):
+        if (
+            has_decorator(func, "staticmethod")
+            or has_decorator(func, "abstractmethod")
+            or self.parser.is_dunder_method(func)
+        ):
             return False
         if isinstance(func, ast.FunctionDef):
             return self._check_for_static_ast(func)
-        return self._check_for_static_cst(func)
+        if isinstance(func, libcst.FunctionDef):
+            return self._check_for_static_cst(func)
+        return False
 
     def _make_static(
         self, func: Union[ast.FunctionDef, libcst.FunctionDef]
@@ -468,18 +480,25 @@ class StaticMethodChecker:
             return self._make_static_ast(func)
         return self._make_static_cst(func)
 
-    def _staticise(self, func: Union[ast.stmt, libcst.CSTNode]) -> Union[ast.stmt, libcst.CSTNode]:
+    def _staticise(self, node: Union[ast.stmt, libcst.CSTNode]) -> Union[ast.stmt, libcst.CSTNode]:
         """
         If the class component provided is a method then check if it could be static and modify if so.
         Args:
-            func: input class component
+            node: input class component
 
         Returns:
             func: forced to be static if applicable
         """
-        if not isinstance(func, (ast.FunctionDef, libcst.FunctionDef)):
-            return func
-        if self._check_for_static(func):
+        if not (self.parser.is_function(node) or self.parser.is_class(node)):
+            return node
+
+        # recursive action for the class - extract methods and replace class body
+        if self.parser.is_class(node) or self.parser.contains_class(node):
+            node = self.parser.update_node_body(
+                node, [self._staticise(child) for child in self.parser.extract_class_components(node)]
+            )
+
+        if self._check_for_static(node):
             self.static_method_count += 1
-            return self._make_static(func)
-        return func
+            return self._make_static(node)
+        return node

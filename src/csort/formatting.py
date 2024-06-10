@@ -72,7 +72,7 @@ def format_csort(
     functions = {name: parser.extract_class_components(cls["node"]) for name, cls in classes.items()}
 
     if auto_static:
-        static_checker = StaticMethodChecker()
+        static_checker = StaticMethodChecker(parser=parser)
         functions = static_checker.staticise_classes(functions)
         for class_name, n_changes in static_checker.class_static_method_counts.items():
             if n_changes > 0:
