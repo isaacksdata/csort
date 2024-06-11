@@ -172,7 +172,7 @@ Option Two - use the remote hook
 ## Todo
 
 - rename as csort is taken in pypi
-- nested classes
+- diff generator does not report nested classes
 - prevent user for setting a method sort level higher than fixed components
   - e.g. static method above class docstring
 - deleter decorators
