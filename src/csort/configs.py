@@ -56,6 +56,7 @@ DEFAULT_CSORT_GENERAL_PARAMS: Final[Dict[str, Any]] = {"use_csort_group": True, 
 find_classes_response = TypedDict("find_classes_response", {"node": Union[ast.ClassDef, libcst.CSTNode], "index": int})
 format_csort_response = TypedDict("format_csort_response", {"code": int, "diff": str})
 ordered_methods_type = List[Union[ast.stmt, Dict[ast.stmt, "ordered_methods_type"]]]
+Node = Union[ast.stmt, libcst.CSTNode]
 
 # Protocols
 

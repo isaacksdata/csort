@@ -10,7 +10,6 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
-from typing import Union
 
 import libcst
 
@@ -20,6 +19,7 @@ from . import generic_functions as GEN
 from .configs import DEFAULT_CSORT_ORDER_PARAMS
 from .configs import DEFAULT_CSORT_PARAMS_SECTION
 from .configs import INSTANCE_METHOD_LEVEL
+from .configs import Node
 from .decorators import get_csort_group_name
 from .decorators import get_decorators
 from .utilities import get_expression_name
@@ -252,7 +252,7 @@ def get_method_describer(parser_type: str, **kwargs: Any) -> MethodDescriber:
 
 
 def describe_method(
-    method: Union[ast.stmt, libcst.CSTNode], method_describer: MethodDescriber
+    method: Node, method_describer: MethodDescriber
 ) -> Tuple[Tuple[int, Optional[str], int], Optional[List[str]], str]:
     """
     Get the ordering level of the method and the method name

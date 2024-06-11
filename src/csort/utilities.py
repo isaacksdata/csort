@@ -13,6 +13,7 @@ import astor
 import libcst
 
 from .configs import DOCSTRING_NAME
+from .configs import Node
 
 
 T = TypeVar("T")
@@ -39,7 +40,7 @@ def extract_text_from_file(file_path: str) -> str:
         return python_code
 
 
-def get_function_name(method: Union[ast.stmt, libcst.CSTNode]) -> str:
+def get_function_name(method: Node) -> str:
     """
     Wrapper function for extracting a function name from AST or CST parsed code
     Args:
@@ -221,7 +222,7 @@ cst_names_factory: Dict[type, Callable] = {
 }
 
 
-def get_expression_name(expression: Union[ast.stmt, libcst.CSTNode]) -> str:
+def get_expression_name(expression: Node) -> str:
     """
     Extract name from ast parsed expression
 

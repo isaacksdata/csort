@@ -8,10 +8,10 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
-from typing import Union
 
 import libcst
 
+from .configs import Node
 from .utilities import get_function_name
 
 
@@ -196,7 +196,7 @@ cst_decorator_description_factory: Dict[type, Callable] = {
 }
 
 
-def get_csort_group_name(method: Union[ast.stmt, libcst.CSTNode]) -> Optional[str]:
+def get_csort_group_name(method: Node) -> Optional[str]:
     """
     Get the group name from a csort_group decorator
     Args:
@@ -245,7 +245,7 @@ def get_decorator_id_cst(decorator: libcst.Decorator) -> str:
     return func(decorator)
 
 
-def get_decorators(method: Union[ast.stmt, libcst.CSTNode], sort: bool = False) -> Optional[List[str]]:
+def get_decorators(method: Node, sort: bool = False) -> Optional[List[str]]:
     """
     Get decorators from an ast parsed function
     Args:
@@ -296,7 +296,7 @@ def _get_decorators_cst(method: libcst.CSTNode, sort: bool = False) -> Optional[
     return decorators
 
 
-def has_decorator(method: Union[ast.stmt, libcst.CSTNode], decorator: str) -> bool:
+def has_decorator(method: Node, decorator: str) -> bool:
     """
     Determine if a parsed method has a specific decorator
     Args:
@@ -426,9 +426,7 @@ class StaticMethodChecker:
         """
         return self.static_method_count
 
-    def staticise_classes(
-        self, class_dict: Dict[str, List[Union[ast.stmt, libcst.CSTNode]]]
-    ) -> Dict[str, List[Union[ast.stmt, libcst.CSTNode]]]:
+    def staticise_classes(self, class_dict: Dict[str, List[Node]]) -> Dict[str, List[Node]]:
         """
         Iterate over each class and its list of functions, apply staticise to each function,
         and store the static method count for each class.
@@ -446,7 +444,7 @@ class StaticMethodChecker:
             self.class_static_method_counts[class_name] = self.get_static_method_count()
         return class_dict
 
-    def _check_for_static(self, func: Union[ast.stmt, libcst.CSTNode]) -> bool:
+    def _check_for_static(self, func: Node) -> bool:
         """
         Returns True if the function is not labelled with staticmethod but could be static
         Args:
@@ -467,7 +465,7 @@ class StaticMethodChecker:
             return self._check_for_static_cst(func)
         return False
 
-    def _make_static(self, func: Union[ast.stmt, libcst.CSTNode]) -> Union[ast.stmt, libcst.CSTNode]:
+    def _make_static(self, func: Node) -> Node:
         """
         Modify parsed function to include @staticmethod decorator and remove "self" from args
         Args:
@@ -482,7 +480,7 @@ class StaticMethodChecker:
             return self._make_static_cst(func)
         return func
 
-    def _staticise(self, node: Union[ast.stmt, libcst.CSTNode]) -> Union[ast.stmt, libcst.CSTNode]:
+    def _staticise(self, node: Node) -> Node:
         """
         If the class component provided is a method then check if it could be static and modify if so.
         Args:
