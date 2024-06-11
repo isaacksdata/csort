@@ -17,7 +17,7 @@ from .utilities import extract_text_from_file
 
 
 def order_class_functions(
-    methods: List[ast.stmt], method_describer: MethodDescriber, parser: ModuleType
+    methods: List[ast.stmt], method_describer: MethodDescriber, parser: ModuleType, parent: Optional[ast.stmt] = None
 ) -> ordered_methods_type:
     """
     Sort a list of method definitions by the method type and alphabetically by method name
@@ -25,14 +25,18 @@ def order_class_functions(
         methods: list of method definitions
         method_describer: instance of MethodDescriber for classifying methods of classes
         parser: module containing functions for the code parser e.g. AST or CST
+        parent: the node from which the methods where extracted
 
     Returns:
         sorted_methods: method definitions sorted by method type
     """
-    sorted_methods: List[ast.stmt] = sorted(methods, key=lambda m: describe_method(m, method_describer))
+    if parent is None or parser.is_class(parent):
+        sorted_methods: List[ast.stmt] = sorted(methods, key=lambda m: describe_method(m, method_describer))
+    else:
+        sorted_methods = methods
     formatted_sorted_methods: ordered_methods_type = [
-        {m: order_class_functions(parser.extract_class_components(m), method_describer, parser)}
-        if parser.is_class(m)
+        {m: order_class_functions(parser.extract_class_components(m), method_describer, parser, m)}
+        if parser.is_class(m) or parser.contains_class(m)
         else m
         for m in sorted_methods
     ]
@@ -68,7 +72,7 @@ def format_csort(
     functions = {name: parser.extract_class_components(cls["node"]) for name, cls in classes.items()}
 
     if auto_static:
-        static_checker = StaticMethodChecker()
+        static_checker = StaticMethodChecker(parser=parser)
         functions = static_checker.staticise_classes(functions)
         for class_name, n_changes in static_checker.class_static_method_counts.items():
             if n_changes > 0:
