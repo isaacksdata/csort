@@ -446,7 +446,7 @@ class StaticMethodChecker:
             self.class_static_method_counts[class_name] = self.get_static_method_count()
         return class_dict
 
-    def _check_for_static(self, func: Union[ast.FunctionDef, libcst.FunctionDef]) -> bool:
+    def _check_for_static(self, func: Union[ast.stmt, libcst.CSTNode]) -> bool:
         """
         Returns True if the function is not labelled with staticmethod but could be static
         Args:
@@ -467,9 +467,7 @@ class StaticMethodChecker:
             return self._check_for_static_cst(func)
         return False
 
-    def _make_static(
-        self, func: Union[ast.FunctionDef, libcst.FunctionDef]
-    ) -> Union[ast.FunctionDef, libcst.FunctionDef]:
+    def _make_static(self, func: Union[ast.stmt, libcst.CSTNode]) -> Union[ast.stmt, libcst.CSTNode]:
         """
         Modify parsed function to include @staticmethod decorator and remove "self" from args
         Args:
@@ -480,7 +478,9 @@ class StaticMethodChecker:
         """
         if isinstance(func, ast.FunctionDef):
             return self._make_static_ast(func)
-        return self._make_static_cst(func)
+        if isinstance(func, libcst.FunctionDef):
+            return self._make_static_cst(func)
+        return func
 
     def _staticise(self, node: Union[ast.stmt, libcst.CSTNode]) -> Union[ast.stmt, libcst.CSTNode]:
         """

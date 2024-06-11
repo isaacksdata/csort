@@ -39,7 +39,7 @@ def extract_text_from_file(file_path: str) -> str:
         return python_code
 
 
-def get_function_name(method: Union[ast.FunctionDef, libcst.FunctionDef]) -> str:
+def get_function_name(method: Union[ast.stmt, libcst.CSTNode]) -> str:
     """
     Wrapper function for extracting a function name from AST or CST parsed code
     Args:

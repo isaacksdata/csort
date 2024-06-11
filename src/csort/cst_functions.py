@@ -161,7 +161,7 @@ def find_classes(module: libcst.Module) -> Dict[str, find_classes_response]:
     return classes
 
 
-def extract_class_components(class_node: Union[libcst.ClassDef, libcst.FunctionDef]) -> Sequence[libcst.BaseStatement]:
+def extract_class_components(class_node: Union[libcst.ClassDef, libcst.FunctionDef]) -> Sequence[libcst.CSTNode]:
     """
     Extract components of the class definition body
     Args:
