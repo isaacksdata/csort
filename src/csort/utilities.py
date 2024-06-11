@@ -48,12 +48,14 @@ def get_function_name(method: Union[ast.FunctionDef, libcst.FunctionDef]) -> str
     Returns:
         function name
     """
-    if isinstance(method, ast.FunctionDef):
+    if isinstance(method, (ast.FunctionDef, ast.ClassDef)):
         return get_function_name_ast(method)
-    return get_expression_name_cst(method)
+    if isinstance(method, (libcst.FunctionDef, libcst.ClassDef)):
+        return get_expression_name_cst(method)
+    raise TypeError(f"Cannot get name from type {type(method)}")
 
 
-def get_function_name_ast(method: ast.FunctionDef) -> str:
+def get_function_name_ast(method: Union[ast.FunctionDef, ast.ClassDef]) -> str:
     """
     Extract name from ast parsed function
 
@@ -72,7 +74,7 @@ def get_function_name_ast(method: ast.FunctionDef) -> str:
     return method.name
 
 
-def get_function_name_cst(method: libcst.FunctionDef) -> str:
+def get_function_name_cst(method: Union[libcst.FunctionDef, libcst.ClassDef]) -> str:
     """
     Extract name from CST parsed function
 

@@ -12,6 +12,8 @@ from typing import Union
 
 import libcst
 
+from .utilities import get_function_name
+
 
 class DecoratorDefaultDict(defaultdict):
     """
@@ -493,11 +495,18 @@ class StaticMethodChecker:
             return node
 
         # recursive action for the class - extract methods and replace class body
-        if self.parser.is_class(node) or self.parser.contains_class(node):
+        if self.parser.is_class(node):
+            node_name = get_function_name(node)
+            node = self.parser.update_node_body(
+                node,
+                self.staticise_classes(class_dict={node_name: self.parser.extract_class_components(node)})[node_name],
+            )
+        elif self.parser.contains_class(node):
             node = self.parser.update_node_body(
                 node, [self._staticise(child) for child in self.parser.extract_class_components(node)]
             )
-
+        else:
+            pass
         if self._check_for_static(node):
             self.static_method_count += 1
             return self._make_static(node)
