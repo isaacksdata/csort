@@ -61,14 +61,14 @@ def test_cst_extract_classes(mock_cst_module):
 @pytest.mark.parametrize("script_path", ["basic"], indirect=True)
 def test_cst_extract_class_components(mock_cst_module):
     output = CST.extract_class_components(mock_cst_module.body[0])
-    assert len(output) == 9
+    assert len(output) == 10
     assert output[0].name.value == "__init__"
 
 
 @pytest.mark.parametrize("script_path", ["basic"], indirect=True)
 def test_cst_is_dunder_method(mock_cst_module):
     output = [CST.is_dunder_method(method) for method in mock_cst_module.body[0].body.body]
-    assert len(output) == 9
+    assert len(output) == 10
     assert sum(output) == 2
     assert output[0]
     assert output[5]
@@ -93,23 +93,23 @@ def test_get_decorators_cst(mock_cst_module):
 @pytest.mark.parametrize("script_path", ["basic"], indirect=True)
 def test_is_class_method(mock_cst_module):
     output = [is_class_method(method) for method in mock_cst_module.body[0].body.body]
-    assert len(output) == 9
-    assert sum(output) == 1
-    assert output[-2]
-
-
-@pytest.mark.parametrize("script_path", ["basic"], indirect=True)
-def test_is_static_method(mock_cst_module):
-    output = [is_static_method(method) for method in mock_cst_module.body[0].body.body]
-    assert len(output) == 9
+    assert len(output) == 10
     assert sum(output) == 1
     assert output[-3]
 
 
 @pytest.mark.parametrize("script_path", ["basic"], indirect=True)
+def test_is_static_method(mock_cst_module):
+    output = [is_static_method(method) for method in mock_cst_module.body[0].body.body]
+    assert len(output) == 10
+    assert sum(output) == 1
+    assert output[-4]
+
+
+@pytest.mark.parametrize("script_path", ["basic"], indirect=True)
 def test_is_property_method(mock_cst_module):
     output = [is_property(method) for method in mock_cst_module.body[0].body.body]
-    assert len(output) == 9
+    assert len(output) == 10
     assert sum(output) == 1
     assert output[3]
 
@@ -117,7 +117,7 @@ def test_is_property_method(mock_cst_module):
 @pytest.mark.parametrize("script_path", ["basic"], indirect=True)
 def test_is_setter_method(mock_cst_module):
     output = [is_setter(method) for method in mock_cst_module.body[0].body.body]
-    assert len(output) == 9
+    assert len(output) == 10
     assert sum(output) == 1
     assert output[4]
 
@@ -125,7 +125,7 @@ def test_is_setter_method(mock_cst_module):
 @pytest.mark.parametrize("script_path", ["basic"], indirect=True)
 def test_is_getter_method(mock_cst_module):
     output = [is_getter(method) for method in mock_cst_module.body[0].body.body]
-    assert len(output) == 9
+    assert len(output) == 10
     assert sum(output) == 1
     assert output[-1]
 

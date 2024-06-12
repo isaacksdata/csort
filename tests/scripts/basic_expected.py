@@ -27,6 +27,10 @@ class MyClass:
     def name(self, new_name: str):
         self._name = new_name
 
+    @name.deleter
+    def name(self):
+        self.name = None
+
     def func(self):
         pass
 

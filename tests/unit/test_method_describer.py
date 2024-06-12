@@ -18,8 +18,8 @@ def mock_config():
     config["csort.order"]["static_method"] = "6"
     config["csort.order"]["property"] = "7"
     config["csort.order"]["decorated_method"] = "10"
-    config["csort.order"]["instance_method"] = "11"
-    config["csort.order"]["private_method"] = "12"
+    config["csort.order"]["instance_method"] = "12"
+    config["csort.order"]["private_method"] = "13"
     return config
 
 
