@@ -132,6 +132,12 @@ Misc
 
     See :ref:`parsing-label` for more details.
 
+
+.. option:: -f FORCE, --force FORCE
+
+    Force csort to allow manual override of sorting levels such that :ref:`methods-label` can be sorted with
+    higher precedence than :ref:`fixed-components-label`.
+
 .. _csort-group-label:
 
 Import Usage

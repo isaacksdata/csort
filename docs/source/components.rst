@@ -8,6 +8,8 @@ The first level of ordering depends on the type of component.
 
 The second level of ordering depends on the name of the component.
 
+.. _fixed-components-label:
+
 Fixed components
 ----------------
 There are currently four types of fixed components which cannot be manually overridden by the user.
@@ -103,6 +105,7 @@ would be converted to:
      age = 50
      last_name = "Bloggs"
 
+.. _methods-label:
 
 Methods
 -------
@@ -324,3 +327,11 @@ By default, csort sorts inner classes to the bottom of the class.
      class SecondName:
         def __init__(self, second_name: str) -> None:
             self.name = second_name
+
+Conflicts
+---------
+* If two different components are given the same sorting level then they will be sorted alphabetically.
+
+* If the sorting level for a method is set to have higher precedence than a fixed component, then a ``ValueError`` will be raised.
+
+* The ``ValueError`` can be overridden by using the ``--force`` option.

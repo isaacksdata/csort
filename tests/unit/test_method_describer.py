@@ -4,6 +4,7 @@ from copy import deepcopy
 from typing import Callable
 
 import pytest
+from csort.generic_functions import is_class_method
 from csort.method_describers import ASTMethodDescriber
 
 
@@ -63,6 +64,20 @@ def test_ast_method_describer_init(mock_config):
         assert isinstance(value, int)
     method_levels = list(describer._method_checking_map.values())
     assert all(m in method_levels for m in list(map(int, list(mock_config["csort.order"].values()))))
+
+
+def test_ast_method_describer__setup_func_to_level_map_valueerror(mock_config):
+    mock_config["csort.order"]["class_method"] = "1"
+    with pytest.raises(ValueError):
+        ASTMethodDescriber(config=mock_config)
+
+
+def test_ast_method_describer__setup_func_to_level_map_override(mock_config, caplog):
+    mock_config["csort.order"]["class_method"] = "1"
+    describer = ASTMethodDescriber(config=mock_config, override_level_check=True)
+    msg = "The sorting level for ['class_method'] is 1 which is higher than max default 2. Exception overridden by --force option."
+    assert msg in caplog.messages
+    assert describer._method_checking_map[is_class_method] == 1
 
 
 def test_ast_method_describer_describe_method(

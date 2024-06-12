@@ -173,8 +173,5 @@ Option Two - use the remote hook
 
 - rename as csort is taken in pypi
 - diff generator does not report nested classes
-- prevent user for setting a method sort level higher than fixed components
-  - e.g. static method above class docstring
 - deleter decorators
-- class decorators e.g. dataclass
 - threshold for number of changes in pre-commit
