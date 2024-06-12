@@ -87,28 +87,6 @@ class MethodDescriber(ABC):
         """
         pass
 
-    def get_method_type(self, method: Any, use_csort_group: bool = True) -> int:
-        """
-        Get the ordering level of the method type
-        Args:
-            method: the method to get the ordering level of
-            use_csort_group: If True, then will check for csort_group
-
-        Returns:
-            level: sorting level of the method
-
-        Raises:
-            TypeError: if incompatible code representation used
-        """
-        if not self._validate_node(method):
-            raise TypeError(f"Node of type {type(method)} cannot be used!")
-        for func, level in self._method_checking_map.items():
-            if func.__name__ == "is_csort_group" and not use_csort_group:
-                continue
-            if func(method):
-                return level
-        return self._instance_method_default
-
     def _setup_func_to_level_map(self) -> Dict[Callable, int]:
         """
         Set up a full mapping from AST function classifying function to ordering level.
@@ -165,6 +143,28 @@ class MethodDescriber(ABC):
 
         return func_to_value_map
 
+    def get_method_type(self, method: Any, use_csort_group: bool = True) -> int:
+        """
+        Get the ordering level of the method type
+        Args:
+            method: the method to get the ordering level of
+            use_csort_group: If True, then will check for csort_group
+
+        Returns:
+            level: sorting level of the method
+
+        Raises:
+            TypeError: if incompatible code representation used
+        """
+        if not self._validate_node(method):
+            raise TypeError(f"Node of type {type(method)} cannot be used!")
+        for func, level in self._method_checking_map.items():
+            if func.__name__ == "is_csort_group" and not use_csort_group:
+                continue
+            if func(method):
+                return level
+        return self._instance_method_default
+
 
 class ASTMethodDescriber(MethodDescriber):
     """
@@ -201,6 +201,7 @@ class ASTMethodDescriber(MethodDescriber):
             "property": GEN.is_property,
             "getter": GEN.is_getter,
             "setter": GEN.is_setter,
+            "deleter": GEN.is_deleter,
             "decorated_method": AST.is_decorated,
             "private_method": AST.is_private_method,
             "inner_class": AST.is_class,
@@ -253,6 +254,7 @@ class CSTMethodDescriber(MethodDescriber):
             "property": GEN.is_property,
             "getter": GEN.is_getter,
             "setter": GEN.is_setter,
+            "deleter": GEN.is_deleter,
             "decorated_method": CST.is_decorated,
             "private_method": CST.is_private_method,
             "inner_class": CST.is_class,
