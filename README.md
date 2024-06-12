@@ -173,5 +173,3 @@ Option Two - use the remote hook
 
 - rename as csort is taken in pypi
 - diff generator does not report nested classes
-- deleter decorators
-- threshold for number of changes in pre-commit
