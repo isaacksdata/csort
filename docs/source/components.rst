@@ -245,7 +245,8 @@ The ``setter`` decorator allows controlled access whilst setting a new value.
 
 
 Deleters
-.......
+........
+
 Deleters work in conjunction with ``getter`` and ``setter`` to support controlled access to private attributes.
 
 The ``deleter`` decorator allows controlled access to remove an attribute from a class - meaning the attribute is
