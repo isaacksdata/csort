@@ -47,10 +47,11 @@ See :ref:`components-label` for details on each component.
 :property: Defaults to 7
 :getter: Defaults to 8
 :setter: Defaults to 9
-:decorated method: Defaults to 10
-:instance method: Defaults to 11
-:private method: Defaults to 12
-:inner class: Defaults to 13
+:deleter: Defaults to 10
+:decorated method: Defaults to 11
+:instance method: Defaults to 12
+:private method: Defaults to 13
+:inner class: Defaults to 14
 
 Configuration Files
 -------------------
@@ -107,9 +108,10 @@ Below is an example ``csort.ini`` file
     property = 8
     getter = 9
     setter = 10
-    decorated_method = 11
-    instance_method = 12
-    inner_class = 13
+    deleter = 11
+    decorated_method = 12
+    instance_method = 13
+    inner_class = 14
 
     [csort]
     use_csort_group = True
