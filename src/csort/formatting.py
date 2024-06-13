@@ -8,16 +8,22 @@ from typing import Optional
 
 from .configs import format_csort_response
 from .configs import ordered_methods_type
+from .decorators import has_decorator
 from .decorators import StaticMethodChecker
 from .diff import SyntaxTreeDiffGenerator
 from .method_describers import describe_method
 from .method_describers import MethodDescriber
 from .utilities import create_path
 from .utilities import extract_text_from_file
+from .utilities import get_function_name
 
 
 def order_class_functions(
-    methods: List[ast.stmt], method_describer: MethodDescriber, parser: ModuleType, parent: Optional[ast.stmt] = None
+    methods: List[ast.stmt],
+    method_describer: MethodDescriber,
+    parser: ModuleType,
+    parent: Optional[ast.stmt] = None,
+    use_property_groups: bool = False,
 ) -> ordered_methods_type:
     """
     Sort a list of method definitions by the method type and alphabetically by method name
@@ -26,6 +32,8 @@ def order_class_functions(
         method_describer: instance of MethodDescriber for classifying methods of classes
         parser: module containing functions for the code parser e.g. AST or CST
         parent: the node from which the methods where extracted
+        use_property_groups: If True, then methods related to a property such as getter, setter, deleter will be
+                            grouped together
 
     Returns:
         sorted_methods: method definitions sorted by method type
@@ -34,6 +42,22 @@ def order_class_functions(
         sorted_methods: List[ast.stmt] = sorted(methods, key=lambda m: describe_method(m, method_describer))
     else:
         sorted_methods = methods
+    if use_property_groups:
+        # find index of properties
+        prop_idx = [i for i, method in enumerate(sorted_methods) if has_decorator(method, "property")]
+        original_order = sorted_methods.copy()
+        # iterate over properties and find methods with the same name
+        for prop in prop_idx:
+            updated_prop = sorted_methods.index(original_order[prop])
+            attr_name = get_function_name(sorted_methods[updated_prop])
+            # sort by property, getter, setter, deleter
+            funcs = sorted(
+                [method for method in sorted_methods if get_function_name(method) == attr_name],
+                key=lambda m: describe_method(m, method_describer),
+            )
+            sorted_methods = [m for m in sorted_methods if m not in funcs]
+            sorted_methods = sorted_methods[:updated_prop] + funcs + sorted_methods[updated_prop:]
+
     formatted_sorted_methods: ordered_methods_type = [
         {m: order_class_functions(parser.extract_class_components(m), method_describer, parser, m)}
         if parser.is_class(m) or parser.contains_class(m)
@@ -49,6 +73,7 @@ def format_csort(
     method_describer: MethodDescriber,
     output_py: Optional[str] = None,
     auto_static: bool = False,
+    use_property_groups: bool = False,
 ) -> format_csort_response:
     """
     Main function for running Csort
@@ -58,6 +83,8 @@ def format_csort(
         method_describer: instance of MethodDescriber for extracting class method info
         output_py: where to write out formatted code (.py) file
         auto_static: If True, then static methods without the @staticmethod decorator will be marked as static
+        use_property_groups: If True, then methods related to a property such as getter, setter, deleter will be
+                            grouped together
 
     Returns:
         {
@@ -79,7 +106,8 @@ def format_csort(
                 logging.info("Csort converted %s methods from %s to static!", n_changes, class_name)
 
     sorted_functions: Dict[str, ordered_methods_type] = {
-        cls: order_class_functions(methods, method_describer, parser) for cls, methods in functions.items()
+        cls: order_class_functions(methods, method_describer, parser, use_property_groups=use_property_groups)
+        for cls, methods in functions.items()
     }
 
     if all(functions[cname] == sorted_functions[cname] for cname in functions.keys()):
