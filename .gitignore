@@ -3,3 +3,4 @@ dist
 .mypy_cache/*
 .pytest_cache
 .coverage
+*.DS_STORE
