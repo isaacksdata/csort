@@ -64,7 +64,7 @@ jobs:
         if: always()
         run: |
           if [[ ${{ job.status }} == 'success' ]]; then
-            sed -i -E 's/!\[unit tests\]\([^)]*\)/![unit tests](https:\/\/github.com\/isaacksdata\/csort\/actions\/workflows\/run_tests.yml\/badge.svg)/' README.md
+            sed -i -E 's/!\[unit tests\]\([^)]*\)/![unit tests](https:\/\/github.com\/isaacksdata\/msort\/actions\/workflows\/run_tests.yml\/badge.svg)/' README.md
           else
-            sed -i -E 's/!\[unit tests\]\([^)]*\)/![unit tests](https:\/\/github.com\/isaacksdata\/csort\/actions\/workflows\/run_tests.yml\/badge.svg?event=push)/' README.md
+            sed -i -E 's/!\[unit tests\]\([^)]*\)/![unit tests](https:\/\/github.com\/isaacksdata\/msort\/actions\/workflows\/run_tests.yml\/badge.svg?event=push)/' README.md
           fi

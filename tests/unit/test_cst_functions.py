@@ -1,23 +1,23 @@
 import os
 from unittest.mock import Mock
 
-import csort.cst_functions as CST
 import libcst
+import msort.cst_functions as CST
 import pytest
-from csort.ast_functions import is_class_method
-from csort.ast_functions import is_getter
-from csort.ast_functions import is_property
-from csort.ast_functions import is_setter
-from csort.ast_functions import is_static_method
-from csort.decorators import _get_decorators_cst
-from csort.decorators import get_decorator_id_cst
-from csort.decorators import StaticMethodChecker
-from csort.utilities import extract_text_from_file
-from csort.utilities import get_annotated_attribute_name_cst
-from csort.utilities import get_attribute_name_cst
-from csort.utilities import get_function_name_cst
-from csort.utilities import is_class_docstring_cst
-from csort.utilities import is_ellipsis_cst
+from msort.ast_functions import is_class_method
+from msort.ast_functions import is_getter
+from msort.ast_functions import is_property
+from msort.ast_functions import is_setter
+from msort.ast_functions import is_static_method
+from msort.decorators import _get_decorators_cst
+from msort.decorators import get_decorator_id_cst
+from msort.decorators import StaticMethodChecker
+from msort.utilities import extract_text_from_file
+from msort.utilities import get_annotated_attribute_name_cst
+from msort.utilities import get_attribute_name_cst
+from msort.utilities import get_function_name_cst
+from msort.utilities import is_class_docstring_cst
+from msort.utilities import is_ellipsis_cst
 
 DEBUG = "tests" in os.getcwd()
 

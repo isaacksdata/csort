@@ -22,14 +22,14 @@ Steps
 
    $ touch .pre-commit-config.yaml
 
-3. Paste in the csort hook
+3. Paste in the msort hook
 
 .. code-block:: yaml
 
-    - repo: https://github.com/isaacksdata/csort
+    - repo: https://github.com/isaacksdata/msort
     rev: v0.1.8
     hooks:
-      - id: csort
+      - id: msort
         args: []
 
 4. Initiate pre-commit
@@ -47,10 +47,10 @@ Common amendments
 
 .. code-block:: yaml
 
-    - repo: https://github.com/isaacksdata/csort
+    - repo: https://github.com/isaacksdata/msort
     rev: v0.1.8
     hooks:
-      - id: csort
+      - id: msort
         args: ["--skip-patterns=test_", "--skip-patterns=_test.py"]
 
 * personalised configurations
@@ -59,8 +59,8 @@ Common amendments
 
 .. code-block:: yaml
 
-    - repo: https://github.com/isaacksdata/csort
+    - repo: https://github.com/isaacksdata/msort
     rev: v0.1.8
     hooks:
-      - id: csort
+      - id: msort
         args: ["--config-path=./pyproject.toml"]
