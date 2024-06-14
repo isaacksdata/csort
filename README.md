@@ -17,7 +17,7 @@
 
 Formatter for automatic re-ordering of methods defined within classes.
 
-Read the full [documentation](http://msort.readthedocs.io/).
+Read the full [documentation](http://csort.readthedocs.io/).
 
 ## Install
 
