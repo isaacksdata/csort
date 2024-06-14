@@ -1,8 +1,8 @@
-<a href="https://github.com/isaacksdata/msort/actions/workflows/test_publish.yaml"><img src="https://github.com/isaacksdata/msort/actions/workflows/test_publish.yaml/badge.svg"></a>
-<a href="https://github.com/isaacksdata/msort/actions/workflows/tox_ci.yaml"><img src="https://github.com/isaacksdata/msort/actions/workflows/tox_ci.yaml/badge.svg"></a>
-<a href="https://codecov.io/gh/isaacksdata/msort"><img src="https://codecov.io/gh/isaacksdata/msort/branch/main/graph/badge.svg"></a>
-<a href='https://msort.readthedocs.io/en/latest/?badge=latest'>
-<img src='https://readthedocs.org/projects/msort/badge/?version=latest' alt='Documentation Status' />
+<a href="https://github.com/isaacksdata/csort/actions/workflows/test_publish.yaml"><img src="https://github.com/isaacksdata/csort/actions/workflows/test_publish.yaml/badge.svg"></a>
+<a href="https://github.com/isaacksdata/csort/actions/workflows/tox_ci.yaml"><img src="https://github.com/isaacksdata/csort/actions/workflows/tox_ci.yaml/badge.svg"></a>
+<a href="https://codecov.io/gh/isaacksdata/csort"><img src="https://codecov.io/gh/isaacksdata/csort/branch/main/graph/badge.svg"></a>
+<a href='https://csort.readthedocs.io/en/latest/?badge=latest'>
+<img src='https://readthedocs.org/projects/csort/badge/?version=latest' alt='Documentation Status' />
 </a>
 ![PyPI Version](https://img.shields.io/pypi/v/msort.svg)
 ![Python versions](https://img.shields.io/badge/Python-3.9--3.12-blue.svg)
