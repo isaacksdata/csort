@@ -2,10 +2,14 @@ import ast
 import configparser
 from copy import deepcopy
 from typing import Callable
+from unittest.mock import patch
 
 import pytest
 from csort.generic_functions import is_class_method
 from csort.method_describers import ASTMethodDescriber
+from csort.method_describers import CSTMethodDescriber
+from csort.method_describers import get_method_describer
+from csort.method_describers import MethodDescriber
 
 
 @pytest.fixture
@@ -53,6 +57,14 @@ def private_func(func_source_code):
     return func_source_code.replace("func", "_func")
 
 
+@patch.multiple(MethodDescriber, __abstractmethods__=set())
+def test_abstract_config_loader():
+    describer = MethodDescriber()
+    assert describer._non_method_defaults() is None
+    assert describer._validate_node(node="") is None
+    assert describer._setup_config_to_func_map is None
+
+
 def test_ast_method_describer_init(mock_config):
     describer = ASTMethodDescriber(config=mock_config)
     assert isinstance(describer._config, configparser.ConfigParser)
@@ -98,3 +110,16 @@ def test_ast_method_describer_describe_method(
         node = ast.parse(func_code).body[0]
         output = describer.get_method_type(node)
         assert output == int(expected_value)
+
+
+def test_ast_method_describer_get_method_type_typeerror(mock_config):
+    describer = ASTMethodDescriber(config=mock_config)
+    with pytest.raises(TypeError):
+        describer.get_method_type(method=1)
+
+
+def test_get_method_describer(mock_config):
+    assert isinstance(get_method_describer("ast", config=mock_config), ASTMethodDescriber)
+    assert isinstance(get_method_describer("cst", config=mock_config), CSTMethodDescriber)
+    with pytest.raises(KeyError):
+        get_method_describer("null")
