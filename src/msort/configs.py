@@ -23,24 +23,24 @@ CLASS_SPACING: Final[str] = "\n\n\n"
 DOCSTRING_NAME: Final[str] = "docstring"
 
 # Name of ini config file
-DEFAULT_CONFIG_INI_FILE_NAME: Final[str] = "csort.ini"
+DEFAULT_CONFIG_INI_FILE_NAME: Final[str] = "msort.ini"
 
 # Name of toml config file
 DEFAULT_CONFIG_TOML_FILE_NAME: Final[str] = "pyproject.toml"
 
 # Name of subsection indicating method ordering
-DEFAULT_CSORT_ORDERING_SUBSECTION: Final[str] = "order"
+DEFAULT_MSORT_ORDERING_SUBSECTION: Final[str] = "order"
 
-# Name of ordering subsection of csort.ini
-DEFAULT_CSORT_ORDERING_SECTION: Final[str] = f"csort.{DEFAULT_CSORT_ORDERING_SUBSECTION}"
+# Name of ordering subsection of msort.ini
+DEFAULT_MSORT_ORDERING_SECTION: Final[str] = f"msort.{DEFAULT_MSORT_ORDERING_SUBSECTION}"
 
-# Name of other csort params config section
-DEFAULT_CSORT_PARAMS_SECTION: Final[str] = "csort"
+# Name of other msort params config section
+DEFAULT_MSORT_PARAMS_SECTION: Final[str] = "msort"
 
 # Default config file parameters
-DEFAULT_CSORT_ORDER_PARAMS: Final[Dict[str, Any]] = {
+DEFAULT_MSORT_ORDER_PARAMS: Final[Dict[str, Any]] = {
     "dunder_method": 3,
-    "csort_group": 4,
+    "msort_group": 4,
     "class_method": 5,
     "static_method": 6,
     "property": 7,
@@ -53,13 +53,13 @@ DEFAULT_CSORT_ORDER_PARAMS: Final[Dict[str, Any]] = {
     "inner_class": 14,
 }
 
-DEFAULT_CSORT_GENERAL_PARAMS: Final[Dict[str, Any]] = {
-    "use_csort_group": True,
+DEFAULT_MSORT_GENERAL_PARAMS: Final[Dict[str, Any]] = {
+    "use_msort_group": True,
     "auto_static": True,
     "use_property_groups": False,
 }
 find_classes_response = TypedDict("find_classes_response", {"node": Union[ast.ClassDef, libcst.CSTNode], "index": int})
-format_csort_response = TypedDict("format_csort_response", {"code": int, "diff": str})
+format_msort_response = TypedDict("format_msort_response", {"code": int, "diff": str})
 ordered_methods_type = List[Union[ast.stmt, Dict[ast.stmt, "ordered_methods_type"]]]
 Node = Union[ast.stmt, libcst.CSTNode]
 

@@ -2,9 +2,9 @@
 
 Parsing
 =======
-Under the hood, Csort parses source code into **Syntax Trees**.
+Under the hood, |project_name| parses source code into **Syntax Trees**.
 
-Csort can work with two types of **Syntax Trees**:
+|project_name| can work with two types of **Syntax Trees**:
 
 * Concrete Syntax Trees (CST)
 * Abstract Syntax Trees (AST)
@@ -274,7 +274,7 @@ Here is the CST for the same simple function:
 
 The CST is considerably longer and more complex but holds information about syntax, formatting and comments.
 
-By default, Csort uses the ``libcst`` python library to parse source code into a python friendly CST.
+By default, |project_name| uses the ``libcst`` python library to parse source code into a python friendly CST.
 The parser can be changed to AST by using the ``--parser=ast`` option on the command line.
 
 **It is strongly recommended to use the default CST parser**

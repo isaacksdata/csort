@@ -1,7 +1,7 @@
-- id: csort
-  name: csort
+- id: msort
+  name: msort
   description: orders components in classes according to the type of method.
-  entry: csort
+  entry: msort
   language: python
   pass_filenames: true
   always_run: false

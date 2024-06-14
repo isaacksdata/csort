@@ -1,11 +1,11 @@
-[tool.csort.order]
+[tool.msort.order]
 dunder_method = 3
-csort_group = 4
+msort_group = 4
 class_method = 5
 private_method = 12
 
-[tool.csort]
-use_csort_group = true
+[tool.msort]
+use_msort_group = true
 auto_static = false
 
 [database]

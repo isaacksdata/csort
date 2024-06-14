@@ -44,19 +44,19 @@ for i, dec in enumerate(decorators):
 # -------------------------------------------------------------------------
 
 
-def get_csort_group_name_ast(method: ast.FunctionDef) -> Optional[str]:
+def get_msort_group_name_ast(method: ast.FunctionDef) -> Optional[str]:
     """
-    Extract the provided csort group name from the csort_group decorator
+    Extract the provided msort group name from the msort_group decorator
     Args:
         method: AST parsed decorator
 
     Returns:
-        group name from the csort_group decorator
+        group name from the msort_group decorator
     """
     if not hasattr(method, "decorator_list"):
         return None
     decorators = method.decorator_list
-    idx = [i for i, decorator in enumerate(decorators) if get_decorator_id(decorator) == "csort_group"]
+    idx = [i for i, decorator in enumerate(decorators) if get_decorator_id(decorator) == "msort_group"]
     if len(idx) == 0:
         return None
     decorator = decorators[idx[0]]
@@ -117,22 +117,22 @@ def decorator_call_id(decorator: ast.Call) -> str:
 # -------------------------------------------------------------------------
 
 
-def get_csort_group_name_cst(method: libcst.FunctionDef) -> Optional[str]:
+def get_msort_group_name_cst(method: libcst.FunctionDef) -> Optional[str]:
     """
-    Extract the provided csort group name from the csort_group decorator
+    Extract the provided msort group name from the msort_group decorator
     Args:
         method: CST parsed decorator
 
     Returns:
-        group name from the csort_group decorator
+        group name from the msort_group decorator
     """
     decorators = method.decorators
-    idx = [i for i, decorator in enumerate(decorators) if get_decorator_id_cst(decorator) == "csort_group"]
+    idx = [i for i, decorator in enumerate(decorators) if get_decorator_id_cst(decorator) == "msort_group"]
     if len(idx) == 0:
         return None
     decorator = decorators[idx[0]]
     if not hasattr(decorator.decorator, "args"):
-        raise AttributeError("Could not find args attribute of csort_group decorator!")
+        raise AttributeError("Could not find args attribute of msort_group decorator!")
     return decorator.decorator.args[0].value.value
 
 
@@ -196,20 +196,20 @@ cst_decorator_description_factory: Dict[type, Callable] = {
 }
 
 
-def get_csort_group_name(method: Node) -> Optional[str]:
+def get_msort_group_name(method: Node) -> Optional[str]:
     """
-    Get the group name from a csort_group decorator
+    Get the group name from a msort_group decorator
     Args:
         method: class method
 
     Returns:
-        name assigned to csort group
+        name assigned to msort group
     """
     if not isinstance(method, (ast.FunctionDef, libcst.FunctionDef)):
         return None
     if isinstance(method, ast.FunctionDef):
-        return get_csort_group_name_ast(method)
-    return get_csort_group_name_cst(method)
+        return get_msort_group_name_ast(method)
+    return get_msort_group_name_cst(method)
 
 
 def get_decorator_id(decorator: ast.expr) -> str:

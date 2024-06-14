@@ -176,7 +176,7 @@ def extract_class_components(class_node: Union[libcst.ClassDef, libcst.FunctionD
         return tuple()
     if not isinstance(class_node.body, libcst.IndentedBlock):
         raise TypeError("Expected class node body to be of type IndentedBlock!")
-    components = [node for node in class_node.body.body if is_csortable(node)]
+    components = [node for node in class_node.body.body if is_msortable(node)]
     return components
 
 
@@ -287,9 +287,9 @@ def is_decorated(expression: libcst.CSTNode) -> bool:
     return True
 
 
-def is_csortable(expression: libcst.CSTNode) -> bool:
+def is_msortable(expression: libcst.CSTNode) -> bool:
     """
-    Determine if the ast parsed expression is sortable by Csort
+    Determine if the ast parsed expression is sortable by msort
 
     Defines a list of checks and if any of the checks evaluate as True, then the expression can be sorted.
 

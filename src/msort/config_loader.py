@@ -1,5 +1,5 @@
 """
-This module contains logic for loading csort configurations from a config file.
+This module contains logic for loading msort configurations from a config file.
 """
 import configparser
 import logging
@@ -16,17 +16,17 @@ import toml
 
 from .configs import DEFAULT_CONFIG_INI_FILE_NAME
 from .configs import DEFAULT_CONFIG_TOML_FILE_NAME
-from .configs import DEFAULT_CSORT_GENERAL_PARAMS
-from .configs import DEFAULT_CSORT_ORDER_PARAMS
-from .configs import DEFAULT_CSORT_ORDERING_SECTION
-from .configs import DEFAULT_CSORT_ORDERING_SUBSECTION
-from .configs import DEFAULT_CSORT_PARAMS_SECTION
+from .configs import DEFAULT_MSORT_GENERAL_PARAMS
+from .configs import DEFAULT_MSORT_ORDER_PARAMS
+from .configs import DEFAULT_MSORT_ORDERING_SECTION
+from .configs import DEFAULT_MSORT_ORDERING_SUBSECTION
+from .configs import DEFAULT_MSORT_PARAMS_SECTION
 from .configs import Readable
 
 
 class ConfigLoader(ABC):
     """
-    A class for loading csort configurations from a config file
+    A class for loading msort configurations from a config file
 
     Attributes:
         _config_path: user defined path to .ini file
@@ -57,13 +57,13 @@ class ConfigLoader(ABC):
     @staticmethod
     def _load_defaults() -> Dict[str, Any]:
         """
-        If no file path is provided or found for csort, then default configurations are loaded
+        If no file path is provided or found for msort, then default configurations are loaded
         Returns:
             cfg: mapping of default configurations
         """
         cfg = {
-            DEFAULT_CSORT_ORDERING_SECTION: DEFAULT_CSORT_ORDER_PARAMS.copy(),
-            DEFAULT_CSORT_PARAMS_SECTION: DEFAULT_CSORT_GENERAL_PARAMS.copy(),
+            DEFAULT_MSORT_ORDERING_SECTION: DEFAULT_MSORT_ORDER_PARAMS.copy(),
+            DEFAULT_MSORT_PARAMS_SECTION: DEFAULT_MSORT_GENERAL_PARAMS.copy(),
         }
         return cfg
 
@@ -121,13 +121,13 @@ class ConfigLoader(ABC):
             cfg = self._load_defaults()
         else:
             cfg = self._read_config(config_path)
-            # add in default csort arguments if not supplied
+            # add in default msort arguments if not supplied
             other_defaults = {
                 k: v
-                for k, v in self._load_defaults()[DEFAULT_CSORT_PARAMS_SECTION].items()
-                if k not in cfg[DEFAULT_CSORT_PARAMS_SECTION]
+                for k, v in self._load_defaults()[DEFAULT_MSORT_PARAMS_SECTION].items()
+                if k not in cfg[DEFAULT_MSORT_PARAMS_SECTION]
             }
-            cfg[DEFAULT_CSORT_PARAMS_SECTION].update(other_defaults)
+            cfg[DEFAULT_MSORT_PARAMS_SECTION].update(other_defaults)
         self._config = cfg
         return cfg
 
@@ -185,7 +185,7 @@ class IniReader:
 
 class ConfigLoaderIni(ConfigLoader):
     """
-    A class for loading csort configurations from a .ini file
+    A class for loading msort configurations from a .ini file
 
     Methods:
         _set_config_parser: set the parser to be IniReader
@@ -197,12 +197,12 @@ class ConfigLoaderIni(ConfigLoader):
     def _read_config(self, config_path: str) -> Dict[str, Any]:
         cfg = self._config_parser.read(config_path)
 
-        formatted_csort_cfg = {
-            DEFAULT_CSORT_PARAMS_SECTION: cfg[DEFAULT_CSORT_PARAMS_SECTION],
-            DEFAULT_CSORT_ORDERING_SECTION: cfg[DEFAULT_CSORT_ORDERING_SECTION],
+        formatted_msort_cfg = {
+            DEFAULT_MSORT_PARAMS_SECTION: cfg[DEFAULT_MSORT_PARAMS_SECTION],
+            DEFAULT_MSORT_ORDERING_SECTION: cfg[DEFAULT_MSORT_ORDERING_SECTION],
         }
         self._loaded_config = True
-        return formatted_csort_cfg
+        return formatted_msort_cfg
 
     def _set_config_parser(self) -> IniReader:
         return IniReader()
@@ -229,7 +229,7 @@ class TomlReader:
 
 class ConfigLoaderToml(ConfigLoader):
     """
-    A class for loading csort configurations from a .toml file
+    A class for loading msort configurations from a .toml file
 
     Methods:
         _set_config_parser: set the parser to be TomlReader
@@ -240,18 +240,18 @@ class ConfigLoaderToml(ConfigLoader):
 
     def _read_config(self, config_path: str) -> Dict[str, Any]:
         cfg = self._config_parser.read(config_path)
-        # toml can contain non csort related configs
-        # toml reads in as csort with order dictionary nested within csort
-        csort_cfg = cfg["tool"][DEFAULT_CSORT_PARAMS_SECTION]
-        if not isinstance(csort_cfg, dict):
-            raise TypeError("Expected csort config from toml file to be a dictionary!")
-        if DEFAULT_CSORT_ORDERING_SUBSECTION in csort_cfg:
-            order = csort_cfg.pop(DEFAULT_CSORT_ORDERING_SUBSECTION)
+        # toml can contain non msort related configs
+        # toml reads in as msort with order dictionary nested within msort
+        msort_cfg = cfg["tool"][DEFAULT_MSORT_PARAMS_SECTION]
+        if not isinstance(msort_cfg, dict):
+            raise TypeError("Expected msort config from toml file to be a dictionary!")
+        if DEFAULT_MSORT_ORDERING_SUBSECTION in msort_cfg:
+            order = msort_cfg.pop(DEFAULT_MSORT_ORDERING_SUBSECTION)
         else:
             order = {}
-        formatted_csort_cfg = {DEFAULT_CSORT_PARAMS_SECTION: csort_cfg, DEFAULT_CSORT_ORDERING_SECTION: order}
+        formatted_msort_cfg = {DEFAULT_MSORT_PARAMS_SECTION: msort_cfg, DEFAULT_MSORT_ORDERING_SECTION: order}
         self._loaded_config = True
-        return formatted_csort_cfg
+        return formatted_msort_cfg
 
     def _set_config_parser(self) -> TomlReader:
         return TomlReader()
@@ -281,7 +281,7 @@ def get_config_loader(config_path: Optional[str] = None) -> ConfigLoader:
         loader_cls = CONFIG_LOADERS.get(Path(config_path).suffix)
         if loader_cls is None:
             raise ValueError(f"{config_path} config format is not supported! Use .ini or pyproject.toml files!")
-        logging.info("Loading csort configurations from %s", config_path)
+        logging.info("Loading msort configurations from %s", config_path)
         return loader_cls(config_path)
 
     loaders = [cls(config_path) for cls in CONFIG_LOADERS.values()]
@@ -292,7 +292,7 @@ def get_config_loader(config_path: Optional[str] = None) -> ConfigLoader:
             break
     if config_path is None:
         # just use default configurations so does not matter which loader we use
-        logging.info("Loading default csort configurations!")
+        logging.info("Loading default msort configurations!")
         return ConfigLoaderToml(config_path=None)
-    logging.info("Found %s. Loading csort configurations from %s", config_path, config_path)
+    logging.info("Found %s. Loading msort configurations from %s", config_path, config_path)
     return CONFIG_LOADERS[Path(config_path).suffix](config_path)

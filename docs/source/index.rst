@@ -1,16 +1,16 @@
-.. Csort documentation master file, created by
+.. Msort documentation master file, created by
    sphinx-quickstart on Thu Jun  6 20:02:03 2024.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Csort's documentation!
-=================================
+Welcome to |project_name|'s documentation!
+==========================================
 
-**Csort** is a python library for formatting python classes.
+**Msort** is a python library for formatting python classes.
 
-Csort can keep components of classes in a pre-defined order according to method names and decorators.
+Msort can keep components of classes in a pre-defined order according to method names and decorators.
 
-This can be useful for navigating complex classes, maintaining readability and, through the ``csort_group`` decorator,
+This can be useful for navigating complex classes, maintaining readability and, through the ``msort_group`` decorator,
 grouping directly related methods together.
 
 Here is an example python class with three methods:
@@ -33,12 +33,12 @@ Here is an example python class with three methods:
       print("This is your average method!")
 
 
-Running **csort** with default configurations would carry out two key changes to ``ExampleClass``.
+Running **msort** with default configurations would carry out two key changes to ``ExampleClass``.
 
 First, the methods would be re-ordered such that **dunder** methods come first, followed by the average method,
 ``func``, followed by the private method ``_private_func``.
 
-Second, csort can automatically detect methods which could be made into a **static method**.
+Second, msort can automatically detect methods which could be made into a **static method**.
 
 The result would be:
 

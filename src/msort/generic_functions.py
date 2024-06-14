@@ -6,16 +6,16 @@ import libcst
 from .decorators import has_decorator
 
 
-def is_csort_group(method: Union[ast.FunctionDef, libcst.CSTNode]) -> bool:
+def is_msort_group(method: Union[ast.FunctionDef, libcst.CSTNode]) -> bool:
     """
-    Determine if the ast parsed method is a csort_group method - i.e. used the @csort_group() decorator
+    Determine if the ast parsed method is a msort_group method - i.e. used the @msort_group() decorator
     Args:
         method: the ast parsed method
 
     Returns:
-        True if the method has been assigned a csort group
+        True if the method has been assigned a msort group
     """
-    return has_decorator(method, "csort_group")
+    return has_decorator(method, "msort_group")
 
 
 def is_class_method(method: Union[ast.FunctionDef, libcst.CSTNode]) -> bool:

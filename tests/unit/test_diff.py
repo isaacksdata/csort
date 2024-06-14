@@ -2,7 +2,7 @@ import ast
 import os
 
 import pytest
-from csort.diff import SyntaxTreeDiffGenerator
+from msort.diff import SyntaxTreeDiffGenerator
 
 
 DEBUG = "tests" in os.getcwd()

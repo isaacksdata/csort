@@ -7,9 +7,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from csort.main import main
-from csort.main import parse_commandline
-from csort.main import validate_paths
+from msort.main import main
+from msort.main import parse_commandline
+from msort.main import validate_paths
 
 
 DEBUG = "tests" in os.getcwd()
@@ -32,8 +32,8 @@ def output_path():
 @pytest.fixture
 def ini_config_path():
     if DEBUG:
-        return "../unit/csort.ini"
-    return "tests/unit/csort.ini"
+        return "../unit/msort.ini"
+    return "tests/unit/msort.ini"
 
 
 @pytest.fixture
@@ -48,7 +48,7 @@ def test_parse_commandline():
         "",  # mock script name
         "--input-path=test/input/path/file.py",
         "--output-path=test/output/path/file.py",
-        "--config-path=test/config/csort.ini",
+        "--config-path=test/config/msort.ini",
         "--skip-patterns=expected",
         "--skip-patterns=pattern",
         "--parser=cst",
@@ -59,7 +59,7 @@ def test_parse_commandline():
     assert isinstance(output, argparse.Namespace)
     assert output.input_path == "test/input/path/file.py"
     assert output.output_path == "test/output/path/file.py"
-    assert output.config_path == "test/config/csort.ini"
+    assert output.config_path == "test/config/msort.ini"
     assert output.skip_patterns == ["expected", "pattern"]
     assert output.parser == "cst"
     assert output.check
@@ -183,7 +183,7 @@ def test_main_check_unchanged(script_path, caplog):
     with patch.object(sys, "argv", commands):
         main()
     assert "No changes made!" in caplog.messages
-    assert any("Csort ran in check mode : 0 / 1 files would be changed!" in msg for msg in caplog.messages)
+    assert any("msort ran in check mode : 0 / 1 files would be changed!" in msg for msg in caplog.messages)
 
 
 def test_main_check(script_path, caplog):
@@ -192,7 +192,7 @@ def test_main_check(script_path, caplog):
     with patch.object(sys, "argv", commands):
         main()
     assert "No changes made!" not in caplog.messages
-    assert any("Csort ran in check mode : 1 / 1 files would be changed!" in msg for msg in caplog.messages)
+    assert any("msort ran in check mode : 1 / 1 files would be changed!" in msg for msg in caplog.messages)
 
 
 def test_main_check_skip_pattern(script_path, caplog):
@@ -208,7 +208,7 @@ def test_main_check_diff(script_path, caplog):
     commands = ["", f"--input-path={script_path}", f"--output-path={output_path}", "--diff"]
     with patch.object(sys, "argv", commands):
         main()
-    assert any("Csort ran in diff mode" in msg for msg in caplog.messages)
+    assert any("msort ran in diff mode" in msg for msg in caplog.messages)
     assert any("func                --->     __len__" in msg for msg in caplog.messages)
 
 
@@ -263,7 +263,7 @@ def test_main_ini_config(script_path, output_path, ini_config_path, caplog):
         main()
     assert Path(output_path).exists()
     assert f"Reformatting {script_path} ..." in caplog.messages
-    assert f"Loading csort configurations from {ini_config_path}" in caplog.messages
+    assert f"Loading msort configurations from {ini_config_path}" in caplog.messages
     shutil.rmtree(Path(output_path).parent.as_posix())
 
 
@@ -279,5 +279,5 @@ def test_main_toml_config(script_path, output_path, toml_config_path, caplog):
         main()
     assert Path(output_path).exists()
     assert f"Reformatting {script_path} ..." in caplog.messages
-    assert f"Loading csort configurations from {toml_config_path}" in caplog.messages
+    assert f"Loading msort configurations from {toml_config_path}" in caplog.messages
     shutil.rmtree(Path(output_path).parent.as_posix())

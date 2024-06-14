@@ -16,12 +16,12 @@ import libcst
 from . import ast_functions as AST
 from . import cst_functions as CST
 from . import generic_functions as GEN
-from .configs import DEFAULT_CSORT_ORDER_PARAMS
-from .configs import DEFAULT_CSORT_PARAMS_SECTION
+from .configs import DEFAULT_MSORT_ORDER_PARAMS
+from .configs import DEFAULT_MSORT_PARAMS_SECTION
 from .configs import INSTANCE_METHOD_LEVEL
 from .configs import Node
-from .decorators import get_csort_group_name
 from .decorators import get_decorators
+from .decorators import get_msort_group_name
 from .utilities import get_expression_name
 from .utilities import is_class_docstring
 from .utilities import is_class_docstring_cst
@@ -62,13 +62,13 @@ class MethodDescriber(ABC):
         pass
 
     @property
-    def use_csort_group(self) -> bool:
+    def use_msort_group(self) -> bool:
         """
-        Property method to access the use_csort_group param of the csort config
+        Property method to access the use_msort_group param of the msort config
         Returns:
-            True if Csort should consider the csort_group decorator
+            True if msort should consider the msort_group decorator
         """
-        param = self._config[DEFAULT_CSORT_PARAMS_SECTION]["use_csort_group"]
+        param = self._config[DEFAULT_MSORT_PARAMS_SECTION]["use_msort_group"]
         return ast.literal_eval(param) if isinstance(param, str) else param
 
     @abstractmethod
@@ -87,6 +87,28 @@ class MethodDescriber(ABC):
         """
         pass
 
+    def get_method_type(self, method: Any, use_msort_group: bool = True) -> int:
+        """
+        Get the ordering level of the method type
+        Args:
+            method: the method to get the ordering level of
+            use_msort_group: If True, then will check for msort_group
+
+        Returns:
+            level: sorting level of the method
+
+        Raises:
+            TypeError: if incompatible code representation used
+        """
+        if not self._validate_node(method):
+            raise TypeError(f"Node of type {type(method)} cannot be used!")
+        for func, level in self._method_checking_map.items():
+            if func.__name__ == "is_msort_group" and not use_msort_group:
+                continue
+            if func(method):
+                return level
+        return self._instance_method_default
+
     def _setup_func_to_level_map(self) -> Dict[Callable, int]:
         """
         Set up a full mapping from AST function classifying function to ordering level.
@@ -102,7 +124,7 @@ class MethodDescriber(ABC):
             ValueError: if max user defined sorting level is >= to a fixed default sorting level and
                         _override_level_check is False
         """
-        configs = self._config["csort.order"]
+        configs = self._config["msort.order"]
         if "instance_method" in configs:
             self._instance_method_default = int(configs.pop("instance_method"))
 
@@ -132,7 +154,7 @@ class MethodDescriber(ABC):
         mapping.extend([(self._config_to_func_map[method], int(value)) for method, value in configs.items()])
 
         # check if need to add any defaults
-        for method_type, value in DEFAULT_CSORT_ORDER_PARAMS.items():
+        for method_type, value in DEFAULT_MSORT_ORDER_PARAMS.items():
             if method_type == "instance_method":
                 continue
             if self._config_to_func_map[method_type] not in map(lambda t: t[0], mapping):
@@ -142,28 +164,6 @@ class MethodDescriber(ABC):
         func_to_value_map: Dict[Callable, int] = OrderedDict(mapping)
 
         return func_to_value_map
-
-    def get_method_type(self, method: Any, use_csort_group: bool = True) -> int:
-        """
-        Get the ordering level of the method type
-        Args:
-            method: the method to get the ordering level of
-            use_csort_group: If True, then will check for csort_group
-
-        Returns:
-            level: sorting level of the method
-
-        Raises:
-            TypeError: if incompatible code representation used
-        """
-        if not self._validate_node(method):
-            raise TypeError(f"Node of type {type(method)} cannot be used!")
-        for func, level in self._method_checking_map.items():
-            if func.__name__ == "is_csort_group" and not use_csort_group:
-                continue
-            if func(method):
-                return level
-        return self._instance_method_default
 
 
 class ASTMethodDescriber(MethodDescriber):
@@ -189,13 +189,13 @@ class ASTMethodDescriber(MethodDescriber):
 
     def _setup_config_to_func_map(self) -> Dict[str, Callable]:
         """
-        Setting up the mapping from csort config to AST function classifying functions
+        Setting up the mapping from msort config to AST function classifying functions
         Returns:
             The mapping of config variables to a Callable function
         """
         return {
             "dunder_method": AST.is_dunder_method,
-            "csort_group": GEN.is_csort_group,
+            "msort_group": GEN.is_msort_group,
             "class_method": GEN.is_class_method,
             "static_method": GEN.is_static_method,
             "property": GEN.is_property,
@@ -242,13 +242,13 @@ class CSTMethodDescriber(MethodDescriber):
 
     def _setup_config_to_func_map(self) -> Dict[str, Callable]:
         """
-        Setting up the mapping from csort config to AST function classifying functions
+        Setting up the mapping from msort config to AST function classifying functions
         Returns:
             The mapping of config variables to a Callable function
         """
         return {
             "dunder_method": CST.is_dunder_method,
-            "csort_group": GEN.is_csort_group,
+            "msort_group": GEN.is_msort_group,
             "class_method": GEN.is_class_method,
             "static_method": GEN.is_static_method,
             "property": GEN.is_property,
@@ -295,17 +295,17 @@ def describe_method(
         name: assigned name of the expression
     """
     name = get_expression_name(method)
-    level = method_describer.get_method_type(method, use_csort_group=method_describer.use_csort_group)
+    level = method_describer.get_method_type(method, use_msort_group=method_describer.use_msort_group)
     decorators = get_decorators(method, sort=True)
-    if decorators is not None and "csort_group" in decorators and method_describer.use_csort_group:
-        csort_group = get_csort_group_name(method)
-        second_level = method_describer.get_method_type(method, use_csort_group=False)
-        decorators.remove("csort_group")
+    if decorators is not None and "msort_group" in decorators and method_describer.use_msort_group:
+        msort_group = get_msort_group_name(method)
+        second_level = method_describer.get_method_type(method, use_msort_group=False)
+        decorators.remove("msort_group")
     else:
-        csort_group = None
+        msort_group = None
         second_level = level
 
     # if sorting gets down to the decorators then need to be sorting list of strings
     decorators = ["zz"] if decorators is None else decorators
 
-    return (level, csort_group, second_level), decorators, name
+    return (level, msort_group, second_level), decorators, name

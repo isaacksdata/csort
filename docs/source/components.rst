@@ -2,7 +2,7 @@
 
 Components
 ==========
-Csort formats python classes by re-ordering the components of classes into a pre-defined order.
+|project_name| formats python classes by re-ordering the components of classes into a pre-defined order.
 
 The first level of ordering depends on the type of component.
 
@@ -16,7 +16,7 @@ There are currently four types of fixed components which cannot be manually over
 
 Ellipsis
 ........
-The ellipsis has multiple uses in python but for csort it can appear as a component when used as a
+The ellipsis has multiple uses in python but for msort it can appear as a component when used as a
 placeholder for a class which has not been implemented yet or during multi-inheritance patterns.
 
 .. code-block:: python
@@ -29,7 +29,7 @@ placeholder for a class which has not been implemented yet or during multi-inher
  class ConcreteClass(ParentClassOne, ParentClassTwo):
     ...
 
-The ellipsis has the highest sorting level in csort, ensuring that such classes do not get reformatted.
+The ellipsis has the highest sorting level in msort, ensuring that such classes do not get reformatted.
 
 Class docstrings
 ................
@@ -41,7 +41,7 @@ Class docstrings have a fixed high order value to ensure that they are not refor
 
  class ExampleClass:
      """
-     This class is an example python class used in the csort documentation.
+     This class is an example python class used in the msort documentation.
      """
      ...
 
@@ -54,12 +54,12 @@ of the class.
 
  class ExampleClass:
      """
-     This class is an example python class used in the csort documentation.
+     This class is an example python class used in the msort documentation.
      """
      name: str = "example"
 
 In this example, the class attribute ``name`` is defined outside of any methods and is type annotated as a string.
-Therefore, csort considers ``name`` to be a typed class attribute.
+Therefore, msort considers ``name`` to be a typed class attribute.
 
 Typed class attributes have a higher sorting level than untyped class attributes.
 
@@ -69,12 +69,12 @@ Untyped class attributes
 
  class ExampleClass:
      """
-     This class is an example python class used in the csort documentation.
+     This class is an example python class used in the msort documentation.
      """
      age = 50
 
 In this example, the class attribute ``age`` is defined outside of any methods and is not type annotated.
-Therefore, csort considers ``age`` to be an untyped class attribute.
+Therefore, msort considers ``age`` to be an untyped class attribute.
 
 If we have both typed and untyped class attributes then they will be re-ordered according to whether they are typed or
 not and then alphabetically.
@@ -85,7 +85,7 @@ For example, this ``ExampleClass``:
 
  class ExampleClass:
      """
-     This class is an example python class used in the csort documentation.
+     This class is an example python class used in the msort documentation.
      """
      age = 50
      name: str = "Joe"
@@ -98,7 +98,7 @@ would be converted to:
 
  class ExampleClass:
      """
-     This class is an example python class used in the csort documentation.
+     This class is an example python class used in the msort documentation.
      """
      pets: List[str] = ["dog", "cat"]
      name: str = "Joe"
@@ -121,7 +121,7 @@ These methods allow objects to implement or emulate the behavior of built-in typ
 
  class ExampleClass:
      """
-     This class is an example python class used in the csort documentation.
+     This class is an example python class used in the msort documentation.
      """
      def __init__(self, name: str) -> None
         self.name: str = name
@@ -147,7 +147,7 @@ Class methods are defined using the @classmethod decorator.
 
  class ExampleClass:
      """
-     This class is an example python class used in the csort documentation.
+     This class is an example python class used in the msort documentation.
      """
      name: str = "example"
 
@@ -186,7 +186,7 @@ The @property decorator turns a method into a "getter" for a read-only attribute
 
  class ExampleClass:
      """
-     This class is an example python class used in the csort documentation.
+     This class is an example python class used in the msort documentation.
      """
      def __init__(self, name: str) -> None
         self._name: str = name
@@ -211,7 +211,7 @@ can be used when a subclass is modifying a property defined in a parent class.
 
  class ExampleClass:
      """
-     This class is an example python class used in the csort documentation.
+     This class is an example python class used in the msort documentation.
      """
      def __init__(self, name: str) -> None
         self._name: str = name
@@ -230,7 +230,7 @@ The ``setter`` decorator allows controlled access whilst setting a new value.
 
  class ExampleClass:
      """
-     This class is an example python class used in the csort documentation.
+     This class is an example python class used in the msort documentation.
      """
      def __init__(self, name: str) -> None
         self._name: str = name
@@ -256,7 +256,7 @@ no longer accessible for the particular instance of the class.
 
  class ExampleClass:
      """
-     This class is an example python class used in the csort documentation.
+     This class is an example python class used in the msort documentation.
      """
      def __init__(self, name: str) -> None
         self._name: str = name
@@ -275,7 +275,7 @@ no longer accessible for the particular instance of the class.
 
 Other decorated methods
 .......................
-Any decorated class method without any of the above mentioned decorators is considered by csort to be a
+Any decorated class method without any of the above mentioned decorators is considered by msort to be a
 **decorated method**. This includes decorators such as ``abstractmethod``, ``functools.lru_cache``, ``singledispatch``.
 
 Instance methods
@@ -289,7 +289,7 @@ Instance methods are the standard python class method.
 
  class ExampleClass:
      """
-     This class is an example python class used in the csort documentation.
+     This class is an example python class used in the msort documentation.
      """
      def __init__(self, name: str) -> None
         self.name: str = name
@@ -313,7 +313,7 @@ Private methods are not supposed to be called outside of the class but are used 
 
  class ExampleClass:
      """
-     This class is an example python class used in the csort documentation.
+     This class is an example python class used in the msort documentation.
      """
      def __init__(self, first_name: str, last_name: str) -> None:
         self.first_name: str = first_name
@@ -329,20 +329,20 @@ Private methods are not supposed to be called outside of the class but are used 
      def _lower_second_name(self) -> str:
         return self.second_name.lower()
 
-In this example, ``_lower_first_name()`` and ``_lower_second_name()`` are private methods. By default, csort puts
+In this example, ``_lower_first_name()`` and ``_lower_second_name()`` are private methods. By default, msort puts
 private methods at the bottom of the class.
 
 Inner Classes
 .............
 Classes may be defined within a class to encapsulate an inner class.
 
-By default, csort sorts inner classes to the bottom of the class.
+By default, msort sorts inner classes to the bottom of the class.
 
 .. code-block:: python
 
  class ExampleClass:
      """
-     This class is an example python class used in the csort documentation.
+     This class is an example python class used in the msort documentation.
      """
      def __init__(self, first_name: str, last_name: str) -> None:
         self.first_name: str = FirstName(first_name)
