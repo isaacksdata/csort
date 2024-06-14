@@ -52,6 +52,7 @@ Common amendments
     hooks:
       - id: csort
         args: ["--skip-patterns=test_", "--skip-patterns=_test.py"]
+
 * personalised configurations
     Csort in pre-commit can be configured by the user through CLI arguments or through a config
     file - see :ref:`config-label`

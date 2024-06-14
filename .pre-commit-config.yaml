@@ -82,4 +82,4 @@ repos:
         entry: csort
         language: system
         types: [python]
-        args: ["-sp=_input.py", "-sp=_expected.py"]
+        args: ["-sp=_input", "-sp=_expected"]

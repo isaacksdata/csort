@@ -8,6 +8,8 @@ The first level of ordering depends on the type of component.
 
 The second level of ordering depends on the name of the component.
 
+.. _fixed-components-label:
+
 Fixed components
 ----------------
 There are currently four types of fixed components which cannot be manually overridden by the user.
@@ -103,6 +105,7 @@ would be converted to:
      age = 50
      last_name = "Bloggs"
 
+.. _methods-label:
 
 Methods
 -------
@@ -241,6 +244,35 @@ The ``setter`` decorator allows controlled access whilst setting a new value.
         self._name = name
 
 
+Deleters
+........
+
+Deleters work in conjunction with ``getter`` and ``setter`` to support controlled access to private attributes.
+
+The ``deleter`` decorator allows controlled access to remove an attribute from a class - meaning the attribute is
+no longer accessible for the particular instance of the class.
+
+.. code-block:: python
+
+ class ExampleClass:
+     """
+     This class is an example python class used in the csort documentation.
+     """
+     def __init__(self, name: str) -> None
+        self._name: str = name
+
+     @name.getter
+     def name(self) -> str:
+        return self._name
+
+     @name.setter
+     def name(self, new_name: str) -> None:
+        self._name = name
+
+     @name.deleter
+     def name(self) -> None:
+        del self._name
+
 Other decorated methods
 .......................
 Any decorated class method without any of the above mentioned decorators is considered by csort to be a
@@ -283,7 +315,7 @@ Private methods are not supposed to be called outside of the class but are used 
      """
      This class is an example python class used in the csort documentation.
      """
-     def __init__(self, first_name: str, last_name: str) -> None
+     def __init__(self, first_name: str, last_name: str) -> None:
         self.first_name: str = first_name
         self.last_name: str = last_name
         self.pets: List[str] = []
@@ -299,3 +331,36 @@ Private methods are not supposed to be called outside of the class but are used 
 
 In this example, ``_lower_first_name()`` and ``_lower_second_name()`` are private methods. By default, csort puts
 private methods at the bottom of the class.
+
+Inner Classes
+.............
+Classes may be defined within a class to encapsulate an inner class.
+
+By default, csort sorts inner classes to the bottom of the class.
+
+.. code-block:: python
+
+ class ExampleClass:
+     """
+     This class is an example python class used in the csort documentation.
+     """
+     def __init__(self, first_name: str, last_name: str) -> None:
+        self.first_name: str = FirstName(first_name)
+        self.last_name: str = SecondName(last_name)
+        self.pets: List[str] = []
+
+     class FirstName:
+        def __init__(self, first_name: str) -> None:
+            self.name = first_name
+
+     class SecondName:
+        def __init__(self, second_name: str) -> None:
+            self.name = second_name
+
+Conflicts
+---------
+* If two different components are given the same sorting level then they will be sorted alphabetically.
+
+* If the sorting level for a method is set to have higher precedence than a fixed component, then a ``ValueError`` will be raised.
+
+* The ``ValueError`` can be overridden by using the ``--force`` option.

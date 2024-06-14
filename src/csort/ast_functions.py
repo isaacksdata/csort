@@ -6,12 +6,14 @@ from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Union
 
 import ast_comments
 import astor
 
 from .configs import DUNDER_PATTERN
 from .configs import find_classes_response
+from .configs import ordered_methods_type
 from .decorators import get_decorators
 from .edge_cases import handle_edge_cases
 from .generic_functions import is_class_method
@@ -47,7 +49,7 @@ def update_module(module: ast.Module, classes: Dict[str, find_classes_response])
     return module
 
 
-def update_node(cls: find_classes_response, components: List[ast.stmt]) -> find_classes_response:
+def update_node(cls: find_classes_response, components: ordered_methods_type) -> find_classes_response:
     """
     Update AST class
     Args:
@@ -62,8 +64,28 @@ def update_node(cls: find_classes_response, components: List[ast.stmt]) -> find_
     """
     if not hasattr(cls["node"], "body"):
         raise AttributeError("Class definition does not have body attribute!")
-    cls["node"].body = components
+    formatted_components = [
+        update_node(find_classes_response(node=list(*m.items())[0], index=0), list(*m.items())[1])["node"]
+        if isinstance(m, dict)
+        else m
+        for m in components
+    ]
+    cls["node"].body = formatted_components
     return cls
+
+
+def update_node_body(node: ast.ClassDef, body: List[ast.stmt]) -> ast.ClassDef:
+    """
+    Update the body of a class definition
+    Args:
+        node: the node to update
+        body: the replacement body
+
+    Returns:
+        node: with updated body
+    """
+    node.body = body
+    return node
 
 
 def parse_code(code: Optional[str] = None, file_path: Optional[str] = None) -> ast.Module:
@@ -103,7 +125,7 @@ def nodes_to_code(tree: ast.Module, source_code: str) -> str:
         new_code: source code strings after formatting
     """
     new_code = preserve_comments(tree)
-    new_code = handle_edge_cases(new_code)
+    new_code = handle_edge_cases(new_code, "ast")
     new_code = handle_import_formatting(source_code=source_code, ast_code=new_code)
     return new_code
 
@@ -126,22 +148,38 @@ def find_classes(code: ast.Module) -> Dict[str, find_classes_response]:
     return classes
 
 
-def extract_class_components(code: ast.ClassDef) -> List[ast.stmt]:
+def extract_class_components(class_node: Union[ast.ClassDef, ast.FunctionDef]) -> List[ast.stmt]:
     """
     Find all method definitions within a class definition
     Args:
-        code: parsed class definition
+        class_node: parsed class definition
 
     Returns:
         functions: list of function definitions
     """
-    functions: List[ast.stmt] = []
+    if isinstance(class_node, ast.FunctionDef):
+        return class_node.body
 
-    # Find all function definitions
-    for node in code.body:
-        if is_csortable(node):
-            functions.append(node)
-    return functions
+    components = [node for node in class_node.body if is_csortable(node)]
+    return components
+
+
+def is_class(expression: ast.AST) -> bool:
+    """
+    Determine if AST parsed expression is a class definition
+    Args:
+        expression: AST expression
+
+    Returns:
+        True if represents a class definition
+    """
+    return isinstance(expression, ast.ClassDef)
+
+
+def contains_class(expression: ast.FunctionDef) -> bool:
+    if not hasattr(expression, "body"):
+        return False
+    return any(is_class(child) for child in expression.body)
 
 
 def is_annotated_class_attribute(expression: ast.AST) -> bool:
@@ -258,6 +296,7 @@ def is_csortable(expression: ast.AST) -> bool:
 
     """
     checks = [
+        is_class,
         is_function,
         is_ellipsis,
         is_annotated_class_attribute,

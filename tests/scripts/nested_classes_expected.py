@@ -27,12 +27,29 @@ class MyClass:
     def name(self, new_name: str):
         self._name = new_name
 
-    @name.deleter
-    def name(self):
-        self.name = None
-
     def func(self):
         pass
 
     def _func(self):
         pass
+
+    class AnotherNestedClass:
+        def __init__(self):
+            self.name = "another-nested-class"
+
+        def func(self):
+            print(self.name)
+
+    class NestedClass:
+        def __init__(self):
+            self.name = "nested-class"
+
+        def func(self):
+            print(self.name)
+
+        class InnerNestedClass:
+            def __init__(self):
+                self.name = "inner-nested-class"
+
+            def func(self):
+                print(self.name)

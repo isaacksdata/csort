@@ -96,6 +96,7 @@ class SyntaxTreeDiffGenerator(DiffGenerator):
         Raises:
             TypeError: if any of the methods are not AST/CST parsed
         """
+        methods = [list(m.keys())[0] if isinstance(m, dict) else m for m in methods]
         if not all(isinstance(method, (ast.AST, libcst.CSTNode)) for method in methods):
             raise TypeError("Unexpected code type!")
         return [get_expression_name(method) for method in methods]

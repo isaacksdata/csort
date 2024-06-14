@@ -1,19 +1,23 @@
 class MyClass:
     def __init__(self):
         self._name = "myclass"
-        print(123)
-        print(456)
+        self._age = 5
 
-    def __len__(self):
-        pass
+    @property
+    def age(self):
+        return self._age
 
-    @classmethod
-    def a_class_method(cls):
-        pass
+    @age.getter
+    def age(self):
+        return self._age
 
-    @staticmethod
-    def a_static_method():
-        pass
+    @age.setter
+    def age(self, new_age: str):
+        self._age = new_age
+
+    @age.deleter
+    def age(self):
+        del self._age
 
     @property
     def name(self):
@@ -29,10 +33,4 @@ class MyClass:
 
     @name.deleter
     def name(self):
-        self.name = None
-
-    def func(self):
-        pass
-
-    def _func(self):
-        pass
+        del self._name

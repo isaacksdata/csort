@@ -4,7 +4,10 @@ from copy import deepcopy
 from typing import Callable
 
 import pytest
+from csort.generic_functions import is_class_method
 from csort.method_describers import ASTMethodDescriber
+from csort.method_describers import CSTMethodDescriber
+from csort.method_describers import get_method_describer
 
 
 @pytest.fixture
@@ -17,8 +20,8 @@ def mock_config():
     config["csort.order"]["static_method"] = "6"
     config["csort.order"]["property"] = "7"
     config["csort.order"]["decorated_method"] = "10"
-    config["csort.order"]["instance_method"] = "11"
-    config["csort.order"]["private_method"] = "12"
+    config["csort.order"]["instance_method"] = "12"
+    config["csort.order"]["private_method"] = "13"
     return config
 
 
@@ -65,6 +68,20 @@ def test_ast_method_describer_init(mock_config):
     assert all(m in method_levels for m in list(map(int, list(mock_config["csort.order"].values()))))
 
 
+def test_ast_method_describer__setup_func_to_level_map_valueerror(mock_config):
+    mock_config["csort.order"]["class_method"] = "1"
+    with pytest.raises(ValueError):
+        ASTMethodDescriber(config=mock_config)
+
+
+def test_ast_method_describer__setup_func_to_level_map_override(mock_config, caplog):
+    mock_config["csort.order"]["class_method"] = "1"
+    describer = ASTMethodDescriber(config=mock_config, override_level_check=True)
+    msg = "The sorting level for ['class_method'] is 1 which is higher than max default 2. Exception overridden by --force option."
+    assert msg in caplog.messages
+    assert describer._method_checking_map[is_class_method] == 1
+
+
 def test_ast_method_describer_describe_method(
     mock_config, func_source_code, static_func, class_func, cached_func, private_func, csort_group_func
 ):
@@ -83,3 +100,16 @@ def test_ast_method_describer_describe_method(
         node = ast.parse(func_code).body[0]
         output = describer.get_method_type(node)
         assert output == int(expected_value)
+
+
+def test_ast_method_describer_get_method_type_typeerror(mock_config):
+    describer = ASTMethodDescriber(config=mock_config)
+    with pytest.raises(TypeError):
+        describer.get_method_type(method=1)
+
+
+def test_get_method_describer(mock_config):
+    assert isinstance(get_method_describer("ast", config=mock_config), ASTMethodDescriber)
+    assert isinstance(get_method_describer("cst", config=mock_config), CSTMethodDescriber)
+    with pytest.raises(KeyError):
+        get_method_describer("null")

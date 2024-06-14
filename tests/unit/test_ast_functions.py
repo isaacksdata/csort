@@ -23,7 +23,7 @@ def mock_ast_module(script_path):
 
 @pytest.fixture
 def static_method_checker():
-    return StaticMethodChecker()
+    return StaticMethodChecker(parser=AST)
 
 
 @pytest.mark.parametrize("script_path", ["basic"], indirect=True)

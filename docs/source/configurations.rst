@@ -31,6 +31,142 @@ Check to see if methods could be static methods and convert to a static method i
 
 Controls whether the ``csort_group`` decorator should be considered when running csort. See :ref:`csort-group-label`
 
+:use_property_groups: Defaults to False
+
+Controls whether methods related to a property are grouped together or not.
+
+.. code-block:: python
+
+    class MyClass:
+        def __init__(self):
+            self._name = "myclass"
+            self._age = 5
+
+        @property
+        def name(self):
+            return self._name
+
+        @name.setter
+        def name(self, new_name: str):
+            self._name = new_name
+
+        @property
+        def age(self):
+            return self._age
+
+        @name.getter
+        def name(self):
+            return self._name
+
+        @age.deleter
+        def age(self):
+            del self._age
+
+        @name.deleter
+        def name(self):
+            del self._name
+
+        @age.setter
+        def age(self, new_age: str):
+            self._age = new_age
+
+        @age.getter
+        def age(self):
+            return self._age
+
+In this example class, we have two properties defined, ``name`` and ``age``.
+Csort can sort these methods in two ways:
+* According to the component sorting order
+
+* According to property groups
+
+Sorting by component sorting order would lead to:
+
+.. code-block:: python
+
+    class MyClass:
+        def __init__(self):
+            self._name = "myclass"
+            self._age = 5
+
+        @property
+        def age(self):
+            return self._age
+
+        @property
+        def name(self):
+            return self._name
+
+        @age.getter
+        def age(self):
+            return self._age
+
+        @name.getter
+        def name(self):
+            return self._name
+
+        @age.setter
+        def age(self, new_age: str):
+            self._age = new_age
+
+        @name.setter
+        def name(self, new_name: str):
+            self._name = new_name
+
+        @age.deleter
+        def age(self):
+            del self._age
+
+        @name.deleter
+        def name(self):
+            del self._name
+
+Properties get sorted above getters, above setters and above deleters.
+
+By using the ``--use-property-groups`` option we can sort by property related methods:
+
+.. code-block:: python
+
+    class MyClass:
+        def __init__(self):
+            self._name = "myclass"
+            self._age = 5
+
+        @property
+        def age(self):
+            return self._age
+
+        @age.getter
+        def age(self):
+            return self._age
+
+        @age.setter
+        def age(self, new_age: str):
+            self._age = new_age
+
+        @age.deleter
+        def age(self):
+            del self._age
+
+        @property
+        def name(self):
+            return self._name
+
+        @name.getter
+        def name(self):
+            return self._name
+
+        @name.setter
+        def name(self, new_name: str):
+            self._name = new_name
+
+        @name.deleter
+        def name(self):
+            del self._name
+
+In this case, the four ``age`` methods are followed by the four ``name`` methods. The sub-ordering of properties,
+setters, deleters respects the sorting level configuration.
+
 Ordering defaults
 .................
 
@@ -47,9 +183,11 @@ See :ref:`components-label` for details on each component.
 :property: Defaults to 7
 :getter: Defaults to 8
 :setter: Defaults to 9
-:decorated method: Defaults to 10
-:instance method: Defaults to 11
-:private method: Defaults to 12
+:deleter: Defaults to 10
+:decorated method: Defaults to 11
+:instance method: Defaults to 12
+:private method: Defaults to 13
+:inner class: Defaults to 14
 
 Configuration Files
 -------------------
@@ -80,6 +218,7 @@ Below is an example ``pyproject.toml`` with csort tool groups
     decorated_method = 10
     instance_method = 11
     private_method = 12
+    inner_class = 13
 
     [tool.csort]
     use_csort_group = true
@@ -105,9 +244,10 @@ Below is an example ``csort.ini`` file
     property = 8
     getter = 9
     setter = 10
-    decorated_method = 11
-    instance_method = 12
-
+    deleter = 11
+    decorated_method = 12
+    instance_method = 13
+    inner_class = 14
 
     [csort]
     use_csort_group = True

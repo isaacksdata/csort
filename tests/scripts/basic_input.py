@@ -29,6 +29,10 @@ class MyClass:
     def a_class_method(cls):
         pass
 
+    @name.deleter
+    def name(self):
+        self.name = None
+
     @name.getter
     def name(self):
         return self._name

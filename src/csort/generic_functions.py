@@ -76,3 +76,15 @@ def is_getter(method: Union[ast.FunctionDef, libcst.CSTNode]) -> bool:
         True if the method is a getter
     """
     return has_decorator(method, "getter")
+
+
+def is_deleter(method: Union[ast.FunctionDef, libcst.CSTNode]) -> bool:
+    """
+    Determine if the ast parsed method is a deleter - i.e. used the @deleter decorator
+    Args:
+        method: the ast parsed method
+
+    Returns:
+        True if the method is a deleter
+    """
+    return has_decorator(method, "deleter")

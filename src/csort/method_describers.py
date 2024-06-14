@@ -10,7 +10,6 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
-from typing import Union
 
 import libcst
 
@@ -20,6 +19,7 @@ from . import generic_functions as GEN
 from .configs import DEFAULT_CSORT_ORDER_PARAMS
 from .configs import DEFAULT_CSORT_PARAMS_SECTION
 from .configs import INSTANCE_METHOD_LEVEL
+from .configs import Node
 from .decorators import get_csort_group_name
 from .decorators import get_decorators
 from .utilities import get_expression_name
@@ -35,12 +35,16 @@ class MethodDescriber(ABC):
 
     Attributes:
         _config: contains configurations from config file
+        _override_level_check: Defaults to False, in which case, if the user tries to set a sorting level for a
+                                non-fixed component to be higher than defaults then an exception will be raised.
+                                If True, then the exception is replaced with a warning.
         _config_to_func_map: a mapping from config keys to the appropriate function
         _method_checking_map: a mapping of a function to an ordering level
     """
 
-    def __init__(self, config: configparser.ConfigParser) -> None:
+    def __init__(self, config: configparser.ConfigParser, override_level_check: bool = False) -> None:
         self._config = config
+        self._override_level_check = override_level_check
         self._config_to_func_map: Dict[str, Callable] = self._setup_config_to_func_map()
         self._method_checking_map: Dict[Callable, int] = self._setup_func_to_level_map()
         self._instance_method_default: int = INSTANCE_METHOD_LEVEL
@@ -83,6 +87,62 @@ class MethodDescriber(ABC):
         """
         pass
 
+    def _setup_func_to_level_map(self) -> Dict[Callable, int]:
+        """
+        Set up a full mapping from AST function classifying function to ordering level.
+
+        1) Fixed defaults are added
+        2) User defined ordering levels from the config file are added
+        3) Any node types missing from the config are added using default values
+        4) Sort the mapping according to ordering level and put into OrderedDict
+        Returns:
+            func_to_value_map: OrderedDict with node classifying functions as keys and ordering levels as values
+
+        Raises:
+            ValueError: if max user defined sorting level is >= to a fixed default sorting level and
+                        _override_level_check is False
+        """
+        configs = self._config["csort.order"]
+        if "instance_method" in configs:
+            self._instance_method_default = int(configs.pop("instance_method"))
+
+        mapping: List[Tuple[Callable, int]] = []
+
+        mapping.extend(self._non_method_defaults())
+
+        # check to see if the user has supplied sorting levels which conflict with the fixed defaults
+        max_default = max(map(lambda t: t[1], mapping))  # highest value from fixed defaults
+        min_user = min(map(int, configs.values()))  # lowest value from config
+        if min_user <= max_default:
+            min_user_method = [k for k, v in configs.items() if v == str(min_user)]
+            if self._override_level_check:
+                logging.warning(
+                    "The sorting level for %s is %s which is higher than max default %s. Exception overridden by "
+                    "--force option.",
+                    min_user_method,
+                    min_user,
+                    max_default,
+                )
+            else:
+                raise ValueError(
+                    "User defined sorting levels should not interfere with the fixed defaults. The lowest "
+                    f"default sorting order is {max_default} but you have defined {min_user_method} with "
+                    f"sorting level of {min_user}. Use the --force option to override this exception."
+                )
+        mapping.extend([(self._config_to_func_map[method], int(value)) for method, value in configs.items()])
+
+        # check if need to add any defaults
+        for method_type, value in DEFAULT_CSORT_ORDER_PARAMS.items():
+            if method_type == "instance_method":
+                continue
+            if self._config_to_func_map[method_type] not in map(lambda t: t[0], mapping):
+                logging.info("Using default level %s for %s", value, method_type)
+                mapping.append((self._config_to_func_map[method_type], value))
+        mapping = sorted(mapping, key=lambda t: t[1])
+        func_to_value_map: Dict[Callable, int] = OrderedDict(mapping)
+
+        return func_to_value_map
+
     def get_method_type(self, method: Any, use_csort_group: bool = True) -> int:
         """
         Get the ordering level of the method type
@@ -104,38 +164,6 @@ class MethodDescriber(ABC):
             if func(method):
                 return level
         return self._instance_method_default
-
-    def _setup_func_to_level_map(self) -> Dict[Callable, int]:
-        """
-        Set up a full mapping from AST function classifying function to ordering level.
-
-        1) Fixed defaults are added
-        2) User defined ordering levels from the config file are added
-        3) Any node types missing from the config are added using default values
-        4) Sort the mapping according to ordering level and put into OrderedDict
-        Returns:
-            func_to_value_map: OrderedDict with node classifying functions as keys and ordering levels as values
-        """
-        configs = self._config["csort.order"]
-        if "instance_method" in configs:
-            self._instance_method_default = int(configs.pop("instance_method"))
-
-        mapping: List[Tuple[Callable, int]] = []
-
-        mapping.extend(self._non_method_defaults())
-        mapping.extend([(self._config_to_func_map[method], int(value)) for method, value in configs.items()])
-
-        # check if need to add any defaults
-        for method_type, value in DEFAULT_CSORT_ORDER_PARAMS.items():
-            if method_type == "instance_method":
-                continue
-            if self._config_to_func_map[method_type] not in map(lambda t: t[0], mapping):
-                logging.info("Using default level %s for %s", value, method_type)
-                mapping.append((self._config_to_func_map[method_type], value))
-        mapping = sorted(mapping, key=lambda t: t[1])
-        func_to_value_map: Dict[Callable, int] = OrderedDict(mapping)
-
-        return func_to_value_map
 
 
 class ASTMethodDescriber(MethodDescriber):
@@ -173,8 +201,10 @@ class ASTMethodDescriber(MethodDescriber):
             "property": GEN.is_property,
             "getter": GEN.is_getter,
             "setter": GEN.is_setter,
+            "deleter": GEN.is_deleter,
             "decorated_method": AST.is_decorated,
             "private_method": AST.is_private_method,
+            "inner_class": AST.is_class,
         }
 
     def _validate_node(self, node: Any) -> bool:
@@ -224,8 +254,10 @@ class CSTMethodDescriber(MethodDescriber):
             "property": GEN.is_property,
             "getter": GEN.is_getter,
             "setter": GEN.is_setter,
+            "deleter": GEN.is_deleter,
             "decorated_method": CST.is_decorated,
             "private_method": CST.is_private_method,
+            "inner_class": CST.is_class,
         }
 
     def _validate_node(self, node: Any) -> bool:
@@ -250,7 +282,7 @@ def get_method_describer(parser_type: str, **kwargs: Any) -> MethodDescriber:
 
 
 def describe_method(
-    method: Union[ast.stmt, libcst.CSTNode], method_describer: MethodDescriber
+    method: Node, method_describer: MethodDescriber
 ) -> Tuple[Tuple[int, Optional[str], int], Optional[List[str]], str]:
     """
     Get the ordering level of the method and the method name
@@ -272,4 +304,8 @@ def describe_method(
     else:
         csort_group = None
         second_level = level
+
+    # if sorting gets down to the decorators then need to be sorting list of strings
+    decorators = ["zz"] if decorators is None else decorators
+
     return (level, csort_group, second_level), decorators, name

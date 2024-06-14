@@ -71,10 +71,25 @@ def parse_commandline() -> Tuple[argparse.Namespace, Dict[str, Any]]:
         help="Use --diff to run Csort without changing any files and print the changes which would be made.",
     )
     parser.add_argument(
+        "-f",
+        "--force",
+        default=False,
+        action="store_true",
+        help="Use --force to override exception raised if the user specifies a sorting level higher than "
+        "fixed defaults",
+    )
+    parser.add_argument(
         "-v", "--verbose", type=int, default=1, help="Set the verbosity of the Csort output. Use 0, 1, or 2."
     )
     parser.add_argument(
         "-p", "--parser", type=str, default="cst", choices=["ast", "cst"], help="Choose a parser. Either ast or cst."
+    )
+    parser.add_argument(
+        "-pg",
+        "--use-property-groups",
+        default=False,
+        action="store_true",
+        help="Use --use-property-groups to group getters, setters and deleters.",
     )
     # params = parser.parse_args()
     params, args = parser.parse_known_args()
@@ -268,11 +283,17 @@ def main() -> None:
     auto_static = ast.literal_eval(auto_static_param) if isinstance(auto_static_param, str) else auto_static_param
     auto_static = True if "auto-static" in args else auto_static
     auto_static = False if "n-auto-static" in args else auto_static
+    property_groups_param = cfg[DEFAULT_CSORT_PARAMS_SECTION]["use_property_groups"]
+    property_groups = (
+        ast.literal_eval(property_groups_param) if isinstance(property_groups_param, str) else property_groups_param
+    )
+    property_groups = True if "property_groups" in args else property_groups
+    property_groups = False if "n-property_groups" in args else property_groups
 
     cfg = update_config(cfg, args)
 
     # instantiate method describer
-    method_describer = get_method_describer(parser_type=params.parser, config=cfg)
+    method_describer = get_method_describer(parser_type=params.parser, config=cfg, override_level_check=params.force)
 
     responses: List[format_csort_response] = []
     for input_script, output_script in zip(py_scripts, outputs):
@@ -286,6 +307,7 @@ def main() -> None:
             parser=code_parser,
             method_describer=method_describer,
             auto_static=auto_static,
+            use_property_groups=property_groups,
         )
         responses.append(response)
     n = sum(resp["code"] for resp in responses)
