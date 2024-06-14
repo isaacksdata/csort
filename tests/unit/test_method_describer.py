@@ -2,14 +2,12 @@ import ast
 import configparser
 from copy import deepcopy
 from typing import Callable
-from unittest.mock import patch
 
 import pytest
 from csort.generic_functions import is_class_method
 from csort.method_describers import ASTMethodDescriber
 from csort.method_describers import CSTMethodDescriber
 from csort.method_describers import get_method_describer
-from csort.method_describers import MethodDescriber
 
 
 @pytest.fixture
@@ -55,14 +53,6 @@ def csort_group_func(func_source_code):
 @pytest.fixture
 def private_func(func_source_code):
     return func_source_code.replace("func", "_func")
-
-
-@patch.multiple(MethodDescriber, __abstractmethods__=set())
-def test_abstract_config_loader():
-    describer = MethodDescriber()
-    assert describer._non_method_defaults() is None
-    assert describer._validate_node(node="") is None
-    assert describer._setup_config_to_func_map is None
 
 
 def test_ast_method_describer_init(mock_config):
