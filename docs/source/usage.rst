@@ -4,7 +4,7 @@ Usage
 Installation
 ------------
 
-To use msort, first install it using pip:
+To use |project_name|, first install it using pip:
 
 .. code-block:: console
 
@@ -70,7 +70,7 @@ specified using the ``--config-path`` option.
 
     This should be the relative path to a ``.ini`` or ``.toml`` file from which msort configurations can be loaded.
 
-Csort configurations can also be overridden on the command line. Any field defined in the configuration file can be
+|project_name| configurations can also be overridden on the command line. Any field defined in the configuration file can be
 re-defined on the command line.
 
 Class component ordering preferences can set on the command line - :ref:`components-label` :
@@ -112,7 +112,7 @@ Non-sorting parameters which are normally set in the configuration file can also
 Alternative modes
 .................
 
-Csort can be executed in alternative modes which do not modify the code.
+|project_name| can be executed in alternative modes which do not modify the code.
 
 .. option:: --check CHECK
 
@@ -150,7 +150,7 @@ Misc
 
 Import Usage
 ------------
-Csort introduces the ``msort_group`` decorator which can be used to force a group of methods to be placed together
+|project_name| introduces the ``msort_group`` decorator which can be used to force a group of methods to be placed together
 by msort.
 
 This decorator can be useful if you have a complex class with subsets of related methods.
@@ -201,7 +201,7 @@ Lets work through an example:
 In this example, the ``Dog`` class uses the ``msort_group`` decorator to define three method groups: movement, sound
 and describe.
 
-Csort will interpret the ``msort_group`` decorator and sort the methods by the group name, then by any additional
+|project_name| will interpret the ``msort_group`` decorator and sort the methods by the group name, then by any additional
 sorting parameter and then alphabetically by name.
 
 .. code-block:: python

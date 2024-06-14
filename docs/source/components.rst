@@ -2,7 +2,7 @@
 
 Components
 ==========
-Csort formats python classes by re-ordering the components of classes into a pre-defined order.
+|project_name| formats python classes by re-ordering the components of classes into a pre-defined order.
 
 The first level of ordering depends on the type of component.
 

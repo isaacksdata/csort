@@ -6,7 +6,7 @@ Configurations
 Precedence
 ----------
 
-Csort configurations follow a hierarchical design pattern.
+|project_name| configurations follow a hierarchical design pattern.
 
 1. Command line configurations - see :ref:`cli-custom-config-label`
 
@@ -19,7 +19,7 @@ The recommended pattern is to use a ``pyproject.toml`` file.
 Defaults
 --------
 
-Csort configurations can be split into **ordering** and **general**.
+|project_name| configurations can be split into **ordering** and **general**.
 
 General defaults
 ................
@@ -75,7 +75,7 @@ Controls whether methods related to a property are grouped together or not.
             return self._age
 
 In this example class, we have two properties defined, ``name`` and ``age``.
-Csort can sort these methods in two ways:
+|project_name| can sort these methods in two ways:
 * According to the component sorting order
 
 * According to property groups

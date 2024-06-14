@@ -1,14 +1,14 @@
-.. Csort documentation master file, created by
+.. Msort documentation master file, created by
    sphinx-quickstart on Thu Jun  6 20:02:03 2024.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Csort's documentation!
-=================================
+Welcome to |project_name|'s documentation!
+==========================================
 
-**Csort** is a python library for formatting python classes.
+**Msort** is a python library for formatting python classes.
 
-Csort can keep components of classes in a pre-defined order according to method names and decorators.
+Msort can keep components of classes in a pre-defined order according to method names and decorators.
 
 This can be useful for navigating complex classes, maintaining readability and, through the ``msort_group`` decorator,
 grouping directly related methods together.

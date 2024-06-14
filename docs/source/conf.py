@@ -5,10 +5,15 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Csort"
+project = "Msort"
 copyright = "2024, Isaac Kitchen-Smith"
 author = "Isaac Kitchen-Smith"
 release = "0.1.8"
+rst_epilog = """
+.. |project_name| replace:: {project}
+""".format(
+    project=project
+)
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

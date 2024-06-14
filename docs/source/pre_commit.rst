@@ -5,7 +5,7 @@ Pre-commit
 
 Pre-commit is great tool for catching bugs early and ensuring consistency across developers.
 
-Csort can be used as part of a pre-commit workflow.
+|project_name| can be used as part of a pre-commit workflow.
 
 Steps
 -----
@@ -54,7 +54,7 @@ Common amendments
         args: ["--skip-patterns=test_", "--skip-patterns=_test.py"]
 
 * personalised configurations
-    Csort in pre-commit can be configured by the user through CLI arguments or through a config
+    |project_name| in pre-commit can be configured by the user through CLI arguments or through a config
     file - see :ref:`config-label`
 
 .. code-block:: yaml
