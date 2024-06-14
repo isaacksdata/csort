@@ -2,7 +2,7 @@ from abc import abstractmethod
 from functools import lru_cache
 from functools import wraps
 
-from src import msort_group
+from msort import msort_group
 
 
 class MyClass:
@@ -16,14 +16,14 @@ class MyClass:
     def a_class_method(cls):
         pass
 
-    @msort_group("test")
-    @staticmethod
-    def a_static_method():
-        pass
-
     @lru_cache
     @staticmethod
     def a_static_cached_method():
+        pass
+
+    @msort_group("test")
+    @staticmethod
+    def a_static_method():
         pass
 
     @property
@@ -49,16 +49,16 @@ class MyClass:
     def wrapped_abstract_func(self):
         pass
 
-    @msort_group("test")
-    def _func(self):
-        pass
-
     @lru_cache
     def cached_func(self):
         pass
 
     @lru_cache
     def second_cached_func(self):
+        pass
+
+    @msort_group("test")
+    def _func(self):
         pass
 
     @wraps

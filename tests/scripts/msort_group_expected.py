@@ -2,7 +2,7 @@ from abc import abstractmethod
 from functools import lru_cache
 from functools import wraps
 
-from src import msort_group
+from msort import msort_group
 
 
 class MyClass:
