@@ -21,7 +21,13 @@ Read the full [documentation](http://msort.readthedocs.io/).
 
 ## Install
 
-Install from `testpypi` using:
+Install from `pypi` using:
+
+```commandline
+pip install msort
+```
+
+Install development branch from testpypi:
 
 ```commandline
 pip install -i https://test.pypi.org/pypi/ --extra-index-url https://pypi.org/simple msort
@@ -161,8 +167,10 @@ Option One - use a local installation of Msort
 
 Option Two - use the remote hook
 
+Note: the github repo is still called csort for legacy reasons.
+
 ```yaml
-  - repo: https://github.com/isaacksdata/msort
+  - repo: https://github.com/isaacksdata/csort
     rev: v0.1.8
     hooks:
       - id: msort
@@ -172,3 +180,4 @@ Option Two - use the remote hook
 ## Todo
 
 - diff generator does not report nested classes
+- rename github repo to msort
