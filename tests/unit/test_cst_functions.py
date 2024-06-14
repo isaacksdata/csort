@@ -1,3 +1,4 @@
+import logging
 import os
 from unittest.mock import Mock
 
@@ -19,13 +20,16 @@ from msort.utilities import get_function_name_cst
 from msort.utilities import is_class_docstring_cst
 from msort.utilities import is_ellipsis_cst
 
+if os.getcwd().endswith("unit"):
+    os.chdir("../..")
+
 DEBUG = "tests" in os.getcwd()
 
 
 @pytest.fixture
 def script_path(request):
-    if DEBUG:
-        return f"../scripts/{request.param}_input.py"
+    # if DEBUG:
+    # return f"../scripts/{request.param}_input.py"
     return f"./tests/scripts/{request.param}_input.py"
 
 

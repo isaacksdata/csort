@@ -183,7 +183,7 @@ def test_main_check_unchanged(script_path, caplog):
     with patch.object(sys, "argv", commands):
         main()
     assert "No changes made!" in caplog.messages
-    assert any("Csort ran in check mode : 0 / 1 files would be changed!" in msg for msg in caplog.messages)
+    assert any("msort ran in check mode : 0 / 1 files would be changed!" in msg for msg in caplog.messages)
 
 
 def test_main_check(script_path, caplog):
@@ -192,7 +192,7 @@ def test_main_check(script_path, caplog):
     with patch.object(sys, "argv", commands):
         main()
     assert "No changes made!" not in caplog.messages
-    assert any("Csort ran in check mode : 1 / 1 files would be changed!" in msg for msg in caplog.messages)
+    assert any("msort ran in check mode : 1 / 1 files would be changed!" in msg for msg in caplog.messages)
 
 
 def test_main_check_skip_pattern(script_path, caplog):
@@ -208,7 +208,7 @@ def test_main_check_diff(script_path, caplog):
     commands = ["", f"--input-path={script_path}", f"--output-path={output_path}", "--diff"]
     with patch.object(sys, "argv", commands):
         main()
-    assert any("Csort ran in diff mode" in msg for msg in caplog.messages)
+    assert any("msort ran in diff mode" in msg for msg in caplog.messages)
     assert any("func                --->     __len__" in msg for msg in caplog.messages)
 
 

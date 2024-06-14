@@ -323,7 +323,7 @@ def test_formatting_pandas_cst(parser, method_describer, input_path, output_path
 def test_formatting_auto_static_ast(parser, method_describer, input_path, output_path, expected_path, caplog):
     caplog.set_level(logging.INFO)
     simple_test(parser, method_describer, input_path, output_path, expected_path, auto_static=True)
-    assert "Csort converted 1 methods from MyClass to static!" in caplog.messages
+    assert "msort converted 1 methods from MyClass to static!" in caplog.messages
 
 
 @pytest.mark.parametrize("parser", ["cst"], indirect=True)
@@ -334,7 +334,7 @@ def test_formatting_auto_static_ast(parser, method_describer, input_path, output
 def test_formatting_auto_static_cst(parser, method_describer, input_path, output_path, expected_path, caplog):
     caplog.set_level(logging.INFO)
     simple_test(parser, method_describer, input_path, output_path, expected_path, use_cst=True, auto_static=True)
-    assert "Csort converted 1 methods from MyClass to static!" in caplog.messages
+    assert "msort converted 1 methods from MyClass to static!" in caplog.messages
 
 
 @pytest.mark.parametrize("parser", ["ast"], indirect=True)
