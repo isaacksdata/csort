@@ -64,7 +64,7 @@ repos:
         language: system
         types: [python]
         args: [
-            "./src/csort",
+            "./src/msort",
             "--rcfile=.pylintrc", # Link to your config file
           ]
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -77,9 +77,9 @@ repos:
           - toml
   - repo: local
     hooks:
-      - id: csort
-        name: csort
-        entry: csort
+      - id: msort
+        name: msort
+        entry: msort
         language: system
         types: [python]
         args: ["-sp=_input", "-sp=_expected"]

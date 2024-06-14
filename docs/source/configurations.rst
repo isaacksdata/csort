@@ -6,11 +6,11 @@ Configurations
 Precedence
 ----------
 
-Csort configurations follow a hierarchical design pattern.
+|project_name| configurations follow a hierarchical design pattern.
 
 1. Command line configurations - see :ref:`cli-custom-config-label`
 
-2. Configuration files - ``pyproject.toml`` / ``csort.ini``
+2. Configuration files - ``pyproject.toml`` / ``msort.ini``
 
 3. Default configurations
 
@@ -19,7 +19,7 @@ The recommended pattern is to use a ``pyproject.toml`` file.
 Defaults
 --------
 
-Csort configurations can be split into **ordering** and **general**.
+|project_name| configurations can be split into **ordering** and **general**.
 
 General defaults
 ................
@@ -27,9 +27,9 @@ General defaults
 
 Check to see if methods could be static methods and convert to a static method if so.
 
-:use_csort_group: Defaults to True
+:use_msort_group: Defaults to True
 
-Controls whether the ``csort_group`` decorator should be considered when running csort. See :ref:`csort-group-label`
+Controls whether the ``msort_group`` decorator should be considered when running msort. See :ref:`msort-group-label`
 
 :use_property_groups: Defaults to False
 
@@ -75,7 +75,7 @@ Controls whether methods related to a property are grouped together or not.
             return self._age
 
 In this example class, we have two properties defined, ``name`` and ``age``.
-Csort can sort these methods in two ways:
+|project_name| can sort these methods in two ways:
 * According to the component sorting order
 
 * According to property groups
@@ -177,7 +177,7 @@ See :ref:`components-label` for details on each component.
 :typed class attribute: Defaults to 1
 :untyped class attribute: Defaults to 2
 :dunder methd: Defaults to 3
-:csort group: Defaults to 4
+:msort group: Defaults to 4
 :class method: Defaults to 5
 :static method: Defaults to 6
 :property: Defaults to 7
@@ -192,24 +192,24 @@ See :ref:`components-label` for details on each component.
 Configuration Files
 -------------------
 
-Configurations can be specified using the legacy ``csort.ini`` file or the more modern ``pyproject.toml``
+Configurations can be specified using the legacy ``msort.ini`` file or the more modern ``pyproject.toml``
 file.
 
-By default, csort will search for a configuration file named either ``csort.ini`` or ``pyproject.toml`` in the
+By default, msort will search for a configuration file named either ``msort.ini`` or ``pyproject.toml`` in the
 working directory.
 
-An alternatively named ``.ini`` or ``.toml`` file can also be used and then specified to csort using the
+An alternatively named ``.ini`` or ``.toml`` file can also be used and then specified to msort using the
 ``--config-path`` option on the command line.
 
 pyproject.toml
 ..............
-Below is an example ``pyproject.toml`` with csort tool groups
+Below is an example ``pyproject.toml`` with msort tool groups
 
 .. code-block:: toml
 
-    [tool.csort.order]
+    [tool.msort.order]
     dunder_method = 3
-    csort_group = 4
+    msort_group = 4
     class_method = 5
     static_method = 6
     getter = 7
@@ -220,25 +220,25 @@ Below is an example ``pyproject.toml`` with csort tool groups
     private_method = 12
     inner_class = 13
 
-    [tool.csort]
-    use_csort_group = true
+    [tool.msort]
+    use_msort_group = true
     auto_static = false
 
 In this example configuration, ``property`` methods have been set to level 9, below ``getter`` and ``setter``.
 By default, ``property`` is normally level 7.
 
 
-csort.ini
+msort.ini
 .........
 
-Below is an example ``csort.ini`` file
+Below is an example ``msort.ini`` file
 
 .. code-block:: ini
 
-    [csort.order]
+    [msort.order]
     dunder_method = 3
     private_method = 4
-    csort_group = 5
+    msort_group = 5
     class_method = 6
     static_method = 7
     property = 8
@@ -249,8 +249,8 @@ Below is an example ``csort.ini`` file
     instance_method = 13
     inner_class = 14
 
-    [csort]
-    use_csort_group = True
+    [msort]
+    use_msort_group = True
     auto_static = False
 
 In this example configuration, ``private_method`` has been set to level 4 so that

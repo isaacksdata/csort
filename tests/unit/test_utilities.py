@@ -1,5 +1,5 @@
 import pytest
-from csort.utilities import check_and_get_attribute
+from msort.utilities import check_and_get_attribute
 
 
 def test_check_attribute_success():

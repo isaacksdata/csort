@@ -7,7 +7,7 @@ version_scheme = "guess-next-dev"
 local_scheme = "dirty-tag"
 
 [project]
-name = "csort"
+name = "msort"
 description = "Automatic ordering of Python class components."
 authors = [
 	{ name = "Isaac Kitchen-Smith", email = "isaacks123@gmail.com" },
@@ -21,14 +21,14 @@ classifiers = [
     "Typing :: Typed"
 
 ]
-keywords = ["csort"]
+keywords = ["msort"]
 requires-python = ">=3.9"
 dynamic = ["version"]
 
 dependencies = ["ast-comments==1.2.2", "astor==0.8.1", "libcst==1.3.1", "toml==0.10.2"]
 
 [project.scripts]
-csort = "csort.main:main"
+msort = "msort.main:main"
 
 [project.optional-dependencies]
 dev = [
@@ -51,7 +51,7 @@ testpaths = ["tests"]
 
 [tool.mypy]
 mypy_path = "src"
-files = "src/csort"
+files = "src/msort"
 ignore_missing_imports = true
 show_error_codes = true
 warn_redundant_casts = true
@@ -76,14 +76,14 @@ line_length = 120
 [tool.black]
 line-length = 120
 
-[tool.csort.order]
+[tool.msort.order]
 dunder_method = 3
-csort_group = 4
+msort_group = 4
 class_method = 5
 private_method = 13
 
-[tool.csort]
-use_csort_group = true
+[tool.msort]
+use_msort_group = true
 auto_static = false
 
 [tool.tox]
@@ -134,7 +134,7 @@ legacy_tox_ini = """
 	skip_install = True
 	deps = pylint
 	commands =
-		pylint ./src/csort --rcfile=.pylintrc
+		pylint ./src/msort --rcfile=.pylintrc
 
 	[testenv:{clean}]
 	description =

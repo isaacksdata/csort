@@ -7,7 +7,7 @@ from typing import Any
 from typing import Callable
 
 
-def csort_group(group: str) -> Callable:
+def msort_group(group: str) -> Callable:
     """
     Decorator to enable sorting of functions by user defined functional groups.
     Args:
@@ -20,11 +20,11 @@ def csort_group(group: str) -> Callable:
 
         class MyClass:
 
-            @csort_group(group="addition")
+            @msort_group(group="addition")
             def func():
                 return 1 + 1
 
-            @csort_group(group="addition")
+            @msort_group(group="addition")
             def related_func():
                 return 2 + 2
     """
@@ -34,17 +34,17 @@ def csort_group(group: str) -> Callable:
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Call the original function
             result = func(*args, **kwargs)
-            logging.debug("Calling %s with csort_group : group = %s", func.__qualname__, group)
+            logging.debug("Calling %s with msort_group : group = %s", func.__qualname__, group)
             return result
 
         if not inspect.isfunction(func) and not inspect.ismethod(func):
-            raise TypeError(f"csort_group should be applied to a function - not {type(func)}")
+            raise TypeError(f"msort_group should be applied to a function - not {type(func)}")
 
-        # this check does not handle nested functions outside of classes - but in this case, csort will not do
+        # this check does not handle nested functions outside of classes - but in this case, msort will not do
         # anything
         if "." not in func.__qualname__:
             logging.warning(
-                "csort_group decorator applied to a function which is not implemented by a class : %s",
+                "msort_group decorator applied to a function which is not implemented by a class : %s",
                 func.__qualname__,
             )
 

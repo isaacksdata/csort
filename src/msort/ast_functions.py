@@ -17,8 +17,8 @@ from .configs import ordered_methods_type
 from .decorators import get_decorators
 from .edge_cases import handle_edge_cases
 from .generic_functions import is_class_method
-from .generic_functions import is_csort_group
 from .generic_functions import is_getter
+from .generic_functions import is_msort_group
 from .generic_functions import is_property
 from .generic_functions import is_setter
 from .generic_functions import is_static_method
@@ -160,7 +160,7 @@ def extract_class_components(class_node: Union[ast.ClassDef, ast.FunctionDef]) -
     if isinstance(class_node, ast.FunctionDef):
         return class_node.body
 
-    components = [node for node in class_node.body if is_csortable(node)]
+    components = [node for node in class_node.body if is_msortable(node)]
     return components
 
 
@@ -282,9 +282,9 @@ def is_decorated(expression: ast.stmt) -> bool:
     return True
 
 
-def is_csortable(expression: ast.AST) -> bool:
+def is_msortable(expression: ast.AST) -> bool:
     """
-    Determine if the ast parsed expression is sortable by Csort
+    Determine if the ast parsed expression is sortable by msort
 
     Defines a list of checks and if any of the checks evaluate as True, then the expression can be sorted.
 
@@ -313,7 +313,7 @@ method_checking_map: Dict[Callable, int] = OrderedDict(
         (is_annotated_class_attribute, 1),
         (is_class_attribute, 2),
         (is_dunder_method, 3),
-        (is_csort_group, 4),
+        (is_msort_group, 4),
         (is_class_method, 5),
         (is_static_method, 6),
         (is_property, 7),

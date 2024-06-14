@@ -1,5 +1,5 @@
 """
-Command line entrypoint for Csort
+Command line entrypoint
 """
 import argparse
 import ast
@@ -13,11 +13,12 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 
+from . import __PROJECT_NAME__
 from .config_loader import get_config_loader
-from .configs import DEFAULT_CSORT_ORDERING_SECTION
-from .configs import DEFAULT_CSORT_PARAMS_SECTION
-from .configs import format_csort_response
-from .formatting import format_csort
+from .configs import DEFAULT_MSORT_ORDERING_SECTION
+from .configs import DEFAULT_MSORT_PARAMS_SECTION
+from .configs import format_msort_response
+from .formatting import format_msort
 from .logger import set_logging
 from .method_describers import get_method_describer
 
@@ -25,8 +26,8 @@ from .method_describers import get_method_describer
 def parse_commandline() -> Tuple[argparse.Namespace, Dict[str, Any]]:
     """Parse CLI arguments using argparse"""
     parser = argparse.ArgumentParser(
-        description="Takes as input the path to .py file or directory containing .py files and re-orders methods of "
-        "classes according to Csort guidelines."
+        description=f"Takes as input the path to .py file or directory containing .py files and re-orders methods of "
+        f"classes according to {__PROJECT_NAME__} guidelines."
     )
     parser.add_argument("files", nargs="*")
     parser.add_argument(
@@ -49,26 +50,26 @@ def parse_commandline() -> Tuple[argparse.Namespace, Dict[str, Any]]:
         "--config-path",
         type=str,
         default=None,
-        help="Relative filepath to a csort.ini or pyproject.toml file.",
+        help="Relative filepath to a msort.ini or pyproject.toml file.",
     )
     parser.add_argument(
         "-sp",
         "--skip-patterns",
         action="append",
-        help="Provide patterns to look for in .py file and avoid running csort on these scripts.",
+        help="Provide patterns to look for in .py file and avoid running msort on these scripts.",
     )
     parser.add_argument(
         "--check",
         default=False,
         action="store_true",
-        help="Use --check to run Csort without changing any files and instead return a code indicating how many files"
+        help=f"fUse --check to run {__PROJECT_NAME__} without changing any files and instead return a code indicating how many files"
         "would be changed.",
     )
     parser.add_argument(
         "--diff",
         default=False,
         action="store_true",
-        help="Use --diff to run Csort without changing any files and print the changes which would be made.",
+        help=f"Use --diff to run {__PROJECT_NAME__} without changing any files and print the changes which would be made.",
     )
     parser.add_argument(
         "-f",
@@ -79,7 +80,11 @@ def parse_commandline() -> Tuple[argparse.Namespace, Dict[str, Any]]:
         "fixed defaults",
     )
     parser.add_argument(
-        "-v", "--verbose", type=int, default=1, help="Set the verbosity of the Csort output. Use 0, 1, or 2."
+        "-v",
+        "--verbose",
+        type=int,
+        default=1,
+        help=f"Set the verbosity of the {__PROJECT_NAME__} output. Use 0, 1, or 2.",
     )
     parser.add_argument(
         "-p", "--parser", type=str, default="cst", choices=["ast", "cst"], help="Choose a parser. Either ast or cst."
@@ -207,16 +212,16 @@ def update_config_ordering(cfg: Dict[str, Any], args: Dict[str, Any]) -> Dict[st
     """
     Update the ordering section of config using command line arguments
     Args:
-        cfg: config extracted from csort.ini
+        cfg: config extracted from msort.ini
         args: command line arguments
 
     Returns:
         cfg: updated if necessary by command line arguments
     """
-    for param in cfg[DEFAULT_CSORT_ORDERING_SECTION]:
+    for param in cfg[DEFAULT_MSORT_ORDERING_SECTION]:
         if param in args or param.replace("_", "-") in args:
             logging.info("Overriding %s order : set to %s", param, args[param.replace("_", "-")])
-            cfg[DEFAULT_CSORT_ORDERING_SECTION][param.replace("-", "_")] = args[param.replace("_", "-")]
+            cfg[DEFAULT_MSORT_ORDERING_SECTION][param.replace("-", "_")] = args[param.replace("_", "-")]
     return cfg
 
 
@@ -224,20 +229,20 @@ def update_config_general(cfg: Dict[str, Any], args: Dict[str, Any]) -> Dict[str
     """
     Update the general params section of config using command line arguments
     Args:
-        cfg: config extracted from csort.ini
+        cfg: config extracted from msort.ini
         args: command line arguments
 
     Returns:
         cfg: updated if necessary by command line arguments
     """
-    for param in cfg[DEFAULT_CSORT_PARAMS_SECTION]:
+    for param in cfg[DEFAULT_MSORT_PARAMS_SECTION]:
         possible_params = [param, param.replace("_", "-"), f"n_{param}", f"n-{param.replace('_', '-')}"]
         for p in possible_params:
             if p in args:
                 value: str = args[p]
                 value = (not re.match(r"^n[-_]", p)) if value is None else value
                 logging.info("Overriding %s : set to %s", param, value)
-                cfg[DEFAULT_CSORT_PARAMS_SECTION][param] = str(value)
+                cfg[DEFAULT_MSORT_PARAMS_SECTION][param] = str(value)
     return cfg
 
 
@@ -245,7 +250,7 @@ def update_config(cfg: Dict[str, Any], args: Dict[str, Any]) -> Dict[str, Any]:
     """
     Update the config using command line arguments
     Args:
-        cfg: config extracted from csort.ini
+        cfg: config extracted from msort.ini
         args: command line arguments
 
     Returns:
@@ -274,16 +279,16 @@ def main() -> None:
         logging.info("Checking %s python scripts ...", len(py_scripts))
 
     logging.info("Using the %s parser!", str.upper(params.parser))
-    code_parser = importlib.import_module(f"csort.{params.parser}_functions")
+    code_parser = importlib.import_module(f"msort.{params.parser}_functions")
     config_loader = get_config_loader(config_path=params.config_path)
     cfg = config_loader.config
 
     # command line can be used to override some options
-    auto_static_param = cfg[DEFAULT_CSORT_PARAMS_SECTION]["auto_static"]
+    auto_static_param = cfg[DEFAULT_MSORT_PARAMS_SECTION]["auto_static"]
     auto_static = ast.literal_eval(auto_static_param) if isinstance(auto_static_param, str) else auto_static_param
     auto_static = True if "auto-static" in args else auto_static
     auto_static = False if "n-auto-static" in args else auto_static
-    property_groups_param = cfg[DEFAULT_CSORT_PARAMS_SECTION]["use_property_groups"]
+    property_groups_param = cfg[DEFAULT_MSORT_PARAMS_SECTION]["use_property_groups"]
     property_groups = (
         ast.literal_eval(property_groups_param) if isinstance(property_groups_param, str) else property_groups_param
     )
@@ -295,13 +300,13 @@ def main() -> None:
     # instantiate method describer
     method_describer = get_method_describer(parser_type=params.parser, config=cfg, override_level_check=params.force)
 
-    responses: List[format_csort_response] = []
+    responses: List[format_msort_response] = []
     for input_script, output_script in zip(py_scripts, outputs):
         if any(skip_pat in Path(input_script).stem for skip_pat in skip_patterns):
             logging.debug("Skipping %s", input_script)
             continue
         logging.debug("Reformatting %s ...", input_script)
-        response = format_csort(
+        response = format_msort(
             file_path=input_script,
             output_py=output_script,
             parser=code_parser,
@@ -312,12 +317,14 @@ def main() -> None:
         responses.append(response)
     n = sum(resp["code"] for resp in responses)
     if params.check:
-        logging.info("\n----\nCsort ran in check mode : %s / %s files would be changed!\n----", n, len(py_scripts))
+        logging.info(
+            f"\n----\n{__PROJECT_NAME__} ran in check mode : %s / %s files would be changed!\n----", n, len(py_scripts)
+        )
     elif params.diff:
         diff = "\n\n".join([resp["diff"] for resp in responses])
-        logging.info("\n ----- \nCsort ran in diff mode : %s", diff)
+        logging.info(f"\n ----- \n{__PROJECT_NAME__} ran in diff mode : %s", diff)
     else:
-        logging.info("\n----\nCsort modified %s / %s files!\n----", n, len(py_scripts))
+        logging.info(f"\n----\n{__PROJECT_NAME__} modified %s / %s files!\n----", n, len(py_scripts))
 
 
 if __name__ == "__main__":

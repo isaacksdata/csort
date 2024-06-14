@@ -14,13 +14,13 @@ class DiffGenerator(ABC):
     """
     Abstract class for code difference generators.
 
-    DiffGenerator classes are used for discerning the difference in the original python code and the csort formatted
-    code. If csort is run with --diff flag then the differences are compiled into a human readable string to be
+    DiffGenerator classes are used for discerning the difference in the original python code and the msort formatted
+    code. If msort is run with --diff flag then the differences are compiled into a human readable string to be
     printed on the terminal.
 
     Attributes:
         _source_code_methods (List[str]): names of methods of the class in original code
-        _modified_code_methods (List[str]): names of methods of the class in csort formatted code
+        _modified_code_methods (List[str]): names of methods of the class in msort formatted code
     """
 
     def __init__(self) -> None:
@@ -39,19 +39,19 @@ class DiffGenerator(ABC):
         """
         pass
 
-    def diff(self, source_code: List[Any], csort_code: List[Any]) -> str:
+    def diff(self, source_code: List[Any], msort_code: List[Any]) -> str:
         """
         Public method for finding difference between two lists of methods.
 
         Args:
             source_code: original list of methods in original order
-            csort_code: csort formatted order of methods
+            msort_code: msort formatted order of methods
 
         Returns:
-            string representing the code changes between source_code and csort_code
+            string representing the code changes between source_code and msort_code
         """
         self._source_code_methods = self._extract_method_names(source_code)
-        self._modified_code_methods = self._extract_method_names(csort_code)
+        self._modified_code_methods = self._extract_method_names(msort_code)
         return self._generate_diff_string()
 
     def _generate_diff_string(self) -> str:

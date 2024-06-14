@@ -6,7 +6,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
-from .configs import format_csort_response
+from .configs import format_msort_response
 from .configs import ordered_methods_type
 from .decorators import has_decorator
 from .decorators import StaticMethodChecker
@@ -67,16 +67,16 @@ def order_class_functions(
     return formatted_sorted_methods
 
 
-def format_csort(
+def format_msort(
     parser: ModuleType,
     file_path: str,
     method_describer: MethodDescriber,
     output_py: Optional[str] = None,
     auto_static: bool = False,
     use_property_groups: bool = False,
-) -> format_csort_response:
+) -> format_msort_response:
     """
-    Main function for running Csort
+    Main function for running msort
     Args:
         parser: Module containing functions for specified code parser
         file_path: path to source code (.py) file
@@ -89,7 +89,7 @@ def format_csort(
     Returns:
         {
             "code" : indicates whether file has changed or not
-            "diff": string indicating changes introduced by csort
+            "diff": string indicating changes introduced by msort
         }
     """
 
@@ -103,7 +103,7 @@ def format_csort(
         functions = static_checker.staticise_classes(functions)
         for class_name, n_changes in static_checker.class_static_method_counts.items():
             if n_changes > 0:
-                logging.info("Csort converted %s methods from %s to static!", n_changes, class_name)
+                logging.info("msort converted %s methods from %s to static!", n_changes, class_name)
 
     sorted_functions: Dict[str, ordered_methods_type] = {
         cls: order_class_functions(methods, method_describer, parser, use_property_groups=use_property_groups)
@@ -112,7 +112,7 @@ def format_csort(
 
     if all(functions[cname] == sorted_functions[cname] for cname in functions.keys()):
         logging.info("No changes made!")
-        return format_csort_response(code=0, diff="")
+        return format_msort_response(code=0, diff="")
     # update the classes dictionary with new class body
     classes = {name: parser.update_node(cls, sorted_functions[name]) for name, cls in classes.items()}
     # update parsed code with sorted classes
@@ -132,4 +132,4 @@ def format_csort(
         create_path(output_py)
         with open(output_py, "w", encoding="utf-8") as f:
             f.writelines(new_code)
-    return format_csort_response(code=1, diff=compiled_diff)
+    return format_msort_response(code=1, diff=compiled_diff)

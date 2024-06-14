@@ -4,24 +4,24 @@ from copy import deepcopy
 from typing import Callable
 
 import pytest
-from csort.generic_functions import is_class_method
-from csort.method_describers import ASTMethodDescriber
-from csort.method_describers import CSTMethodDescriber
-from csort.method_describers import get_method_describer
+from msort.generic_functions import is_class_method
+from msort.method_describers import ASTMethodDescriber
+from msort.method_describers import CSTMethodDescriber
+from msort.method_describers import get_method_describer
 
 
 @pytest.fixture
 def mock_config():
     config = configparser.ConfigParser()
-    config["csort.order"] = {}
-    config["csort.order"]["dunder_method"] = "3"
-    config["csort.order"]["csort_group"] = "4"
-    config["csort.order"]["class_method"] = "5"
-    config["csort.order"]["static_method"] = "6"
-    config["csort.order"]["property"] = "7"
-    config["csort.order"]["decorated_method"] = "10"
-    config["csort.order"]["instance_method"] = "12"
-    config["csort.order"]["private_method"] = "13"
+    config["msort.order"] = {}
+    config["msort.order"]["dunder_method"] = "3"
+    config["msort.order"]["msort_group"] = "4"
+    config["msort.order"]["class_method"] = "5"
+    config["msort.order"]["static_method"] = "6"
+    config["msort.order"]["property"] = "7"
+    config["msort.order"]["decorated_method"] = "10"
+    config["msort.order"]["instance_method"] = "12"
+    config["msort.order"]["private_method"] = "13"
     return config
 
 
@@ -46,8 +46,8 @@ def cached_func(func_source_code):
 
 
 @pytest.fixture
-def csort_group_func(func_source_code):
-    return "@csort_group(group='test')\n" + func_source_code
+def msort_group_func(func_source_code):
+    return "@msort_group(group='test')\n" + func_source_code
 
 
 @pytest.fixture
@@ -65,17 +65,17 @@ def test_ast_method_describer_init(mock_config):
         assert isinstance(func, Callable)
         assert isinstance(value, int)
     method_levels = list(describer._method_checking_map.values())
-    assert all(m in method_levels for m in list(map(int, list(mock_config["csort.order"].values()))))
+    assert all(m in method_levels for m in list(map(int, list(mock_config["msort.order"].values()))))
 
 
 def test_ast_method_describer__setup_func_to_level_map_valueerror(mock_config):
-    mock_config["csort.order"]["class_method"] = "1"
+    mock_config["msort.order"]["class_method"] = "1"
     with pytest.raises(ValueError):
         ASTMethodDescriber(config=mock_config)
 
 
 def test_ast_method_describer__setup_func_to_level_map_override(mock_config, caplog):
-    mock_config["csort.order"]["class_method"] = "1"
+    mock_config["msort.order"]["class_method"] = "1"
     describer = ASTMethodDescriber(config=mock_config, override_level_check=True)
     msg = "The sorting level for ['class_method'] is 1 which is higher than max default 2. Exception overridden by --force option."
     assert msg in caplog.messages
@@ -83,18 +83,18 @@ def test_ast_method_describer__setup_func_to_level_map_override(mock_config, cap
 
 
 def test_ast_method_describer_describe_method(
-    mock_config, func_source_code, static_func, class_func, cached_func, private_func, csort_group_func
+    mock_config, func_source_code, static_func, class_func, cached_func, private_func, msort_group_func
 ):
     describer = ASTMethodDescriber(config=deepcopy(mock_config))
     for func_code, expected_value in zip(
-        [func_source_code, static_func, class_func, cached_func, private_func, csort_group_func],
+        [func_source_code, static_func, class_func, cached_func, private_func, msort_group_func],
         [
-            mock_config["csort.order"]["instance_method"],
-            mock_config["csort.order"]["static_method"],
-            mock_config["csort.order"]["class_method"],
-            mock_config["csort.order"]["decorated_method"],
-            mock_config["csort.order"]["private_method"],
-            mock_config["csort.order"]["csort_group"],
+            mock_config["msort.order"]["instance_method"],
+            mock_config["msort.order"]["static_method"],
+            mock_config["msort.order"]["class_method"],
+            mock_config["msort.order"]["decorated_method"],
+            mock_config["msort.order"]["private_method"],
+            mock_config["msort.order"]["msort_group"],
         ],
     ):
         node = ast.parse(func_code).body[0]

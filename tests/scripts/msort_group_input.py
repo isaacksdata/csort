@@ -2,7 +2,7 @@ from abc import abstractmethod
 from functools import lru_cache
 from functools import wraps
 
-from src import csort_group
+from msort import msort_group
 
 
 class MyClass:
@@ -13,7 +13,7 @@ class MyClass:
     def func(self):
         pass
 
-    @csort_group("test")
+    @msort_group("test")
     def _func(self):
         pass
 
@@ -28,7 +28,7 @@ class MyClass:
     def __len__(self):
         pass
 
-    @csort_group("test")
+    @msort_group("test")
     @staticmethod
     def a_static_method():
         pass

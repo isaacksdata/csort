@@ -3,15 +3,15 @@ from unittest.mock import Mock
 
 import libcst
 import pytest
-from csort.decorators import decorator_attribute_id_cst
-from csort.decorators import decorator_call_id
-from csort.decorators import decorator_call_id_cst
-from csort.decorators import decorator_name_id_cst
-from csort.decorators import get_csort_group_name_ast
-from csort.decorators import get_csort_group_name_cst
-from csort.decorators import get_decorator_id
-from csort.decorators import get_decorator_id_cst
-from csort.decorators import has_decorator
+from msort.decorators import decorator_attribute_id_cst
+from msort.decorators import decorator_call_id
+from msort.decorators import decorator_call_id_cst
+from msort.decorators import decorator_name_id_cst
+from msort.decorators import get_decorator_id
+from msort.decorators import get_decorator_id_cst
+from msort.decorators import get_msort_group_name_ast
+from msort.decorators import get_msort_group_name_cst
+from msort.decorators import has_decorator
 
 
 def test_decorator_call_id_attribute_error():
@@ -58,68 +58,68 @@ def test_has_decorator_false():
     assert not has_decorator(mock_decorator, "mock")
 
 
-def test_get_csort_group_name_ast():
-    code = '@csort_group(group="test")\ndef func():\n\tpass\n'
+def test_get_msort_group_name_ast():
+    code = '@msort_group(group="test")\ndef func():\n\tpass\n'
     node = ast.parse(code)
-    output = get_csort_group_name_ast(node.body[0])
+    output = get_msort_group_name_ast(node.body[0])
     assert output == "test"
 
 
-def test_get_csort_group_name_ast_no_decorator_attr():
-    code = '@csort_group(group="test")\ndef func():\n\tpass\n'
+def test_get_msort_group_name_ast_no_decorator_attr():
+    code = '@msort_group(group="test")\ndef func():\n\tpass\n'
     node = ast.parse(code)
-    output = get_csort_group_name_ast(node)
+    output = get_msort_group_name_ast(node)
     assert output is None
 
 
-def test_get_csort_group_name_ast_no_decorators():
+def test_get_msort_group_name_ast_no_decorators():
     code = "def func():\n\tpass\n"
     node = ast.parse(code)
-    output = get_csort_group_name_ast(node.body[0])
+    output = get_msort_group_name_ast(node.body[0])
     assert output is None
 
 
-def test_get_csort_group_name_ast_no_call_decorators():
-    code = "@csort_group\ndef func():\n\tpass\n"
+def test_get_msort_group_name_ast_no_call_decorators():
+    code = "@msort_group\ndef func():\n\tpass\n"
     node = ast.parse(code)
-    output = get_csort_group_name_ast(node.body[0])
+    output = get_msort_group_name_ast(node.body[0])
     assert output is None
 
 
-def test_get_csort_group_name_ast_no_keyword_value():
-    code = '@csort_group(group="")\ndef func():\n\tpass\n'
+def test_get_msort_group_name_ast_no_keyword_value():
+    code = '@msort_group(group="")\ndef func():\n\tpass\n'
     node = ast.parse(code)
     # override the constant so there is no value attribute
     node.body[0].decorator_list[0].keywords[0].value = 1
-    output = get_csort_group_name_ast(node.body[0])
+    output = get_msort_group_name_ast(node.body[0])
     assert output is None
 
 
-def test_get_csort_group_name_ast_no_arg_value():
-    code = '@csort_group("")\ndef func():\n\tpass\n'
+def test_get_msort_group_name_ast_no_arg_value():
+    code = '@msort_group("")\ndef func():\n\tpass\n'
     node = ast.parse(code)
     # override the constant so there is no value attribute
     node.body[0].decorator_list[0].args[0] = 1
-    output = get_csort_group_name_ast(node.body[0])
+    output = get_msort_group_name_ast(node.body[0])
     assert output is None
 
 
-def test_get_csort_group_name_cst():
-    code = "@csort_group(group=test)\ndef func():\n\tpass\n"
+def test_get_msort_group_name_cst():
+    code = "@msort_group(group=test)\ndef func():\n\tpass\n"
     node = libcst.parse_module(code)
-    output = get_csort_group_name_cst(node.body[0])
+    output = get_msort_group_name_cst(node.body[0])
     assert output == "test"
 
 
-def test_get_csort_group_name_cst_no_decorators():
+def test_get_msort_group_name_cst_no_decorators():
     code = "def func():\n\tpass\n"
     node = libcst.parse_module(code)
-    output = get_csort_group_name_cst(node.body[0])
+    output = get_msort_group_name_cst(node.body[0])
     assert output is None
 
 
-def test_get_csort_group_name_cst_no_args():
-    code = "@csort_group\ndef func():\n\tpass\n"
+def test_get_msort_group_name_cst_no_args():
+    code = "@msort_group\ndef func():\n\tpass\n"
     node = libcst.parse_module(code)
     with pytest.raises(AttributeError):
-        get_csort_group_name_cst(node.body[0])
+        get_msort_group_name_cst(node.body[0])
