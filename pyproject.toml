@@ -80,7 +80,7 @@ line-length = 120
 dunder_method = 3
 csort_group = 4
 class_method = 5
-private_method = 12
+private_method = 13
 
 [tool.csort]
 use_csort_group = true

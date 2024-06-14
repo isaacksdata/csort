@@ -87,7 +87,7 @@ Non-sorting parameters which are normally set in the configuration file can also
 
 .. option:: --auto-static AUTO-STATIC
 
-    Check if a method could be made static and convert it if so.
+    Check if a method could be made static and convert it if so (Default).
 
 .. option:: --n-auto-static N-AUTO-STATIC
 
@@ -95,11 +95,19 @@ Non-sorting parameters which are normally set in the configuration file can also
 
 .. option:: --use-csort-group USE-CSORT-GROUP
 
-    Account for the ``csort_group()`` decorator during method sorting.
+    Account for the ``csort_group()`` decorator during method sorting (Default). See :ref:`csort-group-label`.
 
 .. option:: --n-use-csort-group N-USE-CSORT-GROUP
 
     Do not account for the ``csort_group()`` decorator during method sorting.
+
+.. option:: --use-property-groups USE-PROPERTY-GROUPS
+
+    Group methods related to a class property together.
+
+.. option:: --n-use-property-groups N-USE-PROPERTY-GROUPS
+
+    Do not group methods related to a class property together (Default).
 
 Alternative modes
 .................

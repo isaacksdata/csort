@@ -467,3 +467,41 @@ def test_formatting_csort_class_decorator_cst(parser, method_describer, input_pa
 def test_formatting_csort_class_decorator_ast(parser, method_describer, input_path, output_path, expected_path, caplog):
     caplog.set_level(logging.INFO)
     simple_test(parser, method_describer, input_path, output_path, expected_path, use_cst=False, auto_static=False)
+
+
+@pytest.mark.parametrize("parser", ["cst"], indirect=True)
+@pytest.mark.parametrize("method_describer", ["cst"], indirect=True)
+@pytest.mark.parametrize("input_path", ["property_grouping"], indirect=True)
+@pytest.mark.parametrize("output_path", ["property_grouping"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["property_grouping"], indirect=True)
+def test_formatting_csort_class_decorator_cst(parser, method_describer, input_path, output_path, expected_path, caplog):
+    caplog.set_level(logging.INFO)
+    simple_test(
+        parser,
+        method_describer,
+        input_path,
+        output_path,
+        expected_path,
+        use_cst=True,
+        auto_static=False,
+        use_property_groups=True,
+    )
+
+
+@pytest.mark.parametrize("parser", ["ast"], indirect=True)
+@pytest.mark.parametrize("method_describer", ["ast"], indirect=True)
+@pytest.mark.parametrize("input_path", ["property_grouping"], indirect=True)
+@pytest.mark.parametrize("output_path", ["property_grouping"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["property_grouping"], indirect=True)
+def test_formatting_csort_class_decorator_ast(parser, method_describer, input_path, output_path, expected_path, caplog):
+    caplog.set_level(logging.INFO)
+    simple_test(
+        parser,
+        method_describer,
+        input_path,
+        output_path,
+        expected_path,
+        use_cst=False,
+        auto_static=False,
+        use_property_groups=True,
+    )

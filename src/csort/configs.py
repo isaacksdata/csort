@@ -14,7 +14,7 @@ import libcst
 DUNDER_PATTERN: Final[str] = "__"
 
 # default sorting level to use for instance methods e.g. def func(self): ...
-INSTANCE_METHOD_LEVEL: Final[int] = 11
+INSTANCE_METHOD_LEVEL: Final[int] = 12
 
 # spacing between class definitions
 CLASS_SPACING: Final[str] = "\n\n\n"
@@ -46,13 +46,18 @@ DEFAULT_CSORT_ORDER_PARAMS: Final[Dict[str, Any]] = {
     "property": 7,
     "getter": 8,
     "setter": 9,
-    "decorated_method": 10,
-    "instance_method": 11,
-    "private_method": 12,
-    "inner_class": 13,
+    "deleter": 10,
+    "decorated_method": 11,
+    "instance_method": INSTANCE_METHOD_LEVEL,
+    "private_method": 13,
+    "inner_class": 14,
 }
 
-DEFAULT_CSORT_GENERAL_PARAMS: Final[Dict[str, Any]] = {"use_csort_group": True, "auto_static": True}
+DEFAULT_CSORT_GENERAL_PARAMS: Final[Dict[str, Any]] = {
+    "use_csort_group": True,
+    "auto_static": True,
+    "use_property_groups": False,
+}
 find_classes_response = TypedDict("find_classes_response", {"node": Union[ast.ClassDef, libcst.CSTNode], "index": int})
 format_csort_response = TypedDict("format_csort_response", {"code": int, "diff": str})
 ordered_methods_type = List[Union[ast.stmt, Dict[ast.stmt, "ordered_methods_type"]]]

@@ -244,6 +244,35 @@ The ``setter`` decorator allows controlled access whilst setting a new value.
         self._name = name
 
 
+Deleters
+........
+
+Deleters work in conjunction with ``getter`` and ``setter`` to support controlled access to private attributes.
+
+The ``deleter`` decorator allows controlled access to remove an attribute from a class - meaning the attribute is
+no longer accessible for the particular instance of the class.
+
+.. code-block:: python
+
+ class ExampleClass:
+     """
+     This class is an example python class used in the csort documentation.
+     """
+     def __init__(self, name: str) -> None
+        self._name: str = name
+
+     @name.getter
+     def name(self) -> str:
+        return self._name
+
+     @name.setter
+     def name(self, new_name: str) -> None:
+        self._name = name
+
+     @name.deleter
+     def name(self) -> None:
+        del self._name
+
 Other decorated methods
 .......................
 Any decorated class method without any of the above mentioned decorators is considered by csort to be a

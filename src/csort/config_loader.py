@@ -61,7 +61,10 @@ class ConfigLoader(ABC):
         Returns:
             cfg: mapping of default configurations
         """
-        cfg = {"csort.order": DEFAULT_CSORT_ORDER_PARAMS.copy(), "csort": DEFAULT_CSORT_GENERAL_PARAMS.copy()}
+        cfg = {
+            DEFAULT_CSORT_ORDERING_SECTION: DEFAULT_CSORT_ORDER_PARAMS.copy(),
+            DEFAULT_CSORT_PARAMS_SECTION: DEFAULT_CSORT_GENERAL_PARAMS.copy(),
+        }
         return cfg
 
     @property
@@ -118,6 +121,13 @@ class ConfigLoader(ABC):
             cfg = self._load_defaults()
         else:
             cfg = self._read_config(config_path)
+            # add in default csort arguments if not supplied
+            other_defaults = {
+                k: v
+                for k, v in self._load_defaults()[DEFAULT_CSORT_PARAMS_SECTION].items()
+                if k not in cfg[DEFAULT_CSORT_PARAMS_SECTION]
+            }
+            cfg[DEFAULT_CSORT_PARAMS_SECTION].update(other_defaults)
         self._config = cfg
         return cfg
 
