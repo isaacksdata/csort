@@ -13,9 +13,11 @@ from .decorators import StaticMethodChecker
 from .diff import SyntaxTreeDiffGenerator
 from .method_describers import describe_method
 from .method_describers import MethodDescriber
+from .sorters import Sorter
 from .utilities import create_path
 from .utilities import extract_text_from_file
 from .utilities import get_function_name
+from .visitors import MethodCallVisitor
 
 
 def order_class_functions(
@@ -24,6 +26,7 @@ def order_class_functions(
     parser: ModuleType,
     parent: Optional[ast.stmt] = None,
     use_property_groups: bool = False,
+    use_directed_graph: bool = False,
 ) -> ordered_methods_type:
     """
     Sort a list of method definitions by the method type and alphabetically by method name
@@ -34,6 +37,7 @@ def order_class_functions(
         parent: the node from which the methods where extracted
         use_property_groups: If True, then methods related to a property such as getter, setter, deleter will be
                             grouped together
+        use_directed_graph: If True, then methods are sorted according to dependencies between methods.
 
     Returns:
         sorted_methods: method definitions sorted by method type
@@ -42,6 +46,9 @@ def order_class_functions(
         sorted_methods: List[ast.stmt] = sorted(methods, key=lambda m: describe_method(m, method_describer))
     else:
         sorted_methods = methods
+
+    # todo this should be refactored out into a sub class
+    # todo do we need a Sorter class?
     if use_property_groups:
         # find index of properties
         prop_idx = [i for i, method in enumerate(sorted_methods) if has_decorator(method, "property")]
@@ -71,9 +78,11 @@ def format_msort(
     parser: ModuleType,
     file_path: str,
     method_describer: MethodDescriber,
+    sorter: Sorter,
     output_py: Optional[str] = None,
     auto_static: bool = False,
     use_property_groups: bool = False,
+    use_directed_graph: bool = False,
 ) -> format_msort_response:
     """
     Main function for running msort
@@ -85,6 +94,7 @@ def format_msort(
         auto_static: If True, then static methods without the @staticmethod decorator will be marked as static
         use_property_groups: If True, then methods related to a property such as getter, setter, deleter will be
                             grouped together
+        use_directed_graph: If True, then methods are sorted according to dependencies between methods.
 
     Returns:
         {
@@ -105,9 +115,19 @@ def format_msort(
             if n_changes > 0:
                 logging.info("msort converted %s methods from %s to static!", n_changes, class_name)
 
+    # sorted_functions: Dict[str, ordered_methods_type] = {
+    #     cls: order_class_functions(
+    #         methods,
+    #         method_describer,
+    #         parser,
+    #         use_property_groups=use_property_groups,
+    #         use_directed_graph=use_directed_graph
+    #     )
+    #     for cls, methods in functions.items()
+    # }
+
     sorted_functions: Dict[str, ordered_methods_type] = {
-        cls: order_class_functions(methods, method_describer, parser, use_property_groups=use_property_groups)
-        for cls, methods in functions.items()
+        cls: sorter.sort(methods=methods) for cls, methods in functions.items()
     }
 
     if all(functions[cname] == sorted_functions[cname] for cname in functions.keys()):

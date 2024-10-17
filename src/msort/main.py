@@ -21,6 +21,7 @@ from .configs import format_msort_response
 from .formatting import format_msort
 from .logger import set_logging
 from .method_describers import get_method_describer
+from .sorters import get_sorter
 
 
 def parse_commandline() -> Tuple[argparse.Namespace, Dict[str, Any]]:
@@ -95,6 +96,13 @@ def parse_commandline() -> Tuple[argparse.Namespace, Dict[str, Any]]:
         default=False,
         action="store_true",
         help="Use --use-property-groups to group getters, setters and deleters.",
+    )
+    parser.add_argument(
+        "-dg",
+        "--use-directed-graph",
+        default=False,
+        action="store_true",
+        help="Use --use-directed-graph to sort class methods by the dependencies between methods.",
     )
     # params = parser.parse_args()
     params, args = parser.parse_known_args()
@@ -294,11 +302,24 @@ def main() -> None:
     )
     property_groups = True if "property_groups" in args else property_groups
     property_groups = False if "n-property_groups" in args else property_groups
+    directed_graph_param = cfg[DEFAULT_MSORT_PARAMS_SECTION]["use_directed_graph"]
+    directed_graph = (
+        ast.literal_eval(directed_graph_param) if isinstance(directed_graph_param, str) else directed_graph_param
+    )
+    directed_graph = True if "directed_graph" in args else directed_graph
+    directed_graph = False if "n-directed_graph" in args else directed_graph
 
     cfg = update_config(cfg, args)
 
     # instantiate method describer
     method_describer = get_method_describer(parser_type=params.parser, config=cfg, override_level_check=params.force)
+
+    sorter = get_sorter(
+        parser=code_parser,
+        method_describer=method_describer,
+        use_property_groups=property_groups,
+        use_directed_graph=directed_graph,
+    )
 
     responses: List[format_msort_response] = []
     for input_script, output_script in zip(py_scripts, outputs):
@@ -312,7 +333,7 @@ def main() -> None:
             parser=code_parser,
             method_describer=method_describer,
             auto_static=auto_static,
-            use_property_groups=property_groups,
+            sorter=sorter,
         )
         responses.append(response)
     n = sum(resp["code"] for resp in responses)

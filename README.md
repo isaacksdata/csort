@@ -179,5 +179,6 @@ Note: the github repo is still called csort for legacy reasons.
 
 ## Todo
 
+- sort functions by the relationships between them e.g. find root functions and group functions which call each other
 - diff generator does not report nested classes
 - rename github repo to msort

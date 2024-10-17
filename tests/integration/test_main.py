@@ -136,7 +136,12 @@ def test_validate_paths_with_files(script_path, caplog):
 
 def test_main(script_path, output_path, caplog):
     caplog.set_level(logging.DEBUG)
-    commands = ["", f"--input-path={script_path}", f"--output-path={output_path}"]  # mock script name as first arg
+    commands = [
+        "",
+        f"--input-path={script_path}",
+        f"--output-path={output_path}",
+        "--n-auto-static",
+    ]  # mock script name as first arg
     with patch.object(sys, "argv", commands):
         main()
     assert Path(output_path).exists()

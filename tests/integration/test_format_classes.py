@@ -13,6 +13,7 @@ from msort.config_loader import ConfigLoaderIni
 from msort.configs import DEFAULT_MSORT_PARAMS_SECTION
 from msort.formatting import format_msort
 from msort.method_describers import get_method_describer
+from msort.sorters import get_sorter
 from msort.utilities import extract_text_from_file
 
 DEBUG = "tests" in os.getcwd()
@@ -63,8 +64,19 @@ def simple_test(
     use_cst: bool = False,
     **kwargs,
 ):
+    sorter = get_sorter(
+        parser=parser,
+        method_describer=method_describer,
+        use_property_groups=kwargs.get("use_property_groups", False),
+        use_directed_graph=kwargs.get("use_directed_graph", False),
+    )
     format_msort(
-        parser=parser, file_path=input_path, output_py=output_path, method_describer=method_describer, **kwargs
+        parser=parser,
+        file_path=input_path,
+        output_py=output_path,
+        method_describer=method_describer,
+        sorter=sorter,
+        **kwargs,
     )
     if use_cst:
         code = libcst.parse_module(extract_text_from_file(output_path))
@@ -253,8 +265,16 @@ def test_formatting_imports_cst(parser, method_describer, input_path, output_pat
     simple_test(parser, method_describer, input_path, output_path, expected_path)
 
 
-def complex_test(parser, method_describer, input_path, output_path, expected_path):
-    format_msort(parser=parser, file_path=input_path, output_py=output_path, method_describer=method_describer)
+def complex_test(parser, method_describer, input_path, output_path, expected_path, **kwargs):
+    sorter = get_sorter(
+        parser=parser,
+        method_describer=method_describer,
+        use_property_groups=kwargs.get("use_property_groups", False),
+        use_directed_graph=kwargs.get("use_directed_graph", False),
+    )
+    format_msort(
+        parser=parser, file_path=input_path, output_py=output_path, method_describer=method_describer, sorter=sorter
+    )
     code = ast_comments.parse(extract_text_from_file(output_path))
     expected_code = ast_comments.parse(extract_text_from_file(expected_path))
     assert ast_comments.unparse(code) == ast_comments.unparse(expected_code)
@@ -504,4 +524,44 @@ def test_formatting_msort_class_decorator_ast(parser, method_describer, input_pa
         use_cst=False,
         auto_static=False,
         use_property_groups=True,
+    )
+
+
+@pytest.mark.parametrize("parser", ["cst"], indirect=True)
+@pytest.mark.parametrize("method_describer", ["cst"], indirect=True)
+@pytest.mark.parametrize("input_path", ["directed_graph"], indirect=True)
+@pytest.mark.parametrize("output_path", ["directed_graph"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["directed_graph"], indirect=True)
+def test_formatting_msort_directed_graph_cst(parser, method_describer, input_path, output_path, expected_path, caplog):
+    caplog.set_level(logging.INFO)
+    simple_test(
+        parser,
+        method_describer,
+        input_path,
+        output_path,
+        expected_path,
+        use_cst=True,
+        auto_static=False,
+        use_directed_graph=True,
+    )
+
+
+@pytest.mark.parametrize("parser", ["cst"], indirect=True)
+@pytest.mark.parametrize("method_describer", ["cst"], indirect=True)
+@pytest.mark.parametrize("input_path", ["directed_graph_complex"], indirect=True)
+@pytest.mark.parametrize("output_path", ["directed_graph_complex"], indirect=True)
+@pytest.mark.parametrize("expected_path", ["directed_graph_complex"], indirect=True)
+def test_formatting_msort_directed_graph_complex_cst(
+    parser, method_describer, input_path, output_path, expected_path, caplog
+):
+    caplog.set_level(logging.INFO)
+    complex_test(
+        parser,
+        method_describer,
+        input_path,
+        output_path,
+        expected_path,
+        use_cst=True,
+        auto_static=False,
+        use_directed_graph=True,
     )

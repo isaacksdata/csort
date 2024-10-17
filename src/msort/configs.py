@@ -57,6 +57,7 @@ DEFAULT_MSORT_GENERAL_PARAMS: Final[Dict[str, Any]] = {
     "use_msort_group": True,
     "auto_static": True,
     "use_property_groups": False,
+    "use_directed_graph": False,
 }
 find_classes_response = TypedDict("find_classes_response", {"node": Union[ast.ClassDef, libcst.CSTNode], "index": int})
 format_msort_response = TypedDict("format_msort_response", {"code": int, "diff": str})
